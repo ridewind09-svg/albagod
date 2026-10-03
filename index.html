@@ -142,7 +142,7 @@
         .modal-move-area select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-left: 10px; }
 
         .nickname-modal-content { text-align: center; }
-        .nickname-modal-content input { width: 100%;; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        .nickname-modal-content input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
         .phone-verify-area { display: flex; gap: 10px; margin-bottom: 10px; }
         .phone-verify-area input { flex: 1; margin: 0; }
         .phone-verify-area button { padding: 0 15px; background: #1e1e2f; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap; }
@@ -306,10 +306,10 @@
                 <div class="section-title">👑 관리자 페이지</div>
                 <div class="board-container">
                     <h2 style="margin-bottom:20px;">오늘의 추천 알바 관리</h2>
-                    <div class="write-form" style="display:flex; gap:10px; align-items:center; margin-bottom:20px; background:#f0f2f5;">
-                        <input type="text" id="recJobTitle" placeholder="알바 제목 (예: 카페 바리스타)" style="flex:1; margin-bottom:0;">
-                        <input type="text" id="recJobInfo" placeholder="알바 정보 (예: 시급 10,000원 / 서울)" style="flex:1; margin-bottom:0;">
-                        <button class="btn-write" style="margin:0; display:inline-block;" onclick="addRecJob()">등록</button>
+                    <div class="write-form" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; background:#f0f2f5;">
+                        <input type="text" id="recJobTitle" placeholder="알바 제목 (예: 카페 바리스타)" style="margin-bottom:0;">
+                        <textarea id="recJobInfo" placeholder="알바 상세 내용 입력 (줄바꿈 가능)" style="margin-bottom:0; height:80px; padding:12px; border:1px solid #ccc; border-radius:5px; font-family:'Nanum Square'; resize:vertical;"></textarea>
+                        <button class="btn-write" style="margin:0; align-self:flex-end; display:inline-block;" onclick="addRecJob()">등록</button>
                     </div>
                     <div class="job-list" id="adminRecJobList"></div>
                 </div>
@@ -428,7 +428,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 20가지 프로필 색상 배열
         const profileColors = ['#FF6B6B', '#4ECDC4', '#556270', '#C7F464', '#FF8C42', '#6A4C93', '#1982C4', '#8AC926', '#FF595E', '#FFCA3A', '#F72585', '#7209B7', '#3A0CA3', '#4361EE', '#4CC9F0', '#06D6A0', '#118AB2', '#073B4C', '#EF476F', '#06D6A0'];
 
         let users = {};
@@ -933,7 +932,6 @@
             }).join('');
         }
 
-        // 추천 알바 클릭 함수 (원본 글 있으면 이동, 없으면 모달로 정보 띄움)
         function viewRecJob(jobId) {
             const job = recommendedJobs[jobId];
             if(!job) return;
@@ -943,7 +941,7 @@
             } else {
                 document.getElementById('modalTitle').innerText = job.title;
                 document.getElementById('modalMeta').innerHTML = job.region ? `<span class="tag">${job.region}</span>` : '';
-                document.getElementById('modalContent').innerText = job.info;
+                document.getElementById('modalContent').innerHTML = linkify(job.info); // 전체 내용 표시
                 document.getElementById('modalActions').innerHTML = `<button class="btn-action" style="background:#ccc; color:#333;" onclick="closeModal('postModal')">닫기</button>`;
                 document.getElementById('modalMoveArea').style.display = 'none';
                 document.getElementById('postModal').style.display = 'flex';
@@ -1014,9 +1012,10 @@
 
         function addPostToRec(type, postId) {
             const post = posts[type][postId];
+            // info에 20자 짜르지 않고 본문 전체 저장
             recJobsRef.push({ 
                 title: post.title, 
-                info: post.content.substring(0, 20) + '...', 
+                info: post.content, 
                 region: post.region || '미지정',
                 originType: type,
                 originId: postId
@@ -1146,18 +1145,21 @@
             const list = document.getElementById('adminRecJobList');
             const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] }));
             if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
-            else list.innerHTML = jobs.map(j => `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${j.info}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${j.id}')">삭제</button></div>`).join('');
+            else list.innerHTML = jobs.map(j => {
+                const previewInfo = j.info.length > 30 ? j.info.substring(0, 30) + '...' : j.info;
+                return `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${previewInfo}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${j.id}')">삭제</button></div>`;
+            }).join('');
         }
 
-        // 무조건 클릭되도록 수정된 렌더링 함수
         function renderHomeRecJobs() {
             const list = document.getElementById('homeJobList');
             const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] })).reverse().slice(0, 4);
             if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
             else list.innerHTML = jobs.map(j => {
+                const previewInfo = j.info.length > 50 ? j.info.substring(0, 50) + '...' : j.info;
                 return `<div class="job-card" onclick="viewRecJob('${j.id}')">
                     <div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div>
-                    <div class="job-info">${j.info}</div>
+                    <div class="job-info">${previewInfo}</div>
                 </div>`;
             }).join('');
         }
