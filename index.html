@@ -36,30 +36,30 @@
         .page-section.active { display: flex; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 홈 레이아웃 개선: 카드 디자인 및 여백 조정 */
+        /* 홈 레이아웃: 높이 360px로 축소 고정 */
         .home-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: stretch; }
-        .home-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 25px; display: flex; flex-direction: column; }
+        .home-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; height: 360px; overflow: hidden; }
         
-        .section-title { font-size: 20px; font-weight: 800; margin-bottom: 25px; border-left: 4px solid #1e1e2f; padding-left: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .section-title .title-btn { font-size: 13px; background: #1e1e2f; color: #fff; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: 700; border: none; }
+        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; border-left: 4px solid #1e1e2f; padding-left: 12px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .section-title .title-btn { font-size: 12px; background: #1e1e2f; color: #fff; padding: 5px 10px; border-radius: 20px; cursor: pointer; font-weight: 700; border: none; }
         .section-title .title-btn:hover { background: #2a2a40; }
         .clickable-title { cursor: pointer; transition: color 0.2s; }
         .clickable-title:hover { color: #1565c0; }
 
         /* 추천 알바 카드 */
-        .job-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-        .job-card { background: #f8f9fa; border: 1px solid #eee; padding: 20px; border-radius: 12px; transition: all 0.2s; cursor: pointer; }
+        .job-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; flex: 1; overflow-y: auto; align-content: start; padding-right: 5px; }
+        .job-card { background: #f8f9fa; border: 1px solid #eee; padding: 15px; border-radius: 10px; transition: all 0.2s; cursor: pointer; }
         .job-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-color: #ddd; }
-        .job-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #1e1e2f; }
+        .job-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #1e1e2f; }
         .job-info { font-size: 13px; color: #666; line-height: 1.4; }
 
         /* 채팅 카드 */
-        .chat-box { flex: 1; display: flex; flex-direction: column; }
-        .chat-screen { flex: 1; min-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; background: #f8f9fa; }
+        .chat-box { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+        .chat-screen { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; background: #f8f9fa; }
         .chat-message { margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
         .chat-message .user { font-weight: 700; color: #1e1e2f; }
         .chat-text a, .link-in-text { color: #1565c0; text-decoration: underline; font-weight: 700; word-break: break-all; }
-        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area { display: flex; gap: 10px; flex-shrink: 0; }
         .chat-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         .btn-send { background: #1e1e2f; color: #fff; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; }
 
@@ -178,6 +178,7 @@
             .auth-menu { border-top: none; padding-top: 0; width: auto; order: 2; }
             .auth-menu a { padding: 8px; font-size: 12px; }
             .home-grid, .main-board-container { grid-template-columns: 1fr; }
+            .home-card { height: auto; } /* 모바일에서는 높이 제한 해제 */
             .main-content { padding: 15px; }
             .search-area { flex-direction: column; }
             .job-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
@@ -227,11 +228,11 @@
                 </div>
 
                 <div class="main-board-container">
-                    <div class="home-card">
+                    <div class="home-card" style="height: auto; flex: 1;">
                         <div class="section-title clickable-title" onclick="goToBoard('semiconductor')">🔧 반도체현장 최신글</div>
                         <div class="post-list" id="mainSemiList"></div>
                     </div>
-                    <div class="home-card">
+                    <div class="home-card" style="height: auto; flex: 1;">
                         <div class="section-title clickable-title" onclick="goToBoard('otherjobs')">💼 기타알바 최신글</div>
                         <div class="post-list" id="mainOtherList"></div>
                     </div>
@@ -715,7 +716,7 @@
             const code = document.getElementById('socialVerifyCodeInput').value.trim();
 
             if(!nickname || !name || !phone || !code) { alert('모든 항목을 입력해주세요.'); return; }
-            if(code !== '1234') { alert('[인증 실패] 인증번호가 틀렸니다. (테스트용 1234)'); return; }
+            if(code !== '1234') { alert('[인증 실패] 인증번호가 틀렸습니다. (테스트용 1234)'); return; }
 
             const tempId = `${tempSocialProvider}_user_${Math.floor(Math.random() * 10000)}`;
             currentUser = {
