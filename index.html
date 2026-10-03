@@ -15,9 +15,9 @@
         .app-wrapper { display: flex; min-height: 100vh; max-width: 1280px; margin: 0 auto; background-color: #f0f2f5; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
         .sidebar { width: 250px; background-color: #1e1e2f; color: #fff; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; }
         .logo-container { text-align: center; margin-bottom: 30px; margin-top: 10px; padding-top: 15px; cursor: pointer; }
-        .logo { font-size: 32px; font-weight: 800; position: relative; display: inline-block; } /* 글자 크기 확대 */
+        .logo { font-size: 32px; font-weight: 800; position: relative; display: inline-block; }
         .logo .accent { color: #ffcc00; position: relative; display: inline-block; padding-right: 15px; }
-        .crown { position: absolute; top: -22px; right: -8px; font-size: 26px; transform: rotate(20deg); z-index: 10; } /* 왕관 크기 및 위치 확대 */
+        .crown { position: absolute; top: -22px; right: -8px; font-size: 26px; transform: rotate(20deg); z-index: 10; }
 
         .nav-menu { list-style: none; margin-top: 20px; }
         .nav-menu li { margin-bottom: 10px; }
@@ -39,6 +39,10 @@
         .section-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; border-left: 5px solid #1e1e2f; padding-left: 10px; display: flex; justify-content: space-between; align-items: center; }
         .section-title .title-btn { font-size: 14px; background: #1e1e2f; color: #fff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: 700; border: none; }
         .section-title .title-btn:hover { background: #2a2a40; }
+        
+        /* 클릭 가능한 제목 스타일 */
+        .clickable-title { cursor: pointer; transition: color 0.2s; }
+        .clickable-title:hover { color: #1565c0; }
 
         .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
         .job-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; align-content: start; padding-right: 5px; }
@@ -58,7 +62,7 @@
         .btn-send { background: #1e1e2f; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 700; }
 
         .profile-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; vertical-align: middle; }
-        .profile-img-default { width: 24px; height: 24px; border-radius: 50%; background: #ccc; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 700; }
+        .profile-img-default { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 700; }
 
         .main-board-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .main-board-column { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -162,8 +166,8 @@
             .app-wrapper { flex-direction: column; box-shadow: none; } 
             .sidebar { width: 100%; min-height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px; flex-wrap: wrap; }
             .logo-container { margin-bottom: 0; margin-top: 0; padding-top: 15px; }
-            .logo { font-size: 26px; } /* 모바일 로고 크기 */
-            .crown { font-size: 20px; top: -18px; right: -5px; } /* 모바일 왕관 크기 */
+            .logo { font-size: 26px; } 
+            .crown { font-size: 20px; top: -18px; right: -5px; } 
             .nav-menu { display: flex; gap: 5px; margin-top: 10px; width: 100%; flex-wrap: wrap; order: 3; }
             .nav-menu a { padding: 8px 10px; font-size: 13px; }
             .auth-menu { border-top: none; padding-top: 0; width: auto; order: 2; }
@@ -222,11 +226,13 @@
 
                 <div class="main-board-container">
                     <div class="main-board-column">
-                        <div class="section-title">🔧 반도체현장 최신글</div>
+                        <!-- 제목 클릭 시 게시판으로 이동 -->
+                        <div class="section-title clickable-title" onclick="goToBoard('semiconductor')">🔧 반도체현장 최신글</div>
                         <div class="post-list" id="mainSemiList"></div>
                     </div>
                     <div class="main-board-column">
-                        <div class="section-title">💼 기타알바 최신글</div>
+                        <!-- 제목 클릭 시 게시판으로 이동 -->
+                        <div class="section-title clickable-title" onclick="goToBoard('otherjobs')">💼 기타알바 최신글</div>
                         <div class="post-list" id="mainOtherList"></div>
                     </div>
                 </div>
@@ -426,12 +432,15 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // 20가지 프로필 색상 배열
+        const profileColors = ['#FF6B6B', '#4ECDC4', '#556270', '#C7F464', '#FF8C42', '#6A4C93', '#1982C4', '#8AC926', '#FF595E', '#FFCA3A', '#F72585', '#7209B7', '#3A0CA3', '#4361EE', '#4CC9F0', '#06D6A0', '#118AB2', '#073B4C', '#EF476F', '#06D6A0'];
+
         let users = {};
         let currentUser = null;
-        let posts = { semi: {}, other: {}, free: {}, ref: {} }; // ref(자료실) 추가
+        let posts = { semi: {}, other: {}, free: {}, ref: {} };
         let tempSocialProvider = '';
         let recommendedJobs = {};
-        let editingFiles = []; // 다중 파일 수정용 배열
+        let editingFiles = [];
         
         const savedUser = sessionStorage.getItem('currentUser');
         if(savedUser) currentUser = JSON.parse(savedUser);
@@ -459,6 +468,16 @@
             const name = '익명' + result.snapshot.val();
             sessionStorage.setItem('anonName', name);
             return name;
+        }
+
+        // 문자열 기반 색상 해시 반환 (닉네임/아이디마다 고유 색상 부여)
+        function getColorForString(str) {
+            if(!str) str = 'default';
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return Math.abs(hash) % 20;
         }
 
         usersRef.on('value', (snapshot) => {
@@ -501,10 +520,13 @@
             if(el) el.innerText = Object.keys(users).length;
         }
 
+        // 20가지 색상 랜덤 배경 적용
         function getProfileImgHTML(user) {
             if(user && user.profilePic) return `<img src="${user.profilePic}" class="profile-img" alt="profile">`;
             const initial = user && user.nickname ? user.nickname.charAt(0) : '?';
-            return `<div class="profile-img-default">${initial}</div>`;
+            const colorIndex = getColorForString(user && user.id ? user.id : (user && user.nickname ? user.nickname : 'guest'));
+            const bgColor = profileColors[colorIndex];
+            return `<div class="profile-img-default" style="background-color: ${bgColor};">${initial}</div>`;
         }
 
         function linkify(text) {
@@ -525,6 +547,18 @@
             if(pageId === 'mypage') loadMypage();
             if(pageId === 'admin') { loadAdminPage(); renderAdminRecJobs(); }
             if(['semiconductor', 'otherjobs', 'freeboard', 'reference'].includes(pageId)) checkWriteAuth(pageId);
+        }
+
+        // 홈 메뉴 제목 클릭 시 게시판으로 이동
+        function goToBoard(boardId) {
+            const navLinks = document.querySelectorAll('.nav-link');
+            let targetLink = null;
+            navLinks.forEach(link => {
+                if(link.getAttribute('onclick').includes(boardId)) {
+                    targetLink = link;
+                }
+            });
+            showPage(boardId, targetLink);
         }
 
         function checkWriteAuth(pageId) {
@@ -581,7 +615,6 @@
             }
         }
 
-        // 다중 파일 선택 검사 함수
         function handleFileSelect(type, input) {
             const files = input.files;
             let videoCount = 0;
@@ -920,7 +953,6 @@
                 ${post.region && post.region !== '지역 없음' ? `<span class="tag">${post.region}</span>` : ''}
             `;
             
-            // 파일 렌더링 (새로운 files 배열과 기존 file 객체 호환)
             const filesToRender = post.files || (post.file ? [post.file] : []);
             document.getElementById('modalContent').innerHTML = linkify(post.content) + getFilesHTML(filesToRender);
 
@@ -1109,23 +1141,17 @@
             else list.innerHTML = jobs.map(j => `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${j.info}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${j.id}')">삭제</button></div>`).join('');
         }
 
+        // 추천 알바 카드 클릭 이벤트 명확화
         function renderHomeRecJobs() {
             const list = document.getElementById('homeJobList');
             const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] })).reverse().slice(0, 4);
             if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
             else list.innerHTML = jobs.map(j => {
-                // 원본 글이 있으면 클릭 가능하게 처리
-                if(j.originType && j.originId) {
-                    return `<div class="job-card clickable" onclick="viewPost('${j.originType}', '${j.originId}')">
-                        <div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div>
-                        <div class="job-info">${j.info}</div>
-                    </div>`;
-                } else {
-                    return `<div class="job-card">
-                        <div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div>
-                        <div class="job-info">${j.info}</div>
-                    </div>`;
-                }
+                const clickable = j.originType && j.originId;
+                return `<div class="job-card ${clickable ? 'clickable' : ''}" ${clickable ? `onclick="viewPost('${j.originType}', '${j.originId}')"` : ''}>
+                    <div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div>
+                    <div class="job-info">${j.info}</div>
+                </div>`;
             }).join('');
         }
 
