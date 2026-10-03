@@ -70,7 +70,6 @@
         .write-form select, .write-form input[type="text"], .write-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-family: 'Nanum Square', sans-serif; }
         .write-form textarea { resize: vertical; min-height: 100px; margin-bottom: 20px; }
         
-        /* 파일 첨부 버튼 디자인 크게 눈에 띄게 변경 */
         .file-upload-wrapper { margin-bottom: 20px; }
         .file-upload-label { display: block; padding: 15px; background: #e3f2fd; color: #1565c0; border: 2px dashed #1565c0; border-radius: 8px; text-align: center; cursor: pointer; font-weight: 700; transition: background 0.2s; }
         .file-upload-label:hover { background: #bbdefb; }
@@ -92,6 +91,9 @@
         .file-attachment-box img { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; }
         .file-attachment-box video { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; }
         .file-download-btn { display: inline-block; padding: 10px 15px; background: #e3f2fd; color: #1565c0; text-decoration: none; border-radius: 5px; font-weight: 700; font-size: 14px; }
+
+        .edit-file-item { margin-bottom: 10px; padding: 10px; background: #f0f2f5; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .edit-file-item span { font-weight: 700; font-size: 14px; color: #333; }
 
         .auth-form { max-width: 400px; margin: 0 auto; }
         .auth-form input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
@@ -395,23 +397,84 @@
         </div>
     </div>
 
+    <!-- Firebase SDK (Compat 버전 사용) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    
     <script>
-        let users = [{ id: 'admin', pw: 'admin1234', nickname: '관리자', name: '운영자', phone: '010-0000-0000', provider: '관리자', scraps: [], profilePic: null }]; 
+        // Firebase 설정 (고객님이 제공한 코드)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLm9sr7hw5L4Vwl1ZoF1iQGPUQcsn8uFI",
+            authDomain: "albagod-5cbb4.firebaseapp.com",
+            projectId: "albagod-5cbb4",
+            storageBucket: "albagod-5cbb4.firebasestorage.app",
+            messagingSenderId: "1035968499607",
+            appId: "1:1035968499607:web:1f699c1264021e4f40bed2",
+            measurementId: "G-2P1ZPG28NT",
+            databaseURL: "https://albagod-5cbb4-default-rtdb.firebaseio.com" // DB URL 추가 (프로젝트명에 맞춰 자동 생성됨)
+        };
+
+        // Firebase 초기화
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let users = {}; // DB에서 가져온 유저 목록
         let currentUser = null;
-        let posts = { semi: [], other: [], free: [] };
+        let posts = { semi: {}, other: {}, free: {} }; // DB에서 가져온 게시글
         let tempSocialProvider = '';
-        let postIdCounter = 1;
-        let recommendedJobs = [
-            { id: 1, title: "카페 바리스타", info: "시급 10,000원 / 서울 강남", region: "서울" },
-            { id: 2, title: "편의점 야간", info: "시급 11,000원 / 경기 수원", region: "경기" },
-            { id: 3, title: "과외 (고등수학)", info: "시급 30,000원 / 온라인", region: "온라인" },
-            { id: 4, title: "물류센터 상하차", info: "일당 120,000원 / 부산", region: "부산" }
-        ];
-        let recJobIdCounter = 5;
+        let recommendedJobs = {}; // DB에서 가져온 추천 알바
+
+        // 세션 유지 (로그인 정보)
+        const savedUser = sessionStorage.getItem('currentUser');
+        if(savedUser) currentUser = JSON.parse(savedUser);
+
+        // DB 레퍼런스
+        const usersRef = db.ref('users');
+        const postsRef = db.ref('posts');
+        const recJobsRef = db.ref('recommendedJobs');
+        const chatRef = db.ref('chat');
+
+        // 실시간 리스너: 유저 목록
+        usersRef.on('value', (snapshot) => {
+            users = snapshot.val() || {};
+            if(!users['admin']) {
+                usersRef.child('admin').set({ id: 'admin', pw: 'admin1234', nickname: '관리자', name: '운영자', phone: '010-0000-0000', provider: '관리자', scraps: {}, profilePic: null });
+            }
+            updateUserCount();
+            updateAuthMenu();
+            if(document.getElementById('admin').classList.contains('active')) loadAdminPage();
+            if(document.getElementById('mypage').classList.contains('active')) loadMypage();
+        });
+
+        // 실시간 리스너: 게시글
+        postsRef.on('value', (snapshot) => {
+            posts = snapshot.val() || { semi: {}, other: {}, free: {} };
+            renderPosts();
+            if(document.getElementById('home').classList.contains('active')) searchJobs();
+        });
+
+        // 실시간 리스너: 추천 알바
+        recJobsRef.on('value', (snapshot) => {
+            recommendedJobs = snapshot.val() || {};
+            renderAdminRecJobs();
+            renderHomeRecJobs();
+        });
+
+        // 실시간 리스너: 채팅
+        chatRef.on('value', (snapshot) => {
+            const chatData = snapshot.val() || {};
+            const chatHtml = Object.values(chatData).map(c => 
+                `<div class="chat-message">${getProfileImgHTML(users[c.authorId])} <span class="user">${c.author}:</span> <span class="chat-text">${linkify(c.message)}</span></div>`
+            ).join('');
+            document.getElementById('chatScreen').innerHTML = chatHtml;
+            document.getElementById('chatModalScreen').innerHTML = chatHtml;
+            document.getElementById('chatScreen').scrollTop = document.getElementById('chatScreen').scrollHeight;
+            document.getElementById('chatModalScreen').scrollTop = document.getElementById('chatModalScreen').scrollHeight;
+        });
 
         function updateUserCount() {
             const el = document.getElementById('userCount');
-            if(el) el.innerText = users.length;
+            if(el) el.innerText = Object.keys(users).length;
         }
 
         function getProfileImgHTML(user) {
@@ -501,10 +564,9 @@
 
             if(!id || !pw || !nickname || !name || !phone) { alert('모든 항목을 입력해주세요.'); return; }
             if(pw !== pwCheck) { alert('비밀번호가 일치하지 않습니다.'); return; }
-            if(users.find(u => u.id === id)) { alert('이미 존재하는 아이디입니다.'); return; }
+            if(users[id]) { alert('이미 존재하는 아이디입니다.'); return; }
 
-            users.push({ id, pw, nickname, name, phone, provider: '일반', scraps: [], profilePic: null });
-            updateUserCount(); 
+            usersRef.child(id).set({ id, pw, nickname, name, phone, provider: '일반', scraps: {}, profilePic: null });
             alert('회원가입이 완료되었습니다. 로그인해주세요.');
             showPage('login', document.querySelector('.auth-menu a'));
         }
@@ -516,12 +578,14 @@
             if(!id) { alert('[로그인 실패] 아이디를 입력하지 않으셨습니다.'); return; }
             if(!pw) { alert('[로그인 실패] 비밀번호를 입력하지 않으셨습니다.'); return; }
 
-            const userById = users.find(u => u.id === id);
+            const userById = users[id];
             if(!userById) { alert('[로그인 실패] 존재하지 않는 아이디입니다.'); return; }
             if(userById.pw !== pw) { alert('[로그인 실패] 비밀번호가 틀렸습니다.'); return; }
             
             currentUser = userById;
-            if(!currentUser.scraps) currentUser.scraps = []; 
+            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+            if(!currentUser.scraps) currentUser.scraps = {};
+            
             alert(`[로그인 성공] ${userById.nickname}님 환영합니다!`);
             updateAuthMenu();
             showPage('home', document.querySelector('.nav-menu a'));
@@ -553,13 +617,15 @@
             if(!nickname || !name || !phone || !code) { alert('모든 항목을 입력해주세요.'); return; }
             if(code !== '1234') { alert('[인증 실패] 인증번호가 틀렸습니다. (테스트용 1234)'); return; }
 
+            const tempId = `${tempSocialProvider}_user_${Math.floor(Math.random() * 10000)}`;
             currentUser = {
-                id: `${tempSocialProvider}_user_${Math.floor(Math.random() * 10000)}`,
-                name: name, nickname: nickname, phone: phone,
-                provider: tempSocialProvider, scraps: [], profilePic: null
+                id: tempId, name, nickname, phone,
+                provider: tempSocialProvider, scraps: {}, profilePic: null
             };
-            users.push(currentUser);
-            updateUserCount(); 
+            
+            usersRef.child(tempId).set(currentUser);
+            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
             closeModal('socialModal');
             alert(`[인증 완료] ${tempSocialProvider} 로그인 성공!`);
             updateAuthMenu();
@@ -568,6 +634,7 @@
 
         function handleLogout() {
             currentUser = null;
+            sessionStorage.removeItem('currentUser');
             alert('로그아웃 되었습니다.');
             updateAuthMenu();
             showPage('home', document.querySelector('.nav-link'));
@@ -591,8 +658,8 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     currentUser.profilePic = e.target.result;
-                    const userIndex = users.findIndex(u => u.id === currentUser.id);
-                    if(userIndex !== -1) users[userIndex].profilePic = currentUser.profilePic;
+                    usersRef.child(currentUser.id).update({ profilePic: currentUser.profilePic });
+                    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
                     loadMypage();
                     alert('프로필 사진이 변경되었습니다.');
                 };
@@ -606,27 +673,32 @@
 
             let myPosts = [];
             ['semi', 'other', 'free'].forEach(type => {
-                posts[type].forEach((p, idx) => {
-                    if(currentUser.id === p.authorId) myPosts.push({ type, index: idx, post: p });
+                const typePosts = posts[type] || {};
+                Object.keys(typePosts).forEach(key => {
+                    const p = typePosts[key];
+                    p.id = key;
+                    if(currentUser.id === p.authorId) myPosts.push({ type, post: p });
                 });
             });
 
             let scrapPosts = [];
-            if(currentUser.scraps) {
-                ['semi', 'other', 'free'].forEach(type => {
-                    posts[type].forEach((p, idx) => {
-                        if(currentUser.scraps.includes(p.id)) scrapPosts.push({ type, index: idx, post: p });
-                    });
+            const userScraps = currentUser.scraps || {};
+            ['semi', 'other', 'free'].forEach(type => {
+                const typePosts = posts[type] || {};
+                Object.keys(typePosts).forEach(key => {
+                    const p = typePosts[key];
+                    p.id = key;
+                    if(userScraps[key]) scrapPosts.push({ type, post: p });
                 });
-            }
+            });
 
             let myPostsHtml = myPosts.length === 0 ? `<p style="color:#999;">작성한 글이 없습니다.</p>` : 
-                myPosts.map(m => `<div class="post-item" onclick="viewPost('${m.type}', ${m.index})"><h3>${m.post.title}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div>`).join('');
+                myPosts.map(m => `<div class="post-item" onclick="viewPost('${m.type}', '${m.post.id}')"><h3>${m.post.title}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div>`).join('');
 
             let scrapPostsHtml = scrapPosts.length === 0 ? `<p style="color:#999;">스크랩한 글이 없습니다.</p>` : 
                 scrapPosts.map(s => {
-                    const scrapUser = users.find(u => u.id === s.post.authorId);
-                    return `<div class="post-item" onclick="viewPost('${s.type}', ${s.index})"><h3>${s.post.title}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${s.post.author} | ${s.post.date} <span class="view-btn">[보기]</span></div></div>`;
+                    const scrapUser = users[s.post.authorId];
+                    return `<div class="post-item" onclick="viewPost('${s.type}', '${s.post.id}')"><h3>${s.post.title}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${s.post.author} | ${s.post.date} <span class="view-btn">[보기]</span></div></div>`;
                 }).join('');
 
             mypageContent.innerHTML = `
@@ -653,7 +725,7 @@
         function loadAdminPage() {
             const tbody = document.getElementById('adminUserList');
             if(!currentUser || currentUser.id !== 'admin') return;
-            tbody.innerHTML = users.map(u => `
+            tbody.innerHTML = Object.values(users).map(u => `
                 <tr>
                     <td>${u.id}</td><td>${u.nickname}</td><td>${u.name}</td><td>${u.phone}</td><td>${u.provider}</td>
                     <td>${u.id === 'admin' ? '<span style="color:#999;">삭제 불가</span>' : `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')">삭제</button>`}</td>
@@ -663,27 +735,12 @@
 
         function deleteUser(userId) {
             if(confirm(`${userId} 님을 정말 삭제하시겠습니까?`)) {
-                users = users.filter(u => u.id !== userId);
-                updateUserCount(); 
+                usersRef.child(userId).remove();
                 alert('회원이 삭제되었습니다.');
-                loadAdminPage();
             }
         }
 
         updateAuthMenu();
-        updateUserCount(); 
-
-        function savePostWithFile(type, title, content, region, fileData) {
-            const newPost = { 
-                id: postIdCounter++, title, content, 
-                author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(),
-                region: region || '지역 없음',
-                file: fileData
-            };
-            posts[type].unshift(newPost);
-            alert('글이 성공적으로 작성되었습니다!');
-            renderPosts();
-        }
 
         function writePost(type) {
             const titleInput = document.getElementById(`${type}Title`);
@@ -698,14 +755,25 @@
             const region = regionInput ? regionInput.value : '지역 없음';
             const file = fileInput.files[0];
 
+            const savePostToDB = (fileData) => {
+                const newPostRef = postsRef.child(type).push();
+                const newPost = { 
+                    title: titleInput.value, content: contentInput.value, 
+                    author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(),
+                    region: region, file: fileData
+                };
+                newPostRef.set(newPost);
+                alert('글이 성공적으로 작성되었습니다!');
+            };
+
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    savePostWithFile(type, titleInput.value, contentInput.value, region, { name: file.name, type: file.type, data: e.target.result });
+                    savePostToDB({ name: file.name, type: file.type, data: e.target.result });
                 };
                 reader.readAsDataURL(file); 
             } else {
-                savePostWithFile(type, titleInput.value, contentInput.value, region, null);
+                savePostToDB(null);
             }
 
             titleInput.value = ""; 
@@ -729,12 +797,14 @@
         function renderPosts() {
             ['semi', 'other', 'free'].forEach(type => {
                 const list = document.getElementById(`${type}List`);
-                if (posts[type].length === 0) list.innerHTML = `<p style="color:#999;">등록된 글이 없습니다.</p>`;
-                else list.innerHTML = posts[type].map((p, index) => {
-                    const authorUser = users.find(u => u.id === p.authorId);
+                const typePosts = posts[type] || {};
+                const postArray = Object.keys(typePosts).map(key => ({ id: key, ...typePosts[key] })).reverse(); // 최신순
+                if (postArray.length === 0) list.innerHTML = `<p style="color:#999;">등록된 글이 없습니다.</p>`;
+                else list.innerHTML = postArray.map(p => {
+                    const authorUser = users[p.authorId];
                     const regionTag = p.region && p.region !== '지역 없음' ? `<span class="tag">${p.region}</span>` : '';
                     const fileIcon = p.file ? ' 📎' : '';
-                    return `<div class="post-item" onclick="viewPost('${type}', ${index})">
+                    return `<div class="post-item" onclick="viewPost('${type}', '${p.id}')">
                         <h3>${regionTag} ${p.title}${fileIcon}</h3>
                         <p>${linkify(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content)}</p>
                         <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${p.author} | ${p.date} <span class="view-btn">[클릭하여 보기]</span></div>
@@ -747,20 +817,21 @@
 
         function renderMainList(elementId, type) {
             const list = document.getElementById(elementId);
-            const latestPosts = posts[type].slice(0, 3);
+            const typePosts = posts[type] || {};
+            const latestPosts = Object.keys(typePosts).map(key => ({ id: key, ...typePosts[key] })).reverse().slice(0, 3);
             if (latestPosts.length === 0) list.innerHTML = `<p style="color:#999;">아직 등록된 글이 없습니다.</p>`;
-            else list.innerHTML = latestPosts.map((p, index) => {
-                const authorUser = users.find(u => u.id === p.authorId);
-                return `<div class="post-item" onclick="viewPost('${type}', ${index})">
+            else list.innerHTML = latestPosts.map(p => {
+                const authorUser = users[p.authorId];
+                return `<div class="post-item" onclick="viewPost('${type}', '${p.id}')">
                     <h3>${p.region && p.region !== '지역 없음' ? `<span class="tag">${p.region}</span>` : ''} ${p.title}</h3>
                     <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${p.author} | ${p.date}</div>
                 </div>`;
             }).join('');
         }
 
-        function viewPost(type, index) {
-            const post = posts[type][index];
-            const authorUser = users.find(u => u.id === post.authorId);
+        function viewPost(type, postId) {
+            const post = posts[type][postId];
+            const authorUser = users[post.authorId];
             document.getElementById('modalTitle').innerText = post.title;
             document.getElementById('modalMeta').innerHTML = `
                 ${getProfileImgHTML(authorUser)} <span>작성자: <strong>${post.author}</strong></span>
@@ -779,17 +850,17 @@
             if(currentUser) {
                 let html = '';
                 if(currentUser.id === post.authorId || currentUser.id === 'admin') {
-                    html += `<button class="btn-action btn-edit" onclick="editPost('${type}', ${index})">수정하기</button>`;
-                    html += `<button class="btn-action btn-delete" onclick="deletePost('${type}', ${index})">삭제하기</button>`;
+                    html += `<button class="btn-action btn-edit" onclick="editPost('${type}', '${postId}')">수정하기</button>`;
+                    html += `<button class="btn-action btn-delete" onclick="deletePost('${type}', '${postId}')">삭제하기</button>`;
                 }
                 if(currentUser.id !== post.authorId) {
-                    const isScrapped = currentUser.scraps.includes(post.id);
-                    html += `<button class="btn-action btn-scrap" onclick="toggleScrap('${type}', ${index})">${isScrapped ? '스크랩 취소' : '스크랩하기'}</button>`;
+                    const isScrapped = currentUser.scraps && currentUser.scraps[postId];
+                    html += `<button class="btn-action btn-scrap" onclick="toggleScrap('${type}', '${postId}')">${isScrapped ? '스크랩 취소' : '스크랩하기'}</button>`;
                 }
                 actionsDiv.innerHTML = html;
 
                 if(currentUser.id === 'admin') {
-                    actionsDiv.innerHTML += `<button class="btn-action btn-rec" onclick="addPostToRec('${type}', ${index})">추천 알바 등록</button>`;
+                    actionsDiv.innerHTML += `<button class="btn-action btn-rec" onclick="addPostToRec('${type}', '${postId}')">추천 알바 등록</button>`;
                     moveArea.style.display = 'block';
                     moveArea.innerHTML = `
                         <label style="font-weight:700; margin-right:10px;">게시판 이동 (관리자):</label>
@@ -799,70 +870,106 @@
                             <option value="other">기타알바공고</option>
                             <option value="free">자유게시판</option>
                         </select>
-                        <button class="btn-action btn-move" onclick="movePost('${type}', ${index})">이동하기</button>
+                        <button class="btn-action btn-move" onclick="movePost('${type}', '${postId}')">이동하기</button>
                     `;
                 }
             }
             document.getElementById('postModal').style.display = 'flex';
         }
 
-        function toggleScrap(type, index) {
-            const post = posts[type][index];
-            const scrapIndex = currentUser.scraps.indexOf(post.id);
-            if(scrapIndex > -1) {
-                currentUser.scraps.splice(scrapIndex, 1);
+        function toggleScrap(type, postId) {
+            const post = posts[type][postId];
+            const scrapRef = usersRef.child(currentUser.id).child('scraps').child(postId);
+            if(currentUser.scraps && currentUser.scraps[postId]) {
+                scrapRef.remove();
                 alert('스크랩이 취소되었습니다.');
             } else {
-                currentUser.scraps.push(post.id);
+                scrapRef.set(true);
                 alert('스크랩되었습니다. 마이페이지에서 확인하세요!');
             }
-            viewPost(type, index);
         }
 
-        function addPostToRec(type, index) {
-            const post = posts[type][index];
-            recommendedJobs.unshift({ id: recJobIdCounter++, title: post.title, info: post.content.substring(0, 20) + '...', region: post.region });
+        function addPostToRec(type, postId) {
+            const post = posts[type][postId];
+            recJobsRef.push({ title: post.title, info: post.content.substring(0, 20) + '...', region: post.region || '미지정' });
             alert('오늘의 추천 알바에 등록되었습니다!');
-            renderHomeRecJobs();
             closeModal('postModal');
         }
 
-        function movePost(type, index) {
+        function movePost(type, postId) {
             const newType = document.getElementById('moveSelect').value;
             if(!newType) { alert('이동할 게시판을 선택하세요.'); return; }
             if(newType === type) { alert('같은 게시판입니다.'); return; }
-            const post = posts[type].splice(index, 1)[0]; 
-            posts[newType].unshift(post); 
+            const post = posts[type][postId];
+            postsRef.child(newType).push(post);
+            postsRef.child(type).child(postId).remove();
             alert('게시판이 이동되었습니다.');
-            renderPosts();
             closeModal('postModal');
         }
 
-        function editPost(type, index) {
-            const post = posts[type][index];
+        function editPost(type, postId) {
+            const post = posts[type][postId];
+            editingFile = post.file;
+
             document.getElementById('modalTitle').innerHTML = `<input type="text" id="editTitle" value="${post.title}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">`;
-            document.getElementById('modalContent').innerHTML = `<textarea id="editContent" style="width:100%; height:200px; padding:10px; border:1px solid #ccc; border-radius:5px;">${post.content}</textarea>`;
-            document.getElementById('modalActions').innerHTML = `<button class="btn-action btn-edit" onclick="savePost('${type}', ${index})">저장하기</button><button class="btn-action" style="background:#ccc; color:#333;" onclick="viewPost('${type}', ${index})">취소</button>`;
+            document.getElementById('modalContent').innerHTML = `
+                <textarea id="editContent" style="width:100%; height:150px; padding:10px; border:1px solid #ccc; border-radius:5px;">${post.content}</textarea>
+                ${renderEditFileArea()}
+            `;
+            document.getElementById('modalActions').innerHTML = `<button class="btn-action btn-edit" onclick="savePost('${type}', '${postId}')">저장하기</button><button class="btn-action" style="background:#ccc; color:#333;" onclick="viewPost('${type}', '${postId}')">취소</button>`;
             document.getElementById('modalMoveArea').style.display = 'none';
         }
 
-        function savePost(type, index) {
+        let editingFile = null;
+        function renderEditFileArea() {
+            let html = '<div id="editFileArea">';
+            if(editingFile) {
+                html += `<div class="edit-file-item">
+                            <span>첨부된 파일: ${editingFile.name}</span>
+                            <button class="btn-action btn-delete" style="margin:0; padding:5px 10px;" onclick="removeEditingFile()">삭제</button>
+                         </div>`;
+            }
+            html += `<div class="file-upload-wrapper">
+                        <label class="file-upload-label" for="editFile">📎 새 파일 첨부 (교체)</label>
+                        <input type="file" id="editFile" style="display:none;" onchange="document.getElementById('editFileName').innerText = this.files[0] ? this.files[0].name : (editingFile ? '기존 파일 유지 중' : '선택된 파일 없음');">
+                        <div class="file-name-display" id="editFileName">${editingFile ? '기존 파일 유지 중' : '선택된 파일 없음'}</div>
+                     </div>`;
+            html += '</div>';
+            return html;
+        }
+
+        function removeEditingFile() {
+            editingFile = null;
+            document.getElementById('modalContent').innerHTML = document.getElementById('modalContent').innerHTML.split('<div id="editFileArea">')[0] + renderEditFileArea();
+        }
+
+        function savePost(type, postId) {
             const newTitle = document.getElementById('editTitle').value.trim();
             const newContent = document.getElementById('editContent').value.trim();
             if(!newTitle || !newContent) { alert('제목과 내용을 모두 입력해주세요.'); return; }
-            posts[type][index].title = newTitle;
-            posts[type][index].content = newContent;
-            posts[type][index].date = `${new Date().toLocaleString()} (수정됨)`;
-            alert('글이 수정되었습니다.');
-            renderPosts();
-            viewPost(type, index);
+
+            const newFileInput = document.getElementById('editFile');
+            const newFile = newFileInput.files[0];
+            const postRef = postsRef.child(type).child(postId);
+
+            if(newFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    postRef.update({ title: newTitle, content: newContent, file: { name: newFile.name, type: newFile.type, data: e.target.result }, date: `${new Date().toLocaleString()} (수정됨)` });
+                    alert('글이 수정되었습니다.');
+                };
+                reader.readAsDataURL(newFile);
+            } else {
+                postRef.update({ title: newTitle, content: newContent, file: editingFile, date: `${new Date().toLocaleString()} (수정됨)` });
+                alert('글이 수정되었습니다.');
+            }
+            closeModal('postModal');
         }
 
-        function deletePost(type, index) {
+        function deletePost(type, postId) {
             if(confirm('정말 삭제하시겠습니까?')) {
-                posts[type].splice(index, 1);
+                postsRef.child(type).child(postId).remove();
                 alert('삭제되었습니다.');
-                renderPosts();
                 closeModal('postModal');
             }
         }
@@ -874,30 +981,28 @@
             const title = document.getElementById('recJobTitle').value.trim();
             const info = document.getElementById('recJobInfo').value.trim();
             if(!title || !info) { alert('제목과 정보를 모두 입력해주세요.'); return; }
-            recommendedJobs.unshift({ id: recJobIdCounter++, title, info, region: '미지정' });
+            recJobsRef.push({ title, info, region: '미지정' });
             document.getElementById('recJobTitle').value = '';
             document.getElementById('recJobInfo').value = '';
-            renderAdminRecJobs();
-            renderHomeRecJobs();
         }
 
-        function deleteRecJob(id) {
-            recommendedJobs = recommendedJobs.filter(j => j.id !== id);
-            renderAdminRecJobs();
-            renderHomeRecJobs();
+        function deleteRecJob(jobId) {
+            recJobsRef.child(jobId).remove();
             alert('추천 알바가 삭제되었습니다.');
         }
 
         function renderAdminRecJobs() {
             const list = document.getElementById('adminRecJobList');
-            if(recommendedJobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
-            else list.innerHTML = recommendedJobs.map(j => `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${j.info}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob(${j.id})">삭제</button></div>`).join('');
+            const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] }));
+            if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
+            else list.innerHTML = jobs.map(j => `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${j.info}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${j.id}')">삭제</button></div>`).join('');
         }
 
         function renderHomeRecJobs() {
             const list = document.getElementById('homeJobList');
-            if(recommendedJobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
-            else list.innerHTML = recommendedJobs.map(j => `<div class="job-card"><div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div><div class="job-info">${j.info}</div></div>`).join('');
+            const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] })).reverse();
+            if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
+            else list.innerHTML = jobs.map(j => `<div class="job-card"><div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div><div class="job-info">${j.info}</div></div>`).join('');
         }
 
         function searchJobs() {
@@ -908,7 +1013,10 @@
             
             const results = [];
             ['semi', 'other'].forEach(type => {
-                posts[type].forEach(p => {
+                const typePosts = posts[type] || {};
+                Object.keys(typePosts).forEach(key => {
+                    const p = typePosts[key];
+                    p.id = key;
                     const matchText = (p.title + p.content + p.author).toUpperCase().indexOf(filter) > -1;
                     const matchRegion = !region || p.region === region;
                     if(matchText && matchRegion) results.push({ type, post: p });
@@ -924,9 +1032,8 @@
                 searchDiv.innerHTML = `<p style="color:#999;">검색 결과가 없습니다.</p>`;
             } else {
                 searchDiv.innerHTML = results.map(r => {
-                    const idx = posts[r.type].findIndex(p => p.id === r.post.id);
-                    const authorUser = users.find(u => u.id === r.post.authorId);
-                    return `<div class="post-item" onclick="viewPost('${r.type}', ${idx})">
+                    const authorUser = users[r.post.authorId];
+                    return `<div class="post-item" onclick="viewPost('${r.type}', '${r.post.id}')">
                         <h3>${r.post.region ? `<span class="tag">${r.post.region}</span>` : ''} ${r.post.title}</h3>
                         <p>${linkify(r.post.content.length > 50 ? r.post.content.substring(0, 50) + '...' : r.post.content)}</p>
                         <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${r.post.author} | ${r.post.date}</div>
@@ -934,9 +1041,6 @@
                 }).join('');
             }
         }
-
-        renderHomeRecJobs();
-        renderPosts();
 
         function openChatModal() {
             const mainScreen = document.getElementById('chatScreen');
@@ -953,16 +1057,9 @@
             const message = input.value.trim();
             if (message !== "") {
                 const author = currentUser ? currentUser.nickname : '나';
-                const userObj = currentUser ? currentUser : { nickname: '나' };
-                const profileHTML = getProfileImgHTML(userObj);
-                const newMessageHTML = `<div class="chat-message">${profileHTML} <span class="user">${author}:</span> <span class="chat-text">${linkify(message)}</span></div>`;
+                const authorId = currentUser ? currentUser.id : 'guest';
                 
-                document.getElementById('chatScreen').insertAdjacentHTML('beforeend', newMessageHTML);
-                document.getElementById('chatModalScreen').insertAdjacentHTML('beforeend', newMessageHTML);
-                
-                document.getElementById('chatScreen').scrollTop = document.getElementById('chatScreen').scrollHeight;
-                document.getElementById('chatModalScreen').scrollTop = document.getElementById('chatModalScreen').scrollHeight;
-                
+                chatRef.push({ author, authorId, message, timestamp: Date.now() });
                 input.value = "";
             }
         }
