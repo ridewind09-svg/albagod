@@ -605,7 +605,7 @@
                         
                         <div class="file-upload-wrapper">
                             <label class="file-upload-label" for="${type}File">
-                                📎 파일 첨부하기 (이미지/문서 10개, 동영상 1개 / 한 번에 다중 선택 가능)
+                                📎 파일 첨부하기 (이미지/문서 10개, 동영상 1개 / 총 1MB 이하만 가능)
                             </label>
                             <input type="file" id="${type}File" multiple onchange="handleFileSelect('${type}', this)">
                             <div class="file-name-display" id="${type}FileName">선택된 파일 없음</div>
@@ -641,8 +641,9 @@
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
                 return;
             }
-            if(totalSize > 5 * 1024 * 1024) {
-                alert('파일 총 용량이 너무 큽니다 (5MB 초과). 서버 저장에 실패할 수 있으니 용량이 작은 파일로 첨부해주세요.');
+            // 무료 데이터베이스 제한으로 인해 총 용량 1MB 제한
+            if(totalSize > 1024 * 1024) { 
+                alert('파일 총 용량이 1MB를 초과했습니다. 용량이 작은 파일로 첨부해주세요. (무료 서버 환경에서는 큰 파일 저장이 차단됩니다)');
                 input.value = '';
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
                 return;
@@ -756,6 +757,11 @@
         function handleProfilePicUpload(event) {
             const file = event.target.files[0];
             if(file) {
+                if(file.size > 1024 * 1024) {
+                    alert('프로필 사진은 1MB 이하의 파일만 등록 가능합니다.');
+                    event.target.value = '';
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     currentUser.profilePic = e.target.result;
@@ -868,17 +874,20 @@
                     alert('글이 성공적으로 작성되었습니다!');
                 }).catch((error) => {
                     console.error("저장 실패", error);
-                    alert('파일 용량이 너무 커서 서버에 저장하지 못했습니다. 용량을 줄여서 다시 시도해주세요.');
+                    alert('파일 저장에 실패했습니다. 파일 용량이 너무 크거나 서버 제한에 걸렸을 수 있습니다.\n(에러: ' + error.code + ')');
                 });
             };
 
             if (files.length > 0) {
                 let videoCount = 0;
+                let totalSize = 0;
                 for(let i=0; i<files.length; i++) {
                     if(files[i].type.startsWith('video/')) videoCount++;
+                    totalSize += files[i].size;
                 }
                 if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
                 if(files.length > 10) { alert('파일은 최대 10개까지 업로드 가능합니다.'); return; }
+                if(totalSize > 1024 * 1024) { alert('파일 총 용량이 1MB를 초과했습니다. 용량이 작은 파일로 다시 시도해주세요.'); return; }
 
                 const readers = [];
                 for(let i=0; i<files.length; i++) {
@@ -1110,16 +1119,20 @@
             const postRef = postsRef.child(type).child(postId);
 
             let videoCount = 0;
+            let totalSize = 0;
             for(let i=0; i<editingFiles.length; i++) {
                 if(editingFiles[i].type.startsWith('video/')) videoCount++;
+                // 기존 파일 크기는 알 수 없으므로 패스
             }
 
             if(newFiles.length > 0) {
                 for(let i=0; i<newFiles.length; i++) {
                     if(newFiles[i].type.startsWith('video/')) videoCount++;
+                    totalSize += newFiles[i].size;
                 }
                 if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
                 if((editingFiles.length + newFiles.length) > 10) { alert('파일은 최대 10개까지 업로드 가능합니다.'); return; }
+                if(totalSize > 1024 * 1024) { alert('새로 추가한 파일의 총 용량이 1MB를 초과했습니다.'); return; }
 
                 const readers = [];
                 for(let i=0; i<newFiles.length; i++) {
@@ -1133,13 +1146,21 @@
                 }
                 Promise.all(readers).then((results) => {
                     const allFiles = editingFiles.concat(results);
-                    postRef.update({ title: newTitle, content: newContent, files: allFiles, file: null, date: `${new Date().toLocaleString()} (수정됨)` });
-                    alert('글이 수정되었습니다.');
+                    postRef.update({ title: newTitle, content: newContent, files: allFiles, file: null, date: `${new Date().toLocaleString()} (수정됨)` })
+                    .then(() => {
+                        alert('글이 수정되었습니다.');
+                    }).catch((error) => {
+                        alert('파일 수정 중 에러가 발생했습니다. 용량을 확인해주세요.\n(에러: ' + error.code + ')');
+                    });
                 });
             } else {
                 if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
-                postRef.update({ title: newTitle, content: newContent, files: editingFiles, file: null, date: `${new Date().toLocaleString()} (수정됨)` });
-                alert('글이 수정되었습니다.');
+                postRef.update({ title: newTitle, content: newContent, files: editingFiles, file: null, date: `${new Date().toLocaleString()} (수정됨)` })
+                .then(() => {
+                    alert('글이 수정되었습니다.');
+                }).catch((error) => {
+                    alert('수정 중 에러가 발생했습니다.\n(에러: ' + error.code + ')');
+                });
             }
             closeModal('postModal');
         }
