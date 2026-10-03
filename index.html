@@ -472,6 +472,11 @@
             return Math.abs(hash) % 20;
         }
 
+        function escapeHtml(text) {
+            if(!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
         usersRef.on('value', (snapshot) => {
             users = snapshot.val() || {};
             if(!users['admin']) {
@@ -495,12 +500,18 @@
             renderHomeRecJobs();
         });
 
+        // 채팅 프로필 색상 유지 및 변경 로직
         chatRef.on('value', (snapshot) => {
             const chatData = snapshot.val() || {};
             const chatArray = Object.values(chatData).sort((a,b) => a.timestamp - b.timestamp);
-            const chatHtml = chatArray.map(c => 
-                `<div class="chat-message">${getProfileImgHTML(users[c.authorId])} <span class="user">${c.author}:</span> <span class="chat-text">${linkify(c.message)}</span></div>`
-            ).join('');
+            const chatHtml = chatArray.map(c => {
+                // 익명 사용자도 자신의 닉네임(익명1, 익명2)을 기반으로 고유 색상을 가지도록 임시 유저 객체 생성
+                let tempUser = users[c.authorId];
+                if(!tempUser) {
+                    tempUser = { nickname: c.author, id: c.author }; // c.author("익명1" 등)를 기준으로 색상 해싱
+                }
+                return `<div class="chat-message">${getProfileImgHTML(tempUser)} <span class="user">${escapeHtml(c.author)}:</span> <span class="chat-text">${linkify(escapeHtml(c.message))}</span></div>`;
+            }).join('');
             document.getElementById('chatScreen').innerHTML = chatHtml;
             document.getElementById('chatModalScreen').innerHTML = chatHtml;
             document.getElementById('chatScreen').scrollTop = document.getElementById('chatScreen').scrollHeight;
@@ -515,6 +526,7 @@
         function getProfileImgHTML(user) {
             if(user && user.profilePic) return `<img src="${user.profilePic}" class="profile-img" alt="profile">`;
             const initial = user && user.nickname ? user.nickname.charAt(0) : '?';
+            // user.id가 없으면 user.nickname("익명1" 등)으로 색상 추출
             const colorIndex = getColorForString(user && user.id ? user.id : (user && user.nickname ? user.nickname : 'guest'));
             const bgColor = profileColors[colorIndex];
             return `<div class="profile-img-default" style="background-color: ${bgColor};">${initial}</div>`;
@@ -593,7 +605,7 @@
                         
                         <div class="file-upload-wrapper">
                             <label class="file-upload-label" for="${type}File">
-                                📎 파일 첨부하기 (이미지/문서 최대 10개, 동영상 1개)
+                                📎 파일 첨부하기 (이미지/문서 10개, 동영상 1개 / 한 번에 다중 선택 가능)
                             </label>
                             <input type="file" id="${type}File" multiple onchange="handleFileSelect('${type}', this)">
                             <div class="file-name-display" id="${type}FileName">선택된 파일 없음</div>
@@ -608,10 +620,13 @@
         function handleFileSelect(type, input) {
             const files = input.files;
             let videoCount = 0;
-            let totalFiles = files.length;
+            let totalSize = 0;
+            let fileNames = [];
             
             for(let i=0; i<files.length; i++) {
                 if(files[i].type.startsWith('video/')) videoCount++;
+                totalSize += files[i].size;
+                fileNames.push(files[i].name);
             }
             
             if(videoCount > 1) {
@@ -620,15 +635,22 @@
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
                 return;
             }
-            if(totalFiles > 10) {
+            if(files.length > 10) {
                 alert('이미지와 문서 파일은 합쳐서 최대 10개까지 업로드할 수 있습니다.');
                 input.value = '';
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
                 return;
             }
+            // Firebase 무료 DB 용량 제한으로 인한 총 용량 체크 (5MB)
+            if(totalSize > 5 * 1024 * 1024) {
+                alert('파일 총 용량이 너무 큽니다 (5MB 초과). 서버 저장에 실패할 수 있으니 용량이 작은 파일로 첨부해주세요.');
+                input.value = '';
+                document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
+                return;
+            }
 
-            if(totalFiles > 0) {
-                document.getElementById(`${type}FileName`).innerText = `${totalFiles}개 파일 선택됨`;
+            if(files.length > 0) {
+                document.getElementById(`${type}FileName`).innerText = `선택됨 (${files.length}개): ${fileNames.join(', ')}`;
             } else {
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
             }
@@ -724,7 +746,7 @@
             const authMenu = document.getElementById('authMenu');
             const adminLink = document.getElementById('adminMenuLink');
             if(currentUser) {
-                authMenu.innerHTML = `<a style="background:#4a4a60; cursor:default;">${currentUser.nickname}님</a><a class="logout-btn" onclick="handleLogout()">로그아웃</a>`;
+                authMenu.innerHTML = `<a style="background:#4a4a60; cursor:default;">${escapeHtml(currentUser.nickname)}님</a><a class="logout-btn" onclick="handleLogout()">로그아웃</a>`;
                 adminLink.style.display = currentUser.id === 'admin' ? 'block' : 'none';
             } else {
                 authMenu.innerHTML = `<a onclick="showPage('login', this)">로그인</a><a onclick="showPage('signup', this)">회원가입</a>`;
@@ -773,29 +795,29 @@
             });
 
             let myPostsHtml = myPosts.length === 0 ? `<p style="color:#999;">작성한 글이 없습니다.</p>` : 
-                myPosts.map(m => `<div class="post-item" onclick="viewPost('${m.type}', '${m.post.id}')"><h3>${m.post.title}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div>`).join('');
+                myPosts.map(m => `<div class="post-item" onclick="viewPost('${m.type}', '${m.post.id}')"><h3>${escapeHtml(m.post.title)}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div>`).join('');
 
             let scrapPostsHtml = scrapPosts.length === 0 ? `<p style="color:#999;">스크랩한 글이 없습니다.</p>` : 
                 scrapPosts.map(s => {
                     const scrapUser = users[s.post.authorId];
-                    return `<div class="post-item" onclick="viewPost('${s.type}', '${s.post.id}')"><h3>${s.post.title}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${s.post.author} | ${s.post.date} <span class="view-btn">[보기]</span></div></div>`;
+                    return `<div class="post-item" onclick="viewPost('${s.type}', '${s.post.id}')"><h3>${escapeHtml(s.post.title)}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${escapeHtml(s.post.author)} | ${s.post.date} <span class="view-btn">[보기]</span></div></div>`;
                 }).join('');
 
             mypageContent.innerHTML = `
                 <div class="mypage-header">
-                    <div class="mypage-profile-pic" id="mypageProfilePic">${currentUser.profilePic ? `<img src="${currentUser.profilePic}" style="width:100%; height:100%; object-fit:cover;">` : currentUser.nickname.charAt(0)}</div>
+                    <div class="mypage-profile-pic" id="mypageProfilePic">${currentUser.profilePic ? `<img src="${currentUser.profilePic}" style="width:100%; height:100%; object-fit:cover;">` : escapeHtml(currentUser.nickname.charAt(0))}</div>
                     <div>
-                        <h2 style="margin-bottom:10px;">${currentUser.nickname}님의 마이페이지</h2>
+                        <h2 style="margin-bottom:10px;">${escapeHtml(currentUser.nickname)}님의 마이페이지</h2>
                         <input type="file" accept="image/*" onchange="handleProfilePicUpload(event)" style="display:none;" id="profilePicInput">
                         <button class="btn-auth" style="width:auto; padding:8px 15px; font-size:14px;" onclick="document.getElementById('profilePicInput').click()">프로필 사진 변경</button>
                     </div>
                 </div>
                 <div class="mypage-info">
-                    <div class="info-row"><div class="info-label">아이디</div><div class="info-value">${currentUser.id}</div></div>
-                    <div class="info-row"><div class="info-label">닉네임</div><div class="info-value">${currentUser.nickname}</div></div>
-                    <div class="info-row"><div class="info-label">이름</div><div class="info-value">${currentUser.name}</div></div>
-                    <div class="info-row"><div class="info-label">연락처</div><div class="info-value">${currentUser.phone}</div></div>
-                    <div class="info-row"><div class="info-label">가입 방식</div><div class="info-value">${currentUser.provider}</div></div>
+                    <div class="info-row"><div class="info-label">아이디</div><div class="info-value">${escapeHtml(currentUser.id)}</div></div>
+                    <div class="info-row"><div class="info-label">닉네임</div><div class="info-value">${escapeHtml(currentUser.nickname)}</div></div>
+                    <div class="info-row"><div class="info-label">이름</div><div class="info-value">${escapeHtml(currentUser.name)}</div></div>
+                    <div class="info-row"><div class="info-label">연락처</div><div class="info-value">${escapeHtml(currentUser.phone)}</div></div>
+                    <div class="info-row"><div class="info-label">가입 방식</div><div class="info-value">${escapeHtml(currentUser.provider)}</div></div>
                 </div>
                 <div class="mypage-section"><h3>📝 내가 쓴 게시글</h3><div class="post-list">${myPostsHtml}</div></div>
                 <div class="mypage-section"><h3>⭐ 나의 스크랩 목록</h3><div class="post-list">${scrapPostsHtml}</div></div>
@@ -807,7 +829,7 @@
             if(!currentUser || currentUser.id !== 'admin') return;
             tbody.innerHTML = Object.values(users).map(u => `
                 <tr>
-                    <td>${u.id}</td><td>${u.nickname}</td><td>${u.name}</td><td>${u.phone}</td><td>${u.provider}</td>
+                    <td>${escapeHtml(u.id)}</td><td>${escapeHtml(u.nickname)}</td><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.phone)}</td><td>${escapeHtml(u.provider)}</td>
                     <td>${u.id === 'admin' ? '<span style="color:#999;">삭제 불가</span>' : `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')">삭제</button>`}</td>
                 </tr>
             `).join('');
@@ -842,8 +864,12 @@
                     author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(),
                     region: region, files: filesDataArray
                 };
-                newPostRef.set(newPost);
-                alert('글이 성공적으로 작성되었습니다!');
+                newPostRef.set(newPost).then(() => {
+                    alert('글이 성공적으로 작성되었습니다!');
+                }).catch((error) => {
+                    console.error("저장 실패", error);
+                    alert('파일 용량이 너무 커서 서버에 저장하지 못했습니다. 용량을 줄여서 다시 시도해주세요.');
+                });
             };
 
             if (files.length > 0) {
@@ -883,11 +909,11 @@
             let html = '<div class="file-attachment-box">';
             files.forEach(f => {
                 if(f.type.startsWith('image/')) {
-                    html += `<img src="${f.data}" alt="${f.name}">`;
+                    html += `<img src="${f.data}" alt="${escapeHtml(f.name)}">`;
                 } else if(f.type.startsWith('video/')) {
                     html += `<video src="${f.data}" controls>지원되지 않는 동영상 형식입니다.</video>`;
                 } else {
-                    html += `<a href="${f.data}" download="${f.name}" class="file-download-btn">📎 ${f.name} 다운로드</a>`;
+                    html += `<a href="${f.data}" download="${escapeHtml(f.name)}" class="file-download-btn">📎 ${escapeHtml(f.name)} 다운로드</a>`;
                 }
             });
             html += '</div>';
@@ -905,12 +931,12 @@
                 if (postArray.length === 0) list.innerHTML = `<p style="color:#999;">등록된 글이 없습니다.</p>`;
                 else list.innerHTML = postArray.map(p => {
                     const authorUser = users[p.authorId];
-                    const regionTag = p.region && p.region !== '지역 없음' ? `<span class="tag">${p.region}</span>` : '';
+                    const regionTag = p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : '';
                     const fileIcon = (p.files && p.files.length > 0) || p.file ? ' 📎' : '';
                     return `<div class="post-item" onclick="viewPost('${type}', '${p.id}')">
-                        <h3>${regionTag} ${p.title}${fileIcon}</h3>
-                        <p>${linkify(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content)}</p>
-                        <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${p.author} | ${p.date} <span class="view-btn">[클릭하여 보기]</span></div>
+                        <h3>${regionTag} ${escapeHtml(p.title)}${fileIcon}</h3>
+                        <p>${linkify(escapeHtml(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content))}</p>
+                        <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(p.author)} | ${p.date} <span class="view-btn">[클릭하여 보기]</span></div>
                     </div>`;
                 }).join('');
             });
@@ -926,8 +952,8 @@
             else list.innerHTML = latestPosts.map(p => {
                 const authorUser = users[p.authorId];
                 return `<div class="post-item" onclick="viewPost('${type}', '${p.id}')">
-                    <h3>${p.region && p.region !== '지역 없음' ? `<span class="tag">${p.region}</span>` : ''} ${p.title}</h3>
-                    <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${p.author} | ${p.date}</div>
+                    <h3>${p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''} ${escapeHtml(p.title)}</h3>
+                    <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(p.author)} | ${p.date}</div>
                 </div>`;
             }).join('');
         }
@@ -940,8 +966,8 @@
                 viewPost(job.originType, job.originId);
             } else {
                 document.getElementById('modalTitle').innerText = job.title;
-                document.getElementById('modalMeta').innerHTML = job.region ? `<span class="tag">${job.region}</span>` : '';
-                document.getElementById('modalContent').innerHTML = linkify(job.info); // 전체 내용 표시
+                document.getElementById('modalMeta').innerHTML = job.region ? `<span class="tag">${escapeHtml(job.region)}</span>` : '';
+                document.getElementById('modalContent').innerHTML = linkify(escapeHtml(job.info).replace(/\n/g, '<br>'));
                 document.getElementById('modalActions').innerHTML = `<button class="btn-action" style="background:#ccc; color:#333;" onclick="closeModal('postModal')">닫기</button>`;
                 document.getElementById('modalMoveArea').style.display = 'none';
                 document.getElementById('postModal').style.display = 'flex';
@@ -949,18 +975,21 @@
         }
 
         function viewPost(type, postId) {
-            if(!posts[type] || !posts[type][postId]) return;
+            if(!posts[type] || !posts[type][postId]) {
+                alert('원본 게시글이 삭제되었거나 존재하지 않습니다.');
+                return;
+            }
             const post = posts[type][postId];
             const authorUser = users[post.authorId] || {};
             document.getElementById('modalTitle').innerText = post.title;
             document.getElementById('modalMeta').innerHTML = `
-                ${getProfileImgHTML(authorUser)} <span>작성자: <strong>${post.author}</strong></span>
+                ${getProfileImgHTML(authorUser)} <span>작성자: <strong>${escapeHtml(post.author)}</strong></span>
                 <span>작성일: ${post.date}</span>
-                ${post.region && post.region !== '지역 없음' ? `<span class="tag">${post.region}</span>` : ''}
+                ${post.region && post.region !== '지역 없음' ? `<span class="tag">${escapeHtml(post.region)}</span>` : ''}
             `;
             
             const filesToRender = post.files || (post.file ? [post.file] : []);
-            document.getElementById('modalContent').innerHTML = linkify(post.content) + getFilesHTML(filesToRender);
+            document.getElementById('modalContent').innerHTML = linkify(escapeHtml(post.content).replace(/\n/g, '<br>')) + getFilesHTML(filesToRender);
 
             const actionsDiv = document.getElementById('modalActions');
             const moveArea = document.getElementById('modalMoveArea');
@@ -1012,7 +1041,6 @@
 
         function addPostToRec(type, postId) {
             const post = posts[type][postId];
-            // info에 20자 짜르지 않고 본문 전체 저장
             recJobsRef.push({ 
                 title: post.title, 
                 info: post.content, 
@@ -1039,9 +1067,9 @@
             const post = posts[type][postId];
             editingFiles = post.files || (post.file ? [post.file] : []);
 
-            document.getElementById('modalTitle').innerHTML = `<input type="text" id="editTitle" value="${post.title}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">`;
+            document.getElementById('modalTitle').innerHTML = `<input type="text" id="editTitle" value="${escapeHtml(post.title)}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">`;
             document.getElementById('modalContent').innerHTML = `
-                <textarea id="editContent" style="width:100%; height:150px; padding:10px; border:1px solid #ccc; border-radius:5px;">${post.content}</textarea>
+                <textarea id="editContent" style="width:100%; height:150px; padding:10px; border:1px solid #ccc; border-radius:5px;">${escapeHtml(post.content)}</textarea>
                 ${renderEditFileArea()}
             `;
             document.getElementById('modalActions').innerHTML = `<button class="btn-action btn-edit" onclick="savePost('${type}', '${postId}')">저장하기</button><button class="btn-action" style="background:#ccc; color:#333;" onclick="viewPost('${type}', '${postId}')">취소</button>`;
@@ -1053,7 +1081,7 @@
             if(editingFiles && editingFiles.length > 0) {
                 editingFiles.forEach((f, idx) => {
                     html += `<div class="edit-file-item">
-                                <span>첨부된 파일: ${f.name}</span>
+                                <span>첨부된 파일: ${escapeHtml(f.name)}</span>
                                 <button class="btn-action btn-delete" style="margin:0; padding:5px 10px;" onclick="removeEditingFile(${idx})">삭제</button>
                              </div>`;
                 });
@@ -1147,7 +1175,7 @@
             if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
             else list.innerHTML = jobs.map(j => {
                 const previewInfo = j.info.length > 30 ? j.info.substring(0, 30) + '...' : j.info;
-                return `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${previewInfo}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${j.id}')">삭제</button></div>`;
+                return `<div class="job-card"><div class="job-title">${escapeHtml(j.title)}</div><div class="job-info">${escapeHtml(previewInfo)}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${j.id}')">삭제</button></div>`;
             }).join('');
         }
 
@@ -1158,8 +1186,8 @@
             else list.innerHTML = jobs.map(j => {
                 const previewInfo = j.info.length > 50 ? j.info.substring(0, 50) + '...' : j.info;
                 return `<div class="job-card" onclick="viewRecJob('${j.id}')">
-                    <div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div>
-                    <div class="job-info">${previewInfo}</div>
+                    <div class="job-title">${j.region ? `<span class="tag">${escapeHtml(j.region)}</span>` : ''} ${escapeHtml(j.title)}</div>
+                    <div class="job-info">${escapeHtml(previewInfo)}</div>
                 </div>`;
             }).join('');
         }
@@ -1193,9 +1221,9 @@
                 searchDiv.innerHTML = results.map(r => {
                     const authorUser = users[r.post.authorId];
                     return `<div class="post-item" onclick="viewPost('${r.type}', '${r.post.id}')">
-                        <h3>${r.post.region ? `<span class="tag">${r.post.region}</span>` : ''} ${r.post.title}</h3>
-                        <p>${linkify(r.post.content.length > 50 ? r.post.content.substring(0, 50) + '...' : r.post.content)}</p>
-                        <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${r.post.author} | ${r.post.date}</div>
+                        <h3>${r.post.region ? `<span class="tag">${escapeHtml(r.post.region)}</span>` : ''} ${escapeHtml(r.post.title)}</h3>
+                        <p>${linkify(escapeHtml(r.post.content.length > 50 ? r.post.content.substring(0, 50) + '...' : r.post.content))}</p>
+                        <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(r.post.author)} | ${r.post.date}</div>
                     </div>`;
                 }).join('');
             }
