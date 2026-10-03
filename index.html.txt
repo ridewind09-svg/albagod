@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알바의 신</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Square:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nanum Square', sans-serif; }
+        body { background-color: #f0f2f5; color: #333; display: flex; min-height: 100vh; }
+
+        .sidebar { width: 250px; background-color: #1e1e2f; color: #fff; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo-container { text-align: center; margin-bottom: 30px; margin-top: 10px; padding-top: 15px; cursor: pointer; }
+        .logo { font-size: 28px; font-weight: 800; position: relative; display: inline-block; }
+        .logo .accent { color: #ffcc00; position: relative; display: inline-block; padding-right: 15px; }
+        .crown { position: absolute; top: -18px; right: -5px; font-size: 20px; transform: rotate(20deg); z-index: 10; }
+
+        .nav-menu { list-style: none; margin-top: 20px; }
+        .nav-menu li { margin-bottom: 10px; }
+        .nav-menu a { color: #b0b0c0; text-decoration: none; font-size: 16px; cursor: pointer; transition: all 0.3s; display: block; padding: 12px 15px; border-radius: 8px; font-weight: 700; }
+        .nav-menu a:hover, .nav-menu a.active { color: #fff; background-color: #2a2a40; }
+        .nav-menu .admin-link a { color: #ffcc00; }
+
+        .auth-menu { margin-top: auto; border-top: 1px solid #3a3a50; padding-top: 20px; display: flex; gap: 10px; }
+        .auth-menu a { flex: 1; text-align: center; font-size: 14px; padding: 10px; border-radius: 5px; background: #3a3a50; color: #fff; cursor: pointer; font-weight: 700; text-decoration: none; }
+        .auth-menu a:hover { background: #4a4a60; }
+        .auth-menu .logout-btn { background: #d32f2f; }
+        .auth-menu .logout-btn:hover { background: #b71c1c; }
+
+        .main-content { flex: 1; padding: 30px; display: flex; flex-direction: column; gap: 30px; min-width: 0; }
+        .page-section { display: none; flex-direction: column; gap: 30px; }
+        .page-section.active { display: flex; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-title { font-size: 22px; font-weight: 800; margin-bottom: 20px; border-left: 5px solid #1e1e2f; padding-left: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title .title-btn { font-size: 14px; background: #1e1e2f; color: #fff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: 700; border: none; }
+        .section-title .title-btn:hover { background: #2a2a40; }
+
+        .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
+        
+        .job-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; max-height: 440px; overflow-y: auto; align-content: start; padding-right: 5px; }
+        .job-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .job-card:hover { transform: translateY(-5px); }
+        .job-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+        .job-info { font-size: 14px; color: #666; }
+
+        .chat-box { background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; height: 440px; }
+        .chat-screen { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f9f9f9; }
+        .chat-message { margin-bottom: 10px; font-size: 14px; }
+        .chat-message .user { font-weight: 700; color: #1e1e2f; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn-send { background: #1e1e2f; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 700; }
+
+        .main-board-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .main-board-column { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+        .board-container { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .login-required-box { text-align: center; padding: 40px; background: #f9f9f9; border: 1px dashed #ccc; border-radius: 10px; margin-bottom: 30px; }
+        .login-required-box p { margin-bottom: 15px; color: #666; font-weight: 700; }
+
+        .write-form { margin-bottom: 30px; border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background: #f9f9f9; }
+        .write-form input, .write-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-family: 'Nanum Square', sans-serif; }
+        .write-form textarea { resize: vertical; min-height: 100px; margin-bottom: 20px; }
+        .btn-write { background: #1e1e2f; color: #fff; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: 700; margin-left: auto; display: block; }
+
+        .post-list { display: flex; flex-direction: column; gap: 15px; }
+        .post-item { border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; cursor: pointer; transition: background 0.2s; }
+        .post-item:hover { background: #f9f9fc; padding-left: 10px; padding-right: 10px; }
+        .post-item h3 { font-size: 18px; margin-bottom: 10px; color: #1e1e2f; }
+        .post-item p { font-size: 14px; color: #555; margin-bottom: 10px; line-height: 1.5; }
+        .post-item .meta { font-size: 12px; color: #999; }
+        .post-item .meta .view-btn { color: #1565c0; font-weight: 700; margin-left: 10px; }
+
+        .auth-form { max-width: 400px; margin: 0 auto; }
+        .auth-form input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        .btn-auth { width: 100%; padding: 15px; background: #1e1e2f; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+        .btn-auth:hover { background: #2a2a40; }
+
+        .social-login { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .social-btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .social-btn.google { background: #fff; color: #000; border: 1px solid #ccc; }
+        .social-btn.naver { background: #03C75A; color: #fff; }
+        .social-btn.kakao { background: #FEE500; color: #3C1E1E; }
+        .social-btn:hover { opacity: 0.9; }
+
+        .mypage-info { display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin-bottom: 40px; }
+        .info-row { display: flex; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px; }
+        .info-label { width: 120px; font-weight: 700; color: #555; }
+        .info-value { flex: 1; color: #1e1e2f; font-weight: 800; }
+        .mypage-section { margin-top: 30px; }
+        .mypage-section h3 { font-size: 18px; margin-bottom: 15px; border-left: 4px solid #ffcc00; padding-left: 10px; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; position: relative; max-height: 80vh; overflow-y: auto; animation: fadeIn 0.3s ease; }
+        .modal-close { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #333; font-weight: 800; }
+        
+        .modal-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; border-bottom: 2px solid #1e1e2f; padding-bottom: 10px; }
+        .modal-meta { font-size: 14px; color: #999; margin-bottom: 20px; display: flex; gap: 15px; }
+        .modal-body { font-size: 16px; line-height: 1.6; color: #333; white-space: pre-wrap; margin-bottom: 20px; }
+        .modal-actions { text-align: right; }
+        .btn-action { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; margin-left: 10px; margin-top: 5px; }
+        .btn-edit { background: #1565c0; color: #fff; }
+        .btn-delete { background: #d32f2f; color: #fff; }
+        .btn-scrap { background: #ffcc00; color: #1e1e2f; }
+        .btn-rec { background: #4caf50; color: #fff; }
+        .btn-move { background: #607d8b; color: #fff; }
+        .modal-move-area { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ccc; text-align: right; }
+        .modal-move-area select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-left: 10px; }
+
+        .nickname-modal-content { text-align: center; }
+        .nickname-modal-content input { width: 100%; padding: 15px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+
+        .chat-modal-content { max-width: 800px; height: 80vh; display: flex; flex-direction: column; padding: 40px; }
+        .chat-modal-content .chat-screen { flex: 1; font-size: 16px; padding: 20px; margin-bottom: 20px; }
+        .chat-modal-content .chat-input { font-size: 16px; padding: 15px; }
+        .chat-modal-content .btn-send { font-size: 16px; padding: 15px 30px; }
+
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 20px; }
+        .admin-table { width: 100%; border-collapse: collapse; min-width: 600px; background: #fff; }
+        .admin-table th, .admin-table td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 14px; white-space: nowrap; }
+        .admin-table th { background-color: #1e1e2f; color: #fff; font-weight: 800; }
+        .admin-table tbody tr:hover { background-color: #f0f2f5; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; min-height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px; flex-wrap: wrap; }
+            .logo-container { margin-bottom: 0; margin-top: 0; padding-top: 15px; }
+            .logo { font-size: 22px; }
+            .crown { font-size: 16px; top: -14px; right: -2px; }
+            .nav-menu { display: flex; gap: 5px; margin-top: 10px; width: 100%; flex-wrap: wrap; order: 3; }
+            .nav-menu a { padding: 8px 10px; font-size: 13px; }
+            .auth-menu { border-top: none; padding-top: 0; width: auto; order: 2; }
+            .auth-menu a { padding: 8px; font-size: 12px; }
+            .grid-container { grid-template-columns: 1fr; }
+            .job-list, .chat-box { max-height: none; height: auto; } 
+            .chat-box { height: 300px; }
+            .main-board-container { grid-template-columns: 1fr; }
+            .main-content { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-container" onclick="showPage('home', document.querySelector('.nav-link'))">
+            <div class="logo">알바의 <span class="accent">신<span class="crown">👑</span></span></div>
+        </div>
+        <ul class="nav-menu">
+            <li><a class="nav-link active" onclick="showPage('home', this)">홈</a></li>
+            <li><a class="nav-link" onclick="showPage('semiconductor', this)">반도체현장공고</a></li>
+            <li><a class="nav-link" onclick="showPage('otherjobs', this)">기타알바공고</a></li>
+            <li><a class="nav-link" onclick="showPage('freeboard', this)">자유게시판</a></li>
+            <li><a class="nav-link" onclick="showPage('mypage', this)">마이페이지</a></li>
+            <li id="adminMenuLink" style="display:none;" class="admin-link"><a onclick="showPage('admin', this)">관리자 페이지</a></li>
+        </ul>
+        <div class="auth-menu" id="authMenu">
+            <a onclick="showPage('login', this)">로그인</a>
+            <a onclick="showPage('signup', this)">회원가입</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <section id="home" class="page-section active">
+            <div class="grid-container">
+                <div>
+                    <div class="section-title">🔥 오늘의 추천 알바</div>
+                    <div class="job-list" id="homeJobList"></div>
+                </div>
+                <div class="chat-box">
+                    <div class="section-title">
+                        <span>💬 실시간 채팅</span>
+                        <button class="title-btn" onclick="openChatModal()">크게 보기</button>
+                    </div>
+                    <div class="chat-screen" id="chatScreen">
+                        <div class="chat-message"><span class="user">알바러버:</span> 오늘 알바 끝났습니다 ㅠㅠ</div>
+                        <div class="chat-message"><span class="user">꼬꼬마:</span> 수고하셨어요!</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleKeyPress(event)">
+                        <button class="btn-send" onclick="sendMessage()">전송</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-board-container">
+                <div class="main-board-column">
+                    <div class="section-title">🔧 반도체현장공고 최신글</div>
+                    <div class="post-list" id="mainSemiList"></div>
+                </div>
+                <div class="main-board-column">
+                    <div class="section-title">💼 기타알바공고 최신글</div>
+                    <div class="post-list" id="mainOtherList"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="semiconductor" class="page-section">
+            <div class="section-title">🔧 반도체현장공고 게시판</div>
+            <div class="board-container">
+                <div id="semiWriteArea"></div>
+                <div class="post-list" id="semiList"></div>
+            </div>
+        </section>
+
+        <section id="otherjobs" class="page-section">
+            <div class="section-title">💼 기타알바공고 게시판</div>
+            <div class="board-container">
+                <div id="otherWriteArea"></div>
+                <div class="post-list" id="otherList"></div>
+            </div>
+        </section>
+
+        <section id="freeboard" class="page-section">
+            <div class="section-title">🗣️ 자유게시판</div>
+            <div class="board-container">
+                <div id="freeWriteArea"></div>
+                <div class="post-list" id="freeList"></div>
+            </div>
+        </section>
+
+        <section id="mypage" class="page-section">
+            <div class="section-title">🧑‍💻 마이페이지</div>
+            <div class="board-container" id="mypageContent"></div>
+        </section>
+
+        <section id="admin" class="page-section">
+            <div class="section-title">👑 관리자 페이지</div>
+            <div class="board-container">
+                <h2 style="margin-bottom:20px;">오늘의 추천 알바 관리</h2>
+                <div class="write-form" style="display:flex; gap:10px; align-items:center; margin-bottom:20px; background:#f0f2f5;">
+                    <input type="text" id="recJobTitle" placeholder="알바 제목 (예: 카페 바리스타)" style="flex:1; margin-bottom:0;">
+                    <input type="text" id="recJobInfo" placeholder="알바 정보 (예: 시급 10,000원 / 서울)" style="flex:1; margin-bottom:0;">
+                    <button class="btn-write" style="margin:0; display:inline-block;" onclick="addRecJob()">등록</button>
+                </div>
+                <div class="job-list" id="adminRecJobList"></div>
+            </div>
+            <div class="board-container">
+                <h2 style="margin-bottom:20px;">전체 회원 목록 및 정보</h2>
+                <div class="table-wrapper">
+                    <table class="admin-table">
+                        <thead><tr><th>아이디</th><th>닉네임</th><th>이름</th><th>연락처</th><th>가입 방식</th><th>회원 관리</th></tr></thead>
+                        <tbody id="adminUserList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="login" class="page-section">
+            <div class="section-title">🔓 로그인</div>
+            <div class="board-container">
+                <div class="auth-form">
+                    <input type="text" id="loginId" placeholder="아이디">
+                    <input type="password" id="loginPw" placeholder="비밀번호">
+                    <button class="btn-auth" onclick="handleLogin()">로그인</button>
+                    <div class="social-login">
+                        <button class="social-btn google" onclick="openSocialModal('Google')">G 구글로 로그인</button>
+                        <button class="social-btn naver" onclick="openSocialModal('Naver')">N 네이버로 로그인</button>
+                        <button class="social-btn kakao" onclick="openSocialModal('Kakao')">K 카카오톡으로 로그인</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="signup" class="page-section">
+            <div class="section-title">📝 회원가입</div>
+            <div class="board-container">
+                <div class="auth-form">
+                    <input type="text" id="signupId" placeholder="아이디">
+                    <input type="password" id="signupPw" placeholder="비밀번호">
+                    <input type="password" id="signupPwCheck" placeholder="비밀번호 확인">
+                    <input type="text" id="signupNickname" placeholder="닉네임 (게시판에 표시될 이름)">
+                    <input type="text" id="signupName" placeholder="이름">
+                    <input type="text" id="signupPhone" placeholder="휴대폰 번호">
+                    <button class="btn-auth" onclick="handleSignup()">가입하기</button>
+                    <div class="social-login">
+                        <button class="social-btn google" onclick="openSocialModal('Google')">G 구글로 시작하기</button>
+                        <button class="social-btn naver" onclick="openSocialModal('Naver')">N 네이버로 시작하기</button>
+                        <button class="social-btn kakao" onclick="openSocialModal('Kakao')">K 카카오톡으로 시작하기</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="postModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('postModal')">&times;</button>
+            <div class="modal-title" id="modalTitle"></div>
+            <div class="modal-meta">
+                <span>작성자: <strong id="modalAuthor"></strong></span>
+                <span>작성일: <span id="modalDate"></span></span>
+            </div>
+            <div class="modal-body" id="modalContent"></div>
+            <div class="modal-actions" id="modalActions"></div>
+            <div class="modal-move-area" id="modalMoveArea" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div id="socialModal" class="modal-overlay">
+        <div class="modal-content nickname-modal-content">
+            <button class="modal-close" onclick="closeModal('socialModal')">&times;</button>
+            <h2>닉네임 설정</h2>
+            <p style="color:#666; margin-top:10px;"><span id="socialProviderName"></span> 로그인을 위한 닉네임을 입력해주세요.</p>
+            <input type="text" id="socialNicknameInput" placeholder="사용할 닉네임">
+            <button class="btn-auth" onclick="confirmSocialLogin()">확인 및 로그인</button>
+        </div>
+    </div>
+
+    <div id="chatModal" class="modal-overlay">
+        <div class="modal-content chat-modal-content">
+            <button class="modal-close" onclick="closeModal('chatModal')">&times;</button>
+            <h2 style="margin-bottom:20px;">💬 실시간 채팅 (전체화면)</h2>
+            <div class="chat-screen" id="chatModalScreen"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatModalInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleModalKeyPress(event)">
+                <button class="btn-send" onclick="sendMessage(true)">전송</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let users = [{ id: 'admin', pw: 'admin1234', nickname: '관리자', name: '운영자', phone: '010-0000-0000', provider: '관리자', scraps: [] }]; 
+        let currentUser = null;
+        let posts = { semi: [], other: [], free: [] };
+        let tempSocialProvider = '';
+        let postIdCounter = 1;
+        let recommendedJobs = [
+            { id: 1, title: "카페 바리스타", info: "시급 10,000원 / 서울 강남" },
+            { id: 2, title: "편의점 야간", info: "시급 11,000원 / 경기 수원" },
+            { id: 3, title: "과외 (고등수학)", info: "시급 30,000원 / 온라인" },
+            { id: 4, title: "물류센터 상하차", info: "일당 120,000원 / 부산" }
+        ];
+        let recJobIdCounter = 5;
+
+        function showPage(pageId, element) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            if(element) {
+                document.querySelectorAll('.nav-link, .auth-menu a, .admin-link a').forEach(l => l.classList.remove('active'));
+                element.classList.add('active');
+            }
+            document.getElementById(pageId).classList.add('active');
+            if(pageId === 'mypage') loadMypage();
+            if(pageId === 'admin') { loadAdminPage(); renderAdminRecJobs(); }
+            if(['semiconductor', 'otherjobs', 'freeboard'].includes(pageId)) checkWriteAuth(pageId);
+        }
+
+        function checkWriteAuth(pageId) {
+            const areaId = pageId === 'semiconductor' ? 'semiWriteArea' : pageId === 'otherjobs' ? 'otherWriteArea' : 'freeWriteArea';
+            const type = pageId === 'semiconductor' ? 'semi' : pageId === 'otherjobs' ? 'other' : 'free';
+            const area = document.getElementById(areaId);
+
+            if(!currentUser) {
+                area.innerHTML = `<div class="login-required-box"><p>🔒 게시글 작성은 로그인 후 이용 가능합니다.</p><button class="btn-auth" style="width: auto; padding: 10px 20px;" onclick="showPage('login', document.querySelector('.auth-menu a'))">로그인 하러가기</button></div>`;
+            } else {
+                area.innerHTML = `<div class="write-form"><h3 style="margin-bottom:15px;">글쓰기</h3><input type="text" id="${type}Title" placeholder="제목을 입력하세요"><textarea id="${type}Content" placeholder="내용을 입력하세요"></textarea><button class="btn-write" onclick="writePost('${type}')">작성 완료</button></div>`;
+            }
+        }
+
+        function handleSignup() {
+            const id = document.getElementById('signupId').value.trim();
+            const pw = document.getElementById('signupPw').value.trim();
+            const pwCheck = document.getElementById('signupPwCheck').value.trim();
+            const nickname = document.getElementById('signupNickname').value.trim();
+            const name = document.getElementById('signupName').value.trim();
+            const phone = document.getElementById('signupPhone').value.trim();
+
+            if(!id || !pw || !nickname || !name || !phone) { alert('모든 항목을 입력해주세요.'); return; }
+            if(pw !== pwCheck) { alert('비밀번호가 일치하지 않습니다.'); return; }
+            if(users.find(u => u.id === id)) { alert('이미 존재하는 아이디입니다.'); return; }
+
+            users.push({ id, pw, nickname, name, phone, provider: '일반', scraps: [] });
+            alert('회원가입이 완료되었습니다. 로그인해주세요.');
+            showPage('login', document.querySelector('.auth-menu a'));
+        }
+
+        function handleLogin() {
+            const id = document.getElementById('loginId').value.trim();
+            const pw = document.getElementById('loginPw').value.trim();
+            const user = users.find(u => u.id === id && u.pw === pw);
+            if(!user) { alert('아이디 또는 비밀번호가 일치하지 않습니다.'); return; }
+            currentUser = user;
+            if(!currentUser.scraps) currentUser.scraps = []; 
+            alert(`${user.nickname}님 환영합니다!`);
+            updateAuthMenu();
+            showPage('home', document.querySelector('.nav-menu a'));
+        }
+
+        function openSocialModal(provider) {
+            tempSocialProvider = provider;
+            document.getElementById('socialProviderName').innerText = provider;
+            document.getElementById('socialModal').style.display = 'flex';
+        }
+
+        function confirmSocialLogin() {
+            const nickname = document.getElementById('socialNicknameInput').value.trim();
+            if(!nickname) { alert('닉네임을 입력해주세요.'); return; }
+
+            currentUser = {
+                id: `${tempSocialProvider}_user_${Math.floor(Math.random() * 10000)}`,
+                name: `${tempSocialProvider} 유저`,
+                nickname: nickname,
+                phone: '소셜 로그인 제공',
+                provider: tempSocialProvider,
+                scraps: []
+            };
+            users.push(currentUser);
+            closeModal('socialModal');
+            alert(`${tempSocialProvider} 로그인 성공!`);
+            updateAuthMenu();
+            showPage('home', document.querySelector('.nav-menu a'));
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            alert('로그아웃 되었습니다.');
+            updateAuthMenu();
+            showPage('home', document.querySelector('.nav-link'));
+        }
+
+        function updateAuthMenu() {
+            const authMenu = document.getElementById('authMenu');
+            const adminLink = document.getElementById('adminMenuLink');
+            if(currentUser) {
+                authMenu.innerHTML = `<a style="background:#4a4a60; cursor:default;">${currentUser.nickname}님</a><a class="logout-btn" onclick="handleLogout()">로그아웃</a>`;
+                adminLink.style.display = currentUser.id === 'admin' ? 'block' : 'none';
+            } else {
+                authMenu.innerHTML = `<a onclick="showPage('login', this)">로그인</a><a onclick="showPage('signup', this)">회원가입</a>`;
+                adminLink.style.display = 'none';
+            }
+        }
+
+        function loadMypage() {
+            const mypageContent = document.getElementById('mypageContent');
+            if(!currentUser) {
+                mypageContent.innerHTML = `<p style="text-align:center; color:#666;">로그인이 필요한 페이지입니다.</p>`;
+                return;
+            }
+
+            let myPosts = [];
+            ['semi', 'other', 'free'].forEach(type => {
+                posts[type].forEach((p, idx) => {
+                    if(currentUser.id === p.authorId) myPosts.push({ type, index: idx, post: p });
+                });
+            });
+
+            let scrapPosts = [];
+            if(currentUser.scraps) {
+                ['semi', 'other', 'free'].forEach(type => {
+                    posts[type].forEach((p, idx) => {
+                        if(currentUser.scraps.includes(p.id)) scrapPosts.push({ type, index: idx, post: p });
+                    });
+                });
+            }
+
+            let myPostsHtml = myPosts.length === 0 ? `<p style="color:#999;">작성한 글이 없습니다.</p>` : 
+                myPosts.map(m => `<div class="post-item" onclick="viewPost('${m.type}', ${m.index})"><h3>${m.post.title}</h3><div class="meta">작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div>`).join('');
+
+            let scrapPostsHtml = scrapPosts.length === 0 ? `<p style="color:#999;">스크랩한 글이 없습니다.</p>` : 
+                scrapPosts.map(s => `<div class="post-item" onclick="viewPost('${s.type}', ${s.index})"><h3>${s.post.title}</h3><div class="meta">작성자: ${s.post.author} | ${s.post.date} <span class="view-btn">[보기]</span></div></div>`).join('');
+
+            mypageContent.innerHTML = `
+                <h2 style="margin-bottom:20px;">${currentUser.nickname}님의 마이페이지</h2>
+                <div class="mypage-info">
+                    <div class="info-row"><div class="info-label">아이디</div><div class="info-value">${currentUser.id}</div></div>
+                    <div class="info-row"><div class="info-label">닉네임</div><div class="info-value">${currentUser.nickname}</div></div>
+                    <div class="info-row"><div class="info-label">이름</div><div class="info-value">${currentUser.name}</div></div>
+                    <div class="info-row"><div class="info-label">연락처</div><div class="info-value">${currentUser.phone}</div></div>
+                    <div class="info-row"><div class="info-label">가입 방식</div><div class="info-value">${currentUser.provider}</div></div>
+                </div>
+                <div class="mypage-section">
+                    <h3>📝 내가 쓴 게시글</h3>
+                    <div class="post-list">${myPostsHtml}</div>
+                </div>
+                <div class="mypage-section">
+                    <h3>⭐ 나의 스크랩 목록</h3>
+                    <div class="post-list">${scrapPostsHtml}</div>
+                </div>
+            `;
+        }
+
+        function loadAdminPage() {
+            const tbody = document.getElementById('adminUserList');
+            if(!currentUser || currentUser.id !== 'admin') return;
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.id}</td><td>${u.nickname}</td><td>${u.name}</td><td>${u.phone}</td><td>${u.provider}</td>
+                    <td>${u.id === 'admin' ? '<span style="color:#999;">삭제 불가</span>' : `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')">삭제</button>`}</td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteUser(userId) {
+            if(confirm(`${userId} 님을 정말 삭제하시겠습니까?`)) {
+                users = users.filter(u => u.id !== userId);
+                alert('회원이 삭제되었습니다.');
+                loadAdminPage();
+            }
+        }
+
+        updateAuthMenu();
+
+        function writePost(type) {
+            const titleInput = document.getElementById(`${type}Title`);
+            const contentInput = document.getElementById(`${type}Content`);
+            if(titleInput.value.trim() === "" || contentInput.value.trim() === "") { alert('내용을 입력해주세요.'); return; }
+
+            const newPost = { id: postIdCounter++, title: titleInput.value, content: contentInput.value, author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString() };
+            posts[type].unshift(newPost);
+            titleInput.value = ""; contentInput.value = "";
+            alert('글이 작성되었습니다.');
+            renderPosts();
+        }
+
+        function renderPosts() {
+            ['semi', 'other', 'free'].forEach(type => {
+                const list = document.getElementById(`${type}List`);
+                if (posts[type].length === 0) list.innerHTML = `<p style="color:#999;">등록된 글이 없습니다.</p>`;
+                else list.innerHTML = posts[type].map((p, index) => `<div class="post-item" onclick="viewPost('${type}', ${index})"><h3>${p.title}</h3><p>${p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content}</p><div class="meta">작성자: ${p.author} | ${p.date} <span class="view-btn">[클릭하여 보기]</span></div></div>`).join('');
+            });
+            renderMainList('mainSemiList', 'semi');
+            renderMainList('mainOtherList', 'other');
+        }
+
+        function renderMainList(elementId, type) {
+            const list = document.getElementById(elementId);
+            const latestPosts = posts[type].slice(0, 3);
+            if (latestPosts.length === 0) list.innerHTML = `<p style="color:#999;">아직 등록된 글이 없습니다.</p>`;
+            else list.innerHTML = latestPosts.map((p, index) => `<div class="post-item" onclick="viewPost('${type}', ${index})"><h3>${p.title}</h3><div class="meta">작성자: ${p.author} | ${p.date}</div></div>`).join('');
+        }
+
+        function viewPost(type, index) {
+            const post = posts[type][index];
+            document.getElementById('modalTitle').innerText = post.title;
+            document.getElementById('modalAuthor').innerText = post.author;
+            document.getElementById('modalDate').innerText = post.date;
+            document.getElementById('modalContent').innerText = post.content;
+
+            const actionsDiv = document.getElementById('modalActions');
+            const moveArea = document.getElementById('modalMoveArea');
+            actionsDiv.innerHTML = '';
+            moveArea.innerHTML = '';
+            moveArea.style.display = 'none';
+
+            if(currentUser) {
+                let html = '';
+                if(currentUser.id === post.authorId || currentUser.id === 'admin') {
+                    html += `<button class="btn-action btn-edit" onclick="editPost('${type}', ${index})">수정하기</button>`;
+                    html += `<button class="btn-action btn-delete" onclick="deletePost('${type}', ${index})">삭제하기</button>`;
+                }
+                
+                if(currentUser.id !== post.authorId) {
+                    const isScrapped = currentUser.scraps.includes(post.id);
+                    html += `<button class="btn-action btn-scrap" onclick="toggleScrap('${type}', ${index})">${isScrapped ? '스크랩 취소' : '스크랩하기'}</button>`;
+                }
+                actionsDiv.innerHTML = html;
+
+                if(currentUser.id === 'admin') {
+                    actionsDiv.innerHTML += `<button class="btn-action btn-rec" onclick="addPostToRec('${type}', ${index})">추천 알바 등록</button>`;
+                    
+                    moveArea.style.display = 'block';
+                    moveArea.innerHTML = `
+                        <label style="font-weight:700; margin-right:10px;">게시판 이동 (관리자):</label>
+                        <select id="moveSelect">
+                            <option value="">게시판 선택</option>
+                            <option value="semi">반도체현장공고</option>
+                            <option value="other">기타알바공고</option>
+                            <option value="free">자유게시판</option>
+                        </select>
+                        <button class="btn-action btn-move" onclick="movePost('${type}', ${index})">이동하기</button>
+                    `;
+                }
+            }
+
+            document.getElementById('postModal').style.display = 'flex';
+        }
+
+        function toggleScrap(type, index) {
+            const post = posts[type][index];
+            const scrapIndex = currentUser.scraps.indexOf(post.id);
+            if(scrapIndex > -1) {
+                currentUser.scraps.splice(scrapIndex, 1);
+                alert('스크랩이 취소되었습니다.');
+            } else {
+                currentUser.scraps.push(post.id);
+                alert('스크랩되었습니다. 마이페이지에서 확인하세요!');
+            }
+            viewPost(type, index);
+        }
+
+        function addPostToRec(type, index) {
+            const post = posts[type][index];
+            recommendedJobs.unshift({ id: recJobIdCounter++, title: post.title, info: post.content.substring(0, 20) + '...' });
+            alert('오늘의 추천 알바에 등록되었습니다!');
+            renderHomeRecJobs();
+            closeModal('postModal');
+        }
+
+        function movePost(type, index) {
+            const newType = document.getElementById('moveSelect').value;
+            if(!newType) { alert('이동할 게시판을 선택하세요.'); return; }
+            if(newType === type) { alert('같은 게시판입니다.'); return; }
+
+            const post = posts[type].splice(index, 1)[0]; 
+            posts[newType].unshift(post); 
+            
+            alert('게시판이 이동되었습니다.');
+            renderPosts();
+            closeModal('postModal');
+        }
+
+        function editPost(type, index) {
+            const post = posts[type][index];
+            document.getElementById('modalTitle').innerHTML = `<input type="text" id="editTitle" value="${post.title}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">`;
+            document.getElementById('modalContent').innerHTML = `<textarea id="editContent" style="width:100%; height:200px; padding:10px; border:1px solid #ccc; border-radius:5px;">${post.content}</textarea>`;
+            document.getElementById('modalActions').innerHTML = `<button class="btn-action btn-edit" onclick="savePost('${type}', ${index})">저장하기</button><button class="btn-action" style="background:#ccc; color:#333;" onclick="viewPost('${type}', ${index})">취소</button>`;
+            document.getElementById('modalMoveArea').style.display = 'none';
+        }
+
+        function savePost(type, index) {
+            const newTitle = document.getElementById('editTitle').value.trim();
+            const newContent = document.getElementById('editContent').value.trim();
+            if(!newTitle || !newContent) { alert('제목과 내용을 모두 입력해주세요.'); return; }
+            posts[type][index].title = newTitle;
+            posts[type][index].content = newContent;
+            posts[type][index].date = `${new Date().toLocaleString()} (수정됨)`;
+            alert('글이 수정되었습니다.');
+            renderPosts();
+            viewPost(type, index);
+        }
+
+        function deletePost(type, index) {
+            if(confirm('정말 삭제하시겠습니까?')) {
+                posts[type].splice(index, 1);
+                alert('삭제되었습니다.');
+                renderPosts();
+                closeModal('postModal');
+            }
+        }
+
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        window.onclick = function(event) { if (event.target.id === 'postModal') closeModal('postModal'); if (event.target.id === 'socialModal') closeModal('socialModal'); if (event.target.id === 'chatModal') closeModal('chatModal'); }
+
+        function addRecJob() {
+            const title = document.getElementById('recJobTitle').value.trim();
+            const info = document.getElementById('recJobInfo').value.trim();
+            if(!title || !info) { alert('제목과 정보를 모두 입력해주세요.'); return; }
+            recommendedJobs.unshift({ id: recJobIdCounter++, title, info });
+            document.getElementById('recJobTitle').value = '';
+            document.getElementById('recJobInfo').value = '';
+            renderAdminRecJobs();
+            renderHomeRecJobs();
+        }
+
+        function deleteRecJob(id) {
+            if(confirm('추천 알바에서 삭제하시겠습니까?')) {
+                recommendedJobs = recommendedJobs.filter(j => j.id !== id);
+                renderAdminRecJobs();
+                renderHomeRecJobs();
+            }
+        }
+
+        function renderAdminRecJobs() {
+            const list = document.getElementById('adminRecJobList');
+            if(recommendedJobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
+            else list.innerHTML = recommendedJobs.map(j => `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${j.info}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob(${j.id})">삭제</button></div>`).join('');
+        }
+
+        function renderHomeRecJobs() {
+            const list = document.getElementById('homeJobList');
+            if(recommendedJobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
+            else list.innerHTML = recommendedJobs.map(j => `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${j.info}</div></div>`).join('');
+        }
+
+        renderHomeRecJobs();
+        renderPosts();
+
+        function openChatModal() {
+            const mainScreen = document.getElementById('chatScreen');
+            const modalScreen = document.getElementById('chatModalScreen');
+            modalScreen.innerHTML = mainScreen.innerHTML;
+            modalScreen.scrollTop = modalScreen.scrollHeight;
+            document.getElementById('chatModal').style.display = 'flex';
+            document.getElementById('chatModalInput').focus();
+        }
+
+        function sendMessage(isModal = false) {
+            const inputId = isModal ? 'chatModalInput' : 'chatInput';
+            const input = document.getElementById(inputId);
+            const message = input.value.trim();
+            if (message !== "") {
+                const author = currentUser ? currentUser.nickname : '나';
+                const newMessageHTML = `<div class="chat-message"><span class="user">${author}:</span> ${message}</div>`;
+                
+                document.getElementById('chatScreen').insertAdjacentHTML('beforeend', newMessageHTML);
+                document.getElementById('chatModalScreen').insertAdjacentHTML('beforeend', newMessageHTML);
+                
+                document.getElementById('chatScreen').scrollTop = document.getElementById('chatScreen').scrollHeight;
+                document.getElementById('chatModalScreen').scrollTop = document.getElementById('chatModalScreen').scrollHeight;
+                
+                input.value = "";
+            }
+        }
+        function handleKeyPress(event) { if (event.key === 'Enter') sendMessage(false); }
+        function handleModalKeyPress(event) { if (event.key === 'Enter') sendMessage(true); }
+    </script>
+</body>
+</html>
