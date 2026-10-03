@@ -402,16 +402,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     
     <script>
-        // Firebase 설정 (고객님이 제공한 코드)
+        // Firebase 설정 (싱가폴 리전 데이터베이스 주소 반영 완료)
         const firebaseConfig = {
             apiKey: "AIzaSyCLm9sr7hw5L4Vwl1ZoF1iQGPUQcsn8uFI",
             authDomain: "albagod-5cbb4.firebaseapp.com",
+            databaseURL: "https://albagod-5cbb4-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "albagod-5cbb4",
             storageBucket: "albagod-5cbb4.firebasestorage.app",
             messagingSenderId: "1035968499607",
             appId: "1:1035968499607:web:1f699c1264021e4f40bed2",
-            measurementId: "G-2P1ZPG28NT",
-            databaseURL: "https://albagod-5cbb4-default-rtdb.firebaseio.com" // DB URL 추가 (프로젝트명에 맞춰 자동 생성됨)
+            measurementId: "G-2P1ZPG28NT"
         };
 
         // Firebase 초기화
@@ -423,6 +423,7 @@
         let posts = { semi: {}, other: {}, free: {} }; // DB에서 가져온 게시글
         let tempSocialProvider = '';
         let recommendedJobs = {}; // DB에서 가져온 추천 알바
+        let editingFile = null;
 
         // 세션 유지 (로그인 정보)
         const savedUser = sessionStorage.getItem('currentUser');
@@ -463,7 +464,8 @@
         // 실시간 리스너: 채팅
         chatRef.on('value', (snapshot) => {
             const chatData = snapshot.val() || {};
-            const chatHtml = Object.values(chatData).map(c => 
+            const chatArray = Object.values(chatData).sort((a,b) => a.timestamp - b.timestamp);
+            const chatHtml = chatArray.map(c => 
                 `<div class="chat-message">${getProfileImgHTML(users[c.authorId])} <span class="user">${c.author}:</span> <span class="chat-text">${linkify(c.message)}</span></div>`
             ).join('');
             document.getElementById('chatScreen').innerHTML = chatHtml;
@@ -798,7 +800,7 @@
             ['semi', 'other', 'free'].forEach(type => {
                 const list = document.getElementById(`${type}List`);
                 const typePosts = posts[type] || {};
-                const postArray = Object.keys(typePosts).map(key => ({ id: key, ...typePosts[key] })).reverse(); // 최신순
+                const postArray = Object.keys(typePosts).map(key => ({ id: key, ...typePosts[key] })).reverse();
                 if (postArray.length === 0) list.innerHTML = `<p style="color:#999;">등록된 글이 없습니다.</p>`;
                 else list.innerHTML = postArray.map(p => {
                     const authorUser = users[p.authorId];
@@ -920,7 +922,6 @@
             document.getElementById('modalMoveArea').style.display = 'none';
         }
 
-        let editingFile = null;
         function renderEditFileArea() {
             let html = '<div id="editFileArea">';
             if(editingFile) {
