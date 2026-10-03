@@ -41,9 +41,10 @@
         .section-title .title-btn:hover { background: #2a2a40; }
 
         .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
-        .job-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; max-height: 440px; overflow-y: auto; align-content: start; padding-right: 5px; }
+        .job-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; align-content: start; padding-right: 5px; }
         .job-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .job-card:hover { transform: translateY(-5px); }
+        .job-card.clickable { cursor: pointer; }
+        .job-card.clickable:hover { transform: translateY(-5px); }
         .job-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
         .job-info { font-size: 14px; color: #666; }
 
@@ -168,7 +169,7 @@
             .auth-menu { border-top: none; padding-top: 0; width: auto; order: 2; }
             .auth-menu a { padding: 8px; font-size: 12px; }
             .grid-container { grid-template-columns: 1fr; }
-            .job-list, .chat-box { max-height: none; height: auto; } 
+            .job-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
             .chat-box { height: 300px; }
             .main-board-container { grid-template-columns: 1fr; }
             .main-content { padding: 15px; }
@@ -351,7 +352,7 @@
     </div>
 
     <div class="footer-counter">
-        현재 가입된 회원 수: <span id="userCount">1</span>명
+        현재 가입된 회원 수: <span id="userCount">1</span>명 | 총 방문자 수: <span id="visitorCount">0</span>명
     </div>
 
     <div id="postModal" class="modal-overlay">
@@ -397,12 +398,11 @@
         </div>
     </div>
 
-    <!-- Firebase SDK (Compat 버전 사용) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     
     <script>
-        // Firebase 설정 (싱가폴 리전 데이터베이스 주소 반영 완료)
         const firebaseConfig = {
             apiKey: "AIzaSyCLm9sr7hw5L4Vwl1ZoF1iQGPUQcsn8uFI",
             authDomain: "albagod-5cbb4.firebaseapp.com",
@@ -414,28 +414,45 @@
             measurementId: "G-2P1ZPG28NT"
         };
 
-        // Firebase 초기화
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let users = {}; // DB에서 가져온 유저 목록
+        let users = {};
         let currentUser = null;
-        let posts = { semi: {}, other: {}, free: {} }; // DB에서 가져온 게시글
+        let posts = { semi: {}, other: {}, free: {} };
         let tempSocialProvider = '';
-        let recommendedJobs = {}; // DB에서 가져온 추천 알바
+        let recommendedJobs = {};
         let editingFile = null;
+        let currentAnonName = sessionStorage.getItem('anonName'); // 익명 이름 유지
 
-        // 세션 유지 (로그인 정보)
         const savedUser = sessionStorage.getItem('currentUser');
         if(savedUser) currentUser = JSON.parse(savedUser);
 
-        // DB 레퍼런스
         const usersRef = db.ref('users');
         const postsRef = db.ref('posts');
         const recJobsRef = db.ref('recommendedJobs');
         const chatRef = db.ref('chat');
+        const metaRef = db.ref('meta');
 
-        // 실시간 리스너: 유저 목록
+        // 방문자 수 증가 및 리스닝
+        metaRef.child('visitors').transaction(function(current) {
+            return (current || 0) + 1;
+        });
+        metaRef.child('visitors').on('value', (snapshot) => {
+            document.getElementById('visitorCount').innerText = snapshot.val() || 0;
+        });
+
+        // 익명 이름 발급 함수
+        async function getAnonName() {
+            if (currentAnonName) return currentAnonName;
+            const result = await metaRef.child('anonCounter').transaction(function(current) {
+                return (current || 0) + 1;
+            });
+            currentAnonName = '익명' + result.snapshot.val();
+            sessionStorage.setItem('anonName', currentAnonName);
+            return currentAnonName;
+        }
+
         usersRef.on('value', (snapshot) => {
             users = snapshot.val() || {};
             if(!users['admin']) {
@@ -447,21 +464,18 @@
             if(document.getElementById('mypage').classList.contains('active')) loadMypage();
         });
 
-        // 실시간 리스너: 게시글
         postsRef.on('value', (snapshot) => {
             posts = snapshot.val() || { semi: {}, other: {}, free: {} };
             renderPosts();
             if(document.getElementById('home').classList.contains('active')) searchJobs();
         });
 
-        // 실시간 리스너: 추천 알바
         recJobsRef.on('value', (snapshot) => {
             recommendedJobs = snapshot.val() || {};
             renderAdminRecJobs();
             renderHomeRecJobs();
         });
 
-        // 실시간 리스너: 채팅
         chatRef.on('value', (snapshot) => {
             const chatData = snapshot.val() || {};
             const chatArray = Object.values(chatData).sort((a,b) => a.timestamp - b.timestamp);
@@ -832,8 +846,9 @@
         }
 
         function viewPost(type, postId) {
+            if(!posts[type] || !posts[type][postId]) return; // 이미 삭제된 글 클릭 방지
             const post = posts[type][postId];
-            const authorUser = users[post.authorId];
+            const authorUser = users[post.authorId] || {};
             document.getElementById('modalTitle').innerText = post.title;
             document.getElementById('modalMeta').innerHTML = `
                 ${getProfileImgHTML(authorUser)} <span>작성자: <strong>${post.author}</strong></span>
@@ -880,7 +895,6 @@
         }
 
         function toggleScrap(type, postId) {
-            const post = posts[type][postId];
             const scrapRef = usersRef.child(currentUser.id).child('scraps').child(postId);
             if(currentUser.scraps && currentUser.scraps[postId]) {
                 scrapRef.remove();
@@ -893,7 +907,13 @@
 
         function addPostToRec(type, postId) {
             const post = posts[type][postId];
-            recJobsRef.push({ title: post.title, info: post.content.substring(0, 20) + '...', region: post.region || '미지정' });
+            recJobsRef.push({ 
+                title: post.title, 
+                info: post.content.substring(0, 20) + '...', 
+                region: post.region || '미지정',
+                originType: type, // 원본 게시판
+                originId: postId   // 원본 글 ID
+            });
             alert('오늘의 추천 알바에 등록되었습니다!');
             closeModal('postModal');
         }
@@ -982,7 +1002,7 @@
             const title = document.getElementById('recJobTitle').value.trim();
             const info = document.getElementById('recJobInfo').value.trim();
             if(!title || !info) { alert('제목과 정보를 모두 입력해주세요.'); return; }
-            recJobsRef.push({ title, info, region: '미지정' });
+            recJobsRef.push({ title, info, region: '미지정' }); // 수동 등록은 클릭 연결 안함
             document.getElementById('recJobTitle').value = '';
             document.getElementById('recJobInfo').value = '';
         }
@@ -1001,9 +1021,16 @@
 
         function renderHomeRecJobs() {
             const list = document.getElementById('homeJobList');
-            const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] })).reverse();
+            // 최신 4개만 slice
+            const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] })).reverse().slice(0, 4);
             if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
-            else list.innerHTML = jobs.map(j => `<div class="job-card"><div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div><div class="job-info">${j.info}</div></div>`).join('');
+            else list.innerHTML = jobs.map(j => {
+                const clickable = j.originType && j.originId ? `onclick="viewPost('${j.originType}', '${j.originId}')" class="job-card clickable"` : `class="job-card"`;
+                return `<div ${clickable}>
+                    <div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div>
+                    <div class="job-info">${j.info}</div>
+                </div>`;
+            }).join('');
         }
 
         function searchJobs() {
@@ -1052,13 +1079,21 @@
             document.getElementById('chatModalInput').focus();
         }
 
-        function sendMessage(isModal = false) {
+        async function sendMessage(isModal = false) {
             const inputId = isModal ? 'chatModalInput' : 'chatInput';
             const input = document.getElementById(inputId);
             const message = input.value.trim();
             if (message !== "") {
-                const author = currentUser ? currentUser.nickname : '나';
-                const authorId = currentUser ? currentUser.id : 'guest';
+                let author = '익명';
+                let authorId = 'guest';
+
+                if (currentUser) {
+                    author = currentUser.nickname;
+                    authorId = currentUser.id;
+                } else {
+                    author = await getAnonName();
+                    authorId = 'guest';
+                }
                 
                 chatRef.push({ author, authorId, message, timestamp: Date.now() });
                 input.value = "";
