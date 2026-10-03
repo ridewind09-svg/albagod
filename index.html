@@ -40,15 +40,13 @@
         .section-title .title-btn { font-size: 14px; background: #1e1e2f; color: #fff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: 700; border: none; }
         .section-title .title-btn:hover { background: #2a2a40; }
         
-        /* 클릭 가능한 제목 스타일 */
         .clickable-title { cursor: pointer; transition: color 0.2s; }
         .clickable-title:hover { color: #1565c0; }
 
         .grid-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
         .job-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; align-content: start; padding-right: 5px; }
-        .job-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .job-card.clickable { cursor: pointer; }
-        .job-card.clickable:hover { transform: translateY(-5px); }
+        .job-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; cursor: pointer; }
+        .job-card:hover { transform: translateY(-5px); }
         .job-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
         .job-info { font-size: 14px; color: #666; }
 
@@ -144,7 +142,7 @@
         .modal-move-area select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-left: 10px; }
 
         .nickname-modal-content { text-align: center; }
-        .nickname-modal-content input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        .nickname-modal-content input { width: 100%;; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
         .phone-verify-area { display: flex; gap: 10px; margin-bottom: 10px; }
         .phone-verify-area input { flex: 1; margin: 0; }
         .phone-verify-area button { padding: 0 15px; background: #1e1e2f; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap; }
@@ -226,12 +224,10 @@
 
                 <div class="main-board-container">
                     <div class="main-board-column">
-                        <!-- 제목 클릭 시 게시판으로 이동 -->
                         <div class="section-title clickable-title" onclick="goToBoard('semiconductor')">🔧 반도체현장 최신글</div>
                         <div class="post-list" id="mainSemiList"></div>
                     </div>
                     <div class="main-board-column">
-                        <!-- 제목 클릭 시 게시판으로 이동 -->
                         <div class="section-title clickable-title" onclick="goToBoard('otherjobs')">💼 기타알바 최신글</div>
                         <div class="post-list" id="mainOtherList"></div>
                     </div>
@@ -451,7 +447,6 @@
         const chatRef = db.ref('chat');
         const metaRef = db.ref('meta');
 
-        // 방문자 수 증가 및 리스닝
         metaRef.child('visitors').transaction(function(current) {
             return (current || 0) + 1;
         });
@@ -459,7 +454,6 @@
             document.getElementById('visitorCount').innerText = snapshot.val() || 0;
         });
 
-        // 익명 이름 발급 함수
         async function getAnonName() {
             if (sessionStorage.getItem('anonName')) return sessionStorage.getItem('anonName');
             const result = await metaRef.child('anonCounter').transaction(function(current) {
@@ -470,7 +464,6 @@
             return name;
         }
 
-        // 문자열 기반 색상 해시 반환 (닉네임/아이디마다 고유 색상 부여)
         function getColorForString(str) {
             if(!str) str = 'default';
             let hash = 0;
@@ -520,7 +513,6 @@
             if(el) el.innerText = Object.keys(users).length;
         }
 
-        // 20가지 색상 랜덤 배경 적용
         function getProfileImgHTML(user) {
             if(user && user.profilePic) return `<img src="${user.profilePic}" class="profile-img" alt="profile">`;
             const initial = user && user.nickname ? user.nickname.charAt(0) : '?';
@@ -549,12 +541,11 @@
             if(['semiconductor', 'otherjobs', 'freeboard', 'reference'].includes(pageId)) checkWriteAuth(pageId);
         }
 
-        // 홈 메뉴 제목 클릭 시 게시판으로 이동
         function goToBoard(boardId) {
             const navLinks = document.querySelectorAll('.nav-link');
             let targetLink = null;
             navLinks.forEach(link => {
-                if(link.getAttribute('onclick').includes(boardId)) {
+                if(link.getAttribute('onclick') && link.getAttribute('onclick').includes(boardId)) {
                     targetLink = link;
                 }
             });
@@ -942,6 +933,23 @@
             }).join('');
         }
 
+        // 추천 알바 클릭 함수 (원본 글 있으면 이동, 없으면 모달로 정보 띄움)
+        function viewRecJob(jobId) {
+            const job = recommendedJobs[jobId];
+            if(!job) return;
+
+            if(job.originType && job.originId && posts[job.originType] && posts[job.originType][job.originId]) {
+                viewPost(job.originType, job.originId);
+            } else {
+                document.getElementById('modalTitle').innerText = job.title;
+                document.getElementById('modalMeta').innerHTML = job.region ? `<span class="tag">${job.region}</span>` : '';
+                document.getElementById('modalContent').innerText = job.info;
+                document.getElementById('modalActions').innerHTML = `<button class="btn-action" style="background:#ccc; color:#333;" onclick="closeModal('postModal')">닫기</button>`;
+                document.getElementById('modalMoveArea').style.display = 'none';
+                document.getElementById('postModal').style.display = 'flex';
+            }
+        }
+
         function viewPost(type, postId) {
             if(!posts[type] || !posts[type][postId]) return;
             const post = posts[type][postId];
@@ -1141,14 +1149,13 @@
             else list.innerHTML = jobs.map(j => `<div class="job-card"><div class="job-title">${j.title}</div><div class="job-info">${j.info}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${j.id}')">삭제</button></div>`).join('');
         }
 
-        // 추천 알바 카드 클릭 이벤트 명확화
+        // 무조건 클릭되도록 수정된 렌더링 함수
         function renderHomeRecJobs() {
             const list = document.getElementById('homeJobList');
             const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] })).reverse().slice(0, 4);
             if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
             else list.innerHTML = jobs.map(j => {
-                const clickable = j.originType && j.originId;
-                return `<div class="job-card ${clickable ? 'clickable' : ''}" ${clickable ? `onclick="viewPost('${j.originType}', '${j.originId}')"` : ''}>
+                return `<div class="job-card" onclick="viewRecJob('${j.id}')">
                     <div class="job-title">${j.region ? `<span class="tag">${j.region}</span>` : ''} ${j.title}</div>
                     <div class="job-info">${j.info}</div>
                 </div>`;
