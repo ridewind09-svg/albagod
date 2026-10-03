@@ -51,6 +51,7 @@
         .chat-screen { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f9f9f9; }
         .chat-message { margin-bottom: 10px; font-size: 14px; display: flex; align-items: center; gap: 5px; }
         .chat-message .user { font-weight: 700; color: #1e1e2f; }
+        .chat-text a, .link-in-text { color: #1565c0; text-decoration: underline; font-weight: 700; word-break: break-all; }
         .chat-input-area { display: flex; gap: 10px; }
         .chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
         .btn-send { background: #1e1e2f; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 700; }
@@ -66,8 +67,16 @@
         .login-required-box p { margin-bottom: 15px; color: #666; font-weight: 700; }
 
         .write-form { margin-bottom: 30px; border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background: #f9f9f9; }
-        .write-form select, .write-form input, .write-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-family: 'Nanum Square', sans-serif; }
+        .write-form select, .write-form input[type="text"], .write-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-family: 'Nanum Square', sans-serif; }
         .write-form textarea { resize: vertical; min-height: 100px; margin-bottom: 20px; }
+        
+        /* 파일 첨부 버튼 디자인 크게 눈에 띄게 변경 */
+        .file-upload-wrapper { margin-bottom: 20px; }
+        .file-upload-label { display: block; padding: 15px; background: #e3f2fd; color: #1565c0; border: 2px dashed #1565c0; border-radius: 8px; text-align: center; cursor: pointer; font-weight: 700; transition: background 0.2s; }
+        .file-upload-label:hover { background: #bbdefb; }
+        .file-upload-label input { display: none; }
+        .file-name-display { margin-top: 10px; font-size: 13px; color: #555; font-weight: 700; text-align: center; }
+
         .btn-write { background: #1e1e2f; color: #fff; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: 700; margin-left: auto; display: block; }
 
         .post-list { display: flex; flex-direction: column; gap: 15px; }
@@ -78,6 +87,11 @@
         .post-item .meta { font-size: 12px; color: #999; display: flex; align-items: center; gap: 5px; }
         .post-item .meta .view-btn { color: #1565c0; font-weight: 700; margin-left: 10px; }
         .tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 5px; }
+        
+        .file-attachment-box { margin-top: 15px; padding: 15px; background: #f0f2f5; border-radius: 8px; }
+        .file-attachment-box img { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; }
+        .file-attachment-box video { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; }
+        .file-download-btn { display: inline-block; padding: 10px 15px; background: #e3f2fd; color: #1565c0; text-decoration: none; border-radius: 5px; font-weight: 700; font-size: 14px; }
 
         .auth-form { max-width: 400px; margin: 0 auto; }
         .auth-form input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
@@ -111,7 +125,7 @@
         
         .modal-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; border-bottom: 2px solid #1e1e2f; padding-bottom: 10px; }
         .modal-meta { font-size: 14px; color: #999; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
-        .modal-body { font-size: 16px; line-height: 1.6; color: #333; white-space: pre-wrap; margin-bottom: 20px; }
+        .modal-body { font-size: 16px; line-height: 1.6; color: #333; white-space: pre-wrap; margin-bottom: 20px; word-break: break-all; }
         .modal-actions { text-align: right; }
         .btn-action { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; margin-left: 10px; margin-top: 5px; }
         .btn-edit { background: #1565c0; color: #fff; }
@@ -196,7 +210,7 @@
                         </div>
                         <div class="chat-screen" id="chatScreen"></div>
                         <div class="chat-input-area">
-                            <input type="text" id="chatInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleKeyPress(event)">
+                            <input type="text" id="chatInput" class="chat-input" placeholder="메시지 입력 (URL 자동 링크)" onkeypress="handleKeyPress(event)">
                             <button class="btn-send" onclick="sendMessage(false)">전송</button>
                         </div>
                     </div>
@@ -401,11 +415,17 @@
         }
 
         function getProfileImgHTML(user) {
-            if(user && user.profilePic) {
-                return `<img src="${user.profilePic}" class="profile-img" alt="profile">`;
-            }
+            if(user && user.profilePic) return `<img src="${user.profilePic}" class="profile-img" alt="profile">`;
             const initial = user && user.nickname ? user.nickname.charAt(0) : '?';
             return `<div class="profile-img-default">${initial}</div>`;
+        }
+
+        function linkify(text) {
+            if (!text) return '';
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, function(url) {
+                return `<a href="${url}" target="_blank" class="link-in-text">${url}</a>`;
+            });
         }
 
         function showPage(pageId, element) {
@@ -455,7 +475,16 @@
                             <option value="온라인">온라인</option>
                         </select>` : ''}
                         <input type="text" id="${type}Title" placeholder="제목을 입력하세요">
-                        <textarea id="${type}Content" placeholder="내용을 입력하세요"></textarea>
+                        <textarea id="${type}Content" placeholder="내용을 입력하세요 (https://... 주소는 자동 링크됩니다)"></textarea>
+                        
+                        <div class="file-upload-wrapper">
+                            <label class="file-upload-label" for="${type}File">
+                                📎 파일 첨부하기 (이미지, 동영상, 문서)
+                            </label>
+                            <input type="file" id="${type}File" onchange="document.getElementById('${type}FileName').innerText = this.files[0] ? this.files[0].name : '선택된 파일 없음';">
+                            <div class="file-name-display" id="${type}FileName">선택된 파일 없음</div>
+                        </div>
+
                         <button class="btn-write" onclick="writePost('${type}')">작성 완료</button>
                     </div>
                 `;
@@ -521,15 +550,8 @@
             const phone = document.getElementById('socialPhoneInput').value.trim();
             const code = document.getElementById('socialVerifyCodeInput').value.trim();
 
-            if(!nickname) { alert('닉네임을 입력해주세요.'); return; }
-            if(!name) { alert('이름을 입력해주세요.'); return; }
-            if(!phone) { alert('휴대폰 번호를 입력해주세요.'); return; }
-            if(!code) { alert('인증번호를 입력해주세요.'); return; }
-            
-            if(code !== '1234') {
-                alert('[인증 실패] 인증번호가 틀렸습니다. (테스트용 인증번호는 1234 입니다)');
-                return;
-            }
+            if(!nickname || !name || !phone || !code) { alert('모든 항목을 입력해주세요.'); return; }
+            if(code !== '1234') { alert('[인증 실패] 인증번호가 틀렸습니다. (테스트용 1234)'); return; }
 
             currentUser = {
                 id: `${tempSocialProvider}_user_${Math.floor(Math.random() * 10000)}`,
@@ -651,41 +673,57 @@
         updateAuthMenu();
         updateUserCount(); 
 
-        // 작성 실패 사유 명확화 (캐시 문제로 안 뜰 경우 방지)
+        function savePostWithFile(type, title, content, region, fileData) {
+            const newPost = { 
+                id: postIdCounter++, title, content, 
+                author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(),
+                region: region || '지역 없음',
+                file: fileData
+            };
+            posts[type].unshift(newPost);
+            alert('글이 성공적으로 작성되었습니다!');
+            renderPosts();
+        }
+
         function writePost(type) {
             const titleInput = document.getElementById(`${type}Title`);
             const contentInput = document.getElementById(`${type}Content`);
             const regionInput = document.getElementById(`${type}Region`);
+            const fileInput = document.getElementById(`${type}File`);
             
-            if(!titleInput || titleInput.value.trim() === "") {
-                alert('[경고] 이 창이 떴다면 제목이 비어있는 것입니다. 제목을 입력해주세요.');
-                return;
-            }
-            if(!contentInput || contentInput.value.trim() === "") {
-                alert('[경고] 이 창이 떴다면 내용이 비어있는 것입니다. 내용을 입력해주세요.');
-                return;
-            }
-
-            if(type !== 'free') {
-                if(!regionInput || !regionInput.value) {
-                    alert('[경고] 이 창이 떴다면 근무 지역을 안 고른 것입니다. 제일 위에 있는 지역 선택 박스를 클릭해서 지역을 골라주세요.');
-                    return;
-                }
-            }
+            if(!titleInput || titleInput.value.trim() === "") { alert('[경고] 제목을 입력해주세요.'); return; }
+            if(!contentInput || contentInput.value.trim() === "") { alert('[경고] 내용을 입력해주세요.'); return; }
+            if(type !== 'free' && (!regionInput || !regionInput.value)) { alert('[경고] 근무 지역을 선택해주세요.'); return; }
 
             const region = regionInput ? regionInput.value : '지역 없음';
-            
-            const newPost = { 
-                id: postIdCounter++, title: titleInput.value, content: contentInput.value, 
-                author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(),
-                region: region 
-            };
-            posts[type].unshift(newPost);
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    savePostWithFile(type, titleInput.value, contentInput.value, region, { name: file.name, type: file.type, data: e.target.result });
+                };
+                reader.readAsDataURL(file); 
+            } else {
+                savePostWithFile(type, titleInput.value, contentInput.value, region, null);
+            }
+
             titleInput.value = ""; 
             contentInput.value = "";
             if(regionInput) regionInput.value = "";
-            alert('글이 성공적으로 작성되었습니다!');
-            renderPosts();
+            fileInput.value = "";
+            if(document.getElementById(`${type}FileName`)) document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
+        }
+
+        function getFileHTML(file) {
+            if(!file) return '';
+            if(file.type.startsWith('image/')) {
+                return `<div class="file-attachment-box"><img src="${file.data}" alt="첨부이미지"></div>`;
+            } else if(file.type.startsWith('video/')) {
+                return `<div class="file-attachment-box"><video src="${file.data}" controls>지원되지 않는 동영상 형식입니다.</video></div>`;
+            } else {
+                return `<div class="file-attachment-box"><a href="${file.data}" download="${file.name}" class="file-download-btn">📎 ${file.name} 다운로드</a></div>`;
+            }
         }
 
         function renderPosts() {
@@ -695,9 +733,10 @@
                 else list.innerHTML = posts[type].map((p, index) => {
                     const authorUser = users.find(u => u.id === p.authorId);
                     const regionTag = p.region && p.region !== '지역 없음' ? `<span class="tag">${p.region}</span>` : '';
+                    const fileIcon = p.file ? ' 📎' : '';
                     return `<div class="post-item" onclick="viewPost('${type}', ${index})">
-                        <h3>${regionTag} ${p.title}</h3>
-                        <p>${p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content}</p>
+                        <h3>${regionTag} ${p.title}${fileIcon}</h3>
+                        <p>${linkify(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content)}</p>
                         <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${p.author} | ${p.date} <span class="view-btn">[클릭하여 보기]</span></div>
                     </div>`;
                 }).join('');
@@ -728,7 +767,8 @@
                 <span>작성일: ${post.date}</span>
                 ${post.region && post.region !== '지역 없음' ? `<span class="tag">${post.region}</span>` : ''}
             `;
-            document.getElementById('modalContent').innerText = post.content;
+            
+            document.getElementById('modalContent').innerHTML = linkify(post.content) + getFileHTML(post.file);
 
             const actionsDiv = document.getElementById('modalActions');
             const moveArea = document.getElementById('modalMoveArea');
@@ -841,7 +881,6 @@
             renderHomeRecJobs();
         }
 
-        // 추천 알바 삭제 기능 강화 (confirm 창 제거 후 즉시 삭제)
         function deleteRecJob(id) {
             recommendedJobs = recommendedJobs.filter(j => j.id !== id);
             renderAdminRecJobs();
@@ -889,7 +928,7 @@
                     const authorUser = users.find(u => u.id === r.post.authorId);
                     return `<div class="post-item" onclick="viewPost('${r.type}', ${idx})">
                         <h3>${r.post.region ? `<span class="tag">${r.post.region}</span>` : ''} ${r.post.title}</h3>
-                        <p>${r.post.content.length > 50 ? r.post.content.substring(0, 50) + '...' : r.post.content}</p>
+                        <p>${linkify(r.post.content.length > 50 ? r.post.content.substring(0, 50) + '...' : r.post.content)}</p>
                         <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${r.post.author} | ${r.post.date}</div>
                     </div>`;
                 }).join('');
@@ -916,7 +955,7 @@
                 const author = currentUser ? currentUser.nickname : '나';
                 const userObj = currentUser ? currentUser : { nickname: '나' };
                 const profileHTML = getProfileImgHTML(userObj);
-                const newMessageHTML = `<div class="chat-message">${profileHTML} <span class="user">${author}:</span> ${message}</div>`;
+                const newMessageHTML = `<div class="chat-message">${profileHTML} <span class="user">${author}:</span> <span class="chat-text">${linkify(message)}</span></div>`;
                 
                 document.getElementById('chatScreen').insertAdjacentHTML('beforeend', newMessageHTML);
                 document.getElementById('chatModalScreen').insertAdjacentHTML('beforeend', newMessageHTML);
