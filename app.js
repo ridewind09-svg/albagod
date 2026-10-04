@@ -28,7 +28,87 @@ function getProfileImgHTML(user) { if(user && user.profilePic) return `<img src=
 function linkify(text) { if (!text) return ''; return text.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank" class="link-in-text">${url}</a>`); }
 function showPage(p, e) { document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active')); if(e) { document.querySelectorAll('.nav-link, .auth-menu a, .admin-link a').forEach(l => l.classList.remove('active')); e.classList.add('active'); } document.getElementById(p).classList.add('active'); if(p === 'mypage') loadMypage(); if(p === 'admin') { loadAdminPage(); renderAdminRecJobs(); } if(['semiconductor', 'otherjobs', 'freeboard', 'reference'].includes(p)) checkWriteAuth(p); window.scrollTo(0, 0); }
 function goToBoard(b) { const nl = document.querySelectorAll('.nav-link'); let t = null; nl.forEach(l => { if(l.getAttribute('onclick') && l.getAttribute('onclick').includes(b)) t = l; }); showPage(b, t); }
-function checkWriteAuth(p) { const am = { semiconductor: 'semiWriteArea', otherjobs: 'otherWriteArea', freeboard: 'freeWriteArea', reference: 'refWriteArea' }; const tm = { semiconductor: 'semi', otherjobs: 'other', freeboard: 'free', reference: 'ref' }; const a = document.getElementById(am[p]); const t = tm[p]; tempSelectedFiles = []; if(!currentUser) { a.innerHTML = `<div class="login-required-box"><p>🔒 게시글 작성은 로그인 후 이용 가능합니다.</p><button class="btn-auth" style="width: auto; padding: 10px 20px;" onclick="showPage('login', document.querySelector('.auth-menu a'))">로그인 하러가기</button></div>`; } else { const ij = (t === 'semi' || t === 'other'); a.innerHTML = `<div class="write-form"><h3 style="margin-bottom:15px;">글쓰기</h3>${ij ? `<select id="${t}Region"><option value="">근무 지역 (필수)</option><option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option><option value="온라인">온라인</option></select>` : ''}<input type="text" id="${t}Title" placeholder="제목"><textarea id="${t}Content" placeholder="내용 (https://... 자동 링크)"></textarea><div class="file-upload-wrapper"><label class="file-upload-label" for="${t}File">📎 파일 첨부 (이미지/문서 10개, 동영상 1개)</label><input type="file" id="${t}File" multiple onchange="handleFileSelect('${t}', this)"><div class="file-name-display" id="${t}FileName">선택된 파일 없음</div></div><button class="btn-write" onclick="writePost('${t}')">작성 완료</button></div>`; } }
+
+// ==================== 하위 카테고리 및 필터 로직 ====================
+const semiSubCategories = {
+    '건축/토목': ['전체', '토공', '골조', '내장', '외장', '클린룸', '판넬', '바닥재', '기타'],
+    '설비/유틸': ['전체', '기계', '전기', '배관', '소방', '통신', '기타'],
+    '안전/감시': ['전체', '안전담당', '안전감시', '화재감시', '장비감시자', '유도원', '신호수', '교통통제', '기타'],
+    '관리자': ['전체', '서류', '공무', '보건', '교육', '팀장', '소장', '인원관리', '품질관리', '환경안전', '필드안전', '기타']
+};
+let currentSemiSubCategory = null;
+let currentSemiSubFilter = '전체';
+
+function toggleSemiSubmenu(e) {
+    showPage('semiconductor', e);
+    document.querySelectorAll('.nav-sub-link').forEach(l => l.classList.remove('active'));
+    const submenu = e.nextElementSibling;
+    if(submenu) submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+    currentSemiSubCategory = null; 
+    currentSemiSubFilter = '전체';
+    renderSemiFilters();
+    renderPosts();
+}
+
+function showSemiSubCategory(cat, e) {
+    document.querySelectorAll('.nav-sub-link').forEach(l => l.classList.remove('active'));
+    e.classList.add('active');
+    currentSemiSubCategory = cat;
+    currentSemiSubFilter = '전체';
+    renderSemiFilters();
+    renderPosts();
+}
+
+function renderSemiFilters() {
+    const area = document.getElementById('semiFilterArea');
+    if(!area) return;
+    if(!currentSemiSubCategory) { area.style.display = 'none'; return; }
+    area.style.display = 'flex';
+    const filters = semiSubCategories[currentSemiSubCategory];
+    area.innerHTML = `<strong style="margin-right:10px; align-self:center;">🔍 ${currentSemiSubCategory} 필터:</strong>` + filters.map(f => 
+        `<button class="filter-btn ${currentSemiSubFilter === f ? 'active' : ''}" onclick="setSemiFilter('${f}')">${f}</button>`
+    ).join('');
+}
+
+function setSemiFilter(f) {
+    currentSemiSubFilter = f;
+    renderSemiFilters();
+    renderPosts();
+}
+// =================================================================
+
+function checkWriteAuth(p) { 
+    const am = { semiconductor: 'semiWriteArea', otherjobs: 'otherWriteArea', freeboard: 'freeWriteArea', reference: 'refWriteArea' }; 
+    const tm = { semiconductor: 'semi', otherjobs: 'other', freeboard: 'free', reference: 'ref' }; 
+    const a = document.getElementById(am[p]); 
+    const t = tm[p]; 
+    tempSelectedFiles = []; 
+    if(!currentUser) { 
+        a.innerHTML = `<div class="login-required-box"><p>🔒 게시글 작성은 로그인 후 이용 가능합니다.</p><button class="btn-auth" style="width: auto; padding: 10px 20px;" onclick="showPage('login', document.querySelector('.auth-menu a'))">로그인 하러가기</button></div>`; 
+    } else { 
+        const ij = (t === 'semi' || t === 'other'); 
+        let subCatHtml = '', subFilterHtml = '';
+        if(t === 'semi') {
+            const cats = Object.keys(semiSubCategories);
+            subCatHtml = `<select id="semiSubCategorySelect" onchange="updateSemiSubFilterOptions()" style="margin-bottom:15px;"><option value="">하위 카테고리 (필수)</option>${cats.map(c => `<option value="${c}">${c}</option>`).join('')}</select>`;
+            subFilterHtml = `<select id="semiSubFilterSelect" style="margin-bottom:15px;"><option value="전체">세부 필터 (전체)</option></select>`;
+        }
+        a.innerHTML = `<div class="write-form"><h3 style="margin-bottom:15px;">글쓰기</h3>${subCatHtml}${subFilterHtml}${ij ? `<select id="${t}Region"><option value="">근무 지역 (필수)</option><option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option><option value="온라인">온라인</option></select>` : ''}<input type="text" id="${t}Title" placeholder="제목"><textarea id="${t}Content" placeholder="내용 (https://... 자동 링크)"></textarea><div class="file-upload-wrapper"><label class="file-upload-label" for="${t}File">📎 파일 첨부 (이미지/문서 10개, 동영상 1개)</label><input type="file" id="${t}File" multiple onchange="handleFileSelect('${t}', this)"><div class="file-name-display" id="${t}FileName">선택된 파일 없음</div></div><button class="btn-write" onclick="writePost('${t}')">작성 완료</button></div>`; 
+    } 
+}
+
+function updateSemiSubFilterOptions() {
+    const catSelect = document.getElementById('semiSubCategorySelect');
+    const filterSelect = document.getElementById('semiSubFilterSelect');
+    const cat = catSelect.value;
+    filterSelect.innerHTML = '<option value="전체">전체</option>';
+    if(cat && semiSubCategories[cat]) {
+        semiSubCategories[cat].forEach(f => {
+            if(f !== '전체') filterSelect.innerHTML += `<option value="${f}">${f}</option>`;
+        });
+    }
+}
+
 function handleFileSelect(t, i) { const nf = i.files; for(let j=0; j<nf.length; j++) { let iv = nf[j].type.startsWith('video/'), ii = nf[j].type.startsWith('image/'); let cvc = tempSelectedFiles.filter(f => f.type.startsWith('video/')).length; if(iv && cvc >= 1) { alert('동영상은 1개만 가능.'); continue; } if((ii || iv) && nf[j].size > 3*1024*1024) { alert(`${nf[j].name} 3MB 초과.`); continue; } tempSelectedFiles.push(nf[j]); } if(tempSelectedFiles.length > 10) { alert('최대 10개.'); tempSelectedFiles = tempSelectedFiles.slice(0, 10); } document.getElementById(`${t}FileName`).innerText = tempSelectedFiles.length > 0 ? `선택됨 (${tempSelectedFiles.length}개)` : '선택된 파일 없음'; i.value = ''; }
 function compressImage(f) { return new Promise(r => { if(!f.type.startsWith('image/')) { const rd = new FileReader(); rd.onload = e => r({ name: f.name, type: f.type, data: e.target.result }); rd.readAsDataURL(f); return; } const rd = new FileReader(); rd.onload = e => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); const cx = c.getContext('2d'); let w = im.width, h = im.height, m = 1920; if(w > h && w > m) { h = Math.round(h*m/w); w = m; } else if(h > w && h > m) { w = Math.round(w*m/h); h = m; } c.width = w; c.height = h; cx.drawImage(im, 0, 0, w, h); r({ name: f.name, type: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.8) }); }; im.src = e.target.result; }; rd.readAsDataURL(f); }); }
 function handleSignup() { const i = document.getElementById('signupId').value.trim(), p = document.getElementById('signupPw').value.trim(), pc = document.getElementById('signupPwCheck').value.trim(), n = document.getElementById('signupNickname').value.trim(), nm = document.getElementById('signupName').value.trim(), ph = document.getElementById('signupPhone').value.trim(); if(!i||!p||!n||!nm||!ph) { alert('모두 입력.'); return; } if(p !== pc) { alert('비밀번호 불일치.'); return; } if(users[i]) { alert('존재하는 아이디.'); return; } usersRef.child(i).set({ id: i, pw: p, nickname: n, name: nm, phone: ph, provider: '일반', scraps: {}, profilePic: null }); alert('가입 완료.'); showPage('login', document.querySelector('.auth-menu a')); }
@@ -42,16 +122,127 @@ function handleProfilePicUpload(e) { const f = e.target.files[0]; if(f) { if(f.s
 function loadMypage() { const m = document.getElementById('mypageContent'); if(!currentUser) { m.innerHTML = `<p style="text-align:center; color:#666;">로그인 필요.</p>`; return; } let mp = []; ['semi', 'other', 'free', 'ref'].forEach(t => { const tp = posts[t] || {}; Object.keys(tp).forEach(k => { const p = tp[k]; p.id = k; if(currentUser.id === p.authorId) mp.push({ type: t, post: p }); }); }); let sp = []; const us = currentUser.scraps || {}; ['semi', 'other', 'free', 'ref'].forEach(t => { const tp = posts[t] || {}; Object.keys(tp).forEach(k => { const p = tp[k]; p.id = k; if(us[k]) sp.push({ type: t, post: p }); }); }); let mph = mp.length === 0 ? `<p style="color:#999;">없음.</p>` : mp.map(m => `<div class="post-item"><div class="content-area" onclick="viewPost('${m.type}', '${m.post.id}')"><h3>${escapeHtml(m.post.title)}</h3><div class="meta">${getProfileImgHTML(currentUser)} ${m.post.date} <span class="view-btn">[보기]</span></div></div></div>`).join(''); let sph = sp.length === 0 ? `<p style="color:#999;">없음.</p>` : sp.map(s => { const su = users[s.post.authorId]; return `<div class="post-item"><div class="content-area" onclick="viewPost('${s.type}', '${s.post.id}')"><h3>${escapeHtml(s.post.title)}</h3><div class="meta">${getProfileImgHTML(su)} ${escapeHtml(s.post.author)} | ${s.post.date} <span class="view-btn">[보기]</span></div></div></div>`; }).join(''); m.innerHTML = `<div class="section-title">🧑‍💻 마이페이지</div><div class="mypage-header"><div class="mypage-profile-pic" id="mypageProfilePic">${currentUser.profilePic ? `<img src="${currentUser.profilePic}" style="width:100%; height:100%; object-fit:cover;">` : escapeHtml(currentUser.nickname.charAt(0))}</div><div><h2 style="margin-bottom:10px;">${escapeHtml(currentUser.nickname)}님</h2><input type="file" accept="image/*" onchange="handleProfilePicUpload(event)" style="display:none;" id="profilePicInput"><button class="btn-auth" style="width:auto; padding:8px 15px; font-size:14px;" onclick="document.getElementById('profilePicInput').click()">프로필 변경</button></div></div><div class="mypage-info"><div class="info-row"><div class="info-label">아이디</div><div class="info-value">${escapeHtml(currentUser.id)}</div></div><div class="info-row"><div class="info-label">닉네임</div><div class="info-value">${escapeHtml(currentUser.nickname)}</div></div><div class="info-row"><div class="info-label">이름</div><div class="info-value">${escapeHtml(currentUser.name)}</div></div><div class="info-row"><div class="info-label">연락처</div><div class="info-value">${escapeHtml(currentUser.phone)}</div></div><div class="info-row"><div class="info-label">가입 방식</div><div class="info-value">${escapeHtml(currentUser.provider)}</div></div></div><div class="mypage-section"><h3>📝 내가 쓴 글</h3><div class="post-list">${mph}</div></div><div class="mypage-section"><h3>⭐ 스크랩</h3><div class="post-list">${sph}</div></div>`; }
 function loadAdminPage() { const tb = document.getElementById('adminUserList'); if(!currentUser || currentUser.id !== 'admin') return; tb.innerHTML = Object.values(users).map(u => `<tr><td>${escapeHtml(u.id)}</td><td>${escapeHtml(u.nickname)}</td><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.phone)}</td><td>${escapeHtml(u.provider)}</td><td>${u.id === 'admin' ? '<span style="color:#999;">불가</span>' : `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')">삭제</button>`}</td></tr>`).join(''); }
 function deleteUser(i) { if(confirm(`${i} 삭제?`)) { usersRef.child(i).remove(); alert('삭제됨.'); } } updateAuthMenu();
-function writePost(t) { const ti = document.getElementById(`${t}Title`), ci = document.getElementById(`${t}Content`), ri = document.getElementById(`${t}Region`); if(!ti || !ti.value.trim()) { alert('제목 입력.'); return; } if(!ci || !ci.value.trim()) { alert('내용 입력.'); return; } if(t !== 'free' && t !== 'ref' && (!ri || !ri.value)) { alert('지역 선택.'); return; } const tv = ti.value, cv = ci.value, rv = ri ? ri.value : '지역 없음'; const sp = (fda) => { const npr = postsRef.child(t).push(); const np = { title: tv, content: cv, author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(), region: rv, files: fda, comments: {} }; npr.set(np).then(() => { alert('작성 성공!'); ti.value = ""; ci.value = ""; if(ri) ri.value = ""; tempSelectedFiles = []; if(document.getElementById(`${t}FileName`)) document.getElementById(`${t}FileName`).innerText = '선택된 파일 없음'; }).catch(e => { console.error("실패", e); if(fda && fda.length > 0) { np.files = []; npr.set(np).then(() => { alert('글 작성됨 (파일 제외).'); ti.value=""; ci.value=""; if(ri) ri.value=""; tempSelectedFiles=[]; }).catch(() => alert('작성 실패.')); } else { alert('작성 실패.'); } }); }; if (tempSelectedFiles.length > 0) { let vc = 0; for(let i=0; i<tempSelectedFiles.length; i++) if(tempSelectedFiles[i].type.startsWith('video/')) vc++; if(vc > 1) { alert('동영상 1개만.'); return; } if(tempSelectedFiles.length > 10) { alert('파일 10개만.'); return; } const ps = []; for(let i=0; i<tempSelectedFiles.length; i++) { if(tempSelectedFiles[i].type.startsWith('video/') && tempSelectedFiles[i].size > 3*1024*1024) { alert('동영상 3MB 이하.'); return; } ps.push(compressImage(tempSelectedFiles[i])); } Promise.all(ps).then(r => sp(r)); } else { sp([]); } }
+function writePost(t) { 
+    const ti = document.getElementById(`${t}Title`), ci = document.getElementById(`${t}Content`), ri = document.getElementById(`${t}Region`); 
+    if(!ti || !ti.value.trim()) { alert('제목 입력.'); return; } 
+    if(!ci || !ci.value.trim()) { alert('내용 입력.'); return; } 
+    if(t !== 'free' && t !== 'ref' && (!ri || !ri.value)) { alert('지역 선택.'); return; } 
+    
+    let subCat = null, subFil = null;
+    if(t === 'semi') {
+        subCat = document.getElementById('semiSubCategorySelect')?.value || null;
+        subFil = document.getElementById('semiSubFilterSelect')?.value || '전체';
+        if(!subCat) { alert('하위 카테고리 선택.'); return; }
+    }
+
+    const tv = ti.value, cv = ci.value, rv = ri ? ri.value : '지역 없음'; 
+    const sp = (fda) => { 
+        const npr = postsRef.child(t).push(); 
+        const np = { 
+            title: tv, content: cv, author: currentUser.nickname, authorId: currentUser.id, 
+            date: new Date().toLocaleString(), region: rv, files: fda, comments: {}, 
+            semiSubCategory: subCat, semiSubFilter: subFil 
+        }; 
+        npr.set(np).then(() => { 
+            alert('작성 성공!'); ti.value = ""; ci.value = ""; if(ri) ri.value = ""; 
+            if(document.getElementById('semiSubCategorySelect')) document.getElementById('semiSubCategorySelect').value = "";
+            if(document.getElementById('semiSubFilterSelect')) document.getElementById('semiSubFilterSelect').innerHTML = '<option value="전체">세부 필터 (전체)</option>';
+            tempSelectedFiles = []; 
+            if(document.getElementById(`${t}FileName`)) document.getElementById(`${t}FileName`).innerText = '선택된 파일 없음'; 
+        }).catch(e => { 
+            console.error("실패", e); 
+            if(fda && fda.length > 0) { np.files = []; npr.set(np).then(() => { alert('글 작성됨 (파일 제외).'); ti.value=""; ci.value=""; if(ri) ri.value=""; tempSelectedFiles=[]; }).catch(() => alert('작성 실패.')); } 
+            else { alert('작성 실패.'); } 
+        }); 
+    }; 
+    if (tempSelectedFiles.length > 0) { 
+        let vc = 0; for(let i=0; i<tempSelectedFiles.length; i++) if(tempSelectedFiles[i].type.startsWith('video/')) vc++; 
+        if(vc > 1) { alert('동영상 1개만.'); return; } 
+        if(tempSelectedFiles.length > 10) { alert('파일 10개만.'); return; } 
+        const ps = []; for(let i=0; i<tempSelectedFiles.length; i++) { 
+            if(tempSelectedFiles[i].type.startsWith('video/') && tempSelectedFiles[i].size > 3*1024*1024) { alert('동영상 3MB 이하.'); return; } 
+            ps.push(compressImage(tempSelectedFiles[i])); 
+        } 
+        Promise.all(ps).then(r => sp(r)); 
+    } else { sp([]); } 
+}
 function openImageViewer(b64) { try { const p = b64.split(','); const m = p[0].match(/:(.*?);/)[1]; const bs = atob(p[1]); let u8 = new Uint8Array(bs.length); for (let i = 0; i < bs.length; i++) u8[i] = bs.charCodeAt(i); const b = new Blob([u8], { type: m }); const u = URL.createObjectURL(b); const w = window.open('', '_blank'); if (w) { w.location.href = u; setTimeout(() => URL.revokeObjectURL(u), 10000); } else { alert('팝업 차단.'); } } catch (e) { console.error("실패", e); window.open(b64, '_blank'); } }
 function getFilesHTML(f) { if(!f || f.length === 0) return ''; let h = '<div class="file-attachment-box">'; f.forEach(x => { if(x.type.startsWith('image/')) h += `<img src="${x.data}" alt="${escapeHtml(x.name)}" onclick="openImageViewer(this.src)" style="cursor: zoom-in; max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">`; else if(x.type.startsWith('video/')) h += `<video src="${x.data}" controls style="max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">지원 안됨.</video>`; else h += `<a href="${x.data}" download="${escapeHtml(x.name)}" class="file-download-btn">📎 ${escapeHtml(x.name)} 다운로드</a>`; }); h += '</div>'; return h; }
-function renderPosts() { ['semi', 'other', 'free', 'ref'].forEach(t => { const l = document.getElementById(t === 'ref' ? 'refList' : `${t}List`); if(!l) return; const bb = document.getElementById(`bulkBar_${t}`); if(bb) bb.classList.toggle('active', currentUser && currentUser.id === 'admin'); const tp = posts[t] || {}; const pa = Object.keys(tp).map(k => ({ id: k, ...tp[k] })).reverse(); if (pa.length === 0) l.innerHTML = `<p style="color:#999;">글 없음.</p>`; else l.innerHTML = pa.map(p => { const au = users[p.authorId]; const rt = p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''; const fi = (p.files && p.files.length > 0) || p.file ? ' 📎' : ''; const cc = p.comments ? Object.keys(p.comments).length : 0; const ci = cc > 0 ? ` 💬${cc}` : ''; const ch = (currentUser && currentUser.id === 'admin') ? `<label class="admin-checkbox-label"><input type="checkbox" class="admin-checkbox" data-type="${t}" data-id="${p.id}"></label>` : ''; return `<div class="post-item">${ch}<div class="content-area" onclick="viewPost('${t}', '${p.id}')"><h3>${rt} ${escapeHtml(p.title)}${fi}${ci}</h3><p>${linkify(escapeHtml(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content))}</p><div class="meta">${getProfileImgHTML(au)} ${escapeHtml(p.author)} | ${p.date} <span class="view-btn">[보기]</span></div></div></div>`; }).join(''); }); renderMainList('mainSemiList', 'semi'); renderMainList('mainOtherList', 'other'); }
+
+function renderPosts() { 
+    ['semi', 'other', 'free', 'ref'].forEach(t => { 
+        const l = document.getElementById(t === 'ref' ? 'refList' : `${t}List`); 
+        if(!l) return; 
+        const bb = document.getElementById(`bulkBar_${t}`); 
+        if(bb) bb.classList.toggle('active', currentUser && currentUser.id === 'admin'); 
+        const tp = posts[t] || {}; 
+        
+        let pa = Object.keys(tp).map(k => ({ id: k, ...tp[k] })).reverse();
+        
+        // 반도체 게시판 하위 카테고리 필터링
+        if(t === 'semi' && currentSemiSubCategory) {
+            pa = pa.filter(p => p.semiSubCategory === currentSemiSubCategory);
+            if(currentSemiSubFilter && currentSemiSubFilter !== '전체') {
+                pa = pa.filter(p => p.semiSubFilter === currentSemiSubFilter);
+            }
+        }
+        
+        // 공지글(고정핀) 최상단 정렬
+        pa.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
+        
+        if (pa.length === 0) l.innerHTML = (t === 'semi' && currentSemiSubCategory) ? `<p style="color:#999;">해당 조건에 맞는 글이 없습니다.</p>` : `<p style="color:#999;">글 없음.</p>`; 
+        else l.innerHTML = pa.map(p => { 
+            const au = users[p.authorId]; 
+            const rt = p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''; 
+            const fi = (p.files && p.files.length > 0) || p.file ? ' 📎' : ''; 
+            const cc = p.comments ? Object.keys(p.comments).length : 0; 
+            const ci = cc > 0 ? ` 💬${cc}` : ''; 
+            const pin = p.isPinned ? '📌 ' : ''; 
+            const subTag = p.semiSubCategory ? `<span class="tag" style="background:#e0e0e0; color:#333;">${escapeHtml(p.semiSubCategory)}</span><span class="tag" style="background:#f0f0f0; color:#555;">${escapeHtml(p.semiSubFilter || '전체')}</span>` : '';
+            const ch = (currentUser && currentUser.id === 'admin') ? `<label class="admin-checkbox-label"><input type="checkbox" class="admin-checkbox" data-type="${t}" data-id="${p.id}"></label>` : ''; 
+            return `<div class="post-item">${ch}<div class="content-area" onclick="viewPost('${t}', '${p.id}')"><h3>${pin}${rt} ${subTag} ${escapeHtml(p.title)}${fi}${ci}</h3><p>${linkify(escapeHtml(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content))}</p><div class="meta">${getProfileImgHTML(au)} ${escapeHtml(p.author)} | ${p.date} <span class="view-btn">[보기]</span></div></div></div>`; 
+        }).join(''); 
+    }); 
+    renderMainList('mainSemiList', 'semi'); 
+    renderMainList('mainOtherList', 'other'); 
+}
 function renderMainList(e, t) { const l = document.getElementById(e); const tp = posts[t] || {}; const lp = Object.keys(tp).map(k => ({ id: k, ...tp[k] })).reverse().slice(0, 3); if (lp.length === 0) l.innerHTML = `<p style="color:#999;">글 없음.</p>`; else l.innerHTML = lp.map(p => { const au = users[p.authorId]; return `<div class="post-item"><div class="content-area" onclick="viewPost('${t}', '${p.id}')"><h3>${p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''} ${escapeHtml(p.title)}</h3><div class="meta">${getProfileImgHTML(au)} ${escapeHtml(p.author)} | ${p.date}</div></div></div>`; }).join(''); }
 function toggleAllPosts(c, t) { document.querySelectorAll(`.admin-checkbox[data-type="${t}"]`).forEach(cb => cb.checked = c.checked); }
 function bulkDeletePosts(t) { const c = document.querySelectorAll(`.admin-checkbox[data-type="${t}"]:checked`); if(c.length === 0) { alert('선택.'); return; } if(confirm(`${c.length}개 삭제?`)) { Promise.all(Array.from(c).map(cb => postsRef.child(t).child(cb.getAttribute('data-id')).remove())).then(() => { alert('삭제됨.'); document.getElementById(`selectAll_${t}`).checked = false; }).catch(() => alert('오류.')); } }
 function bulkMovePosts(t) { const c = document.querySelectorAll(`.admin-checkbox[data-type="${t}"]:checked`); const nt = document.getElementById(`bulkMoveSelect_${t}`).value; if(c.length === 0) { alert('선택.'); return; } if(!nt) { alert('게시판 선택.'); return; } if(confirm(`${c.length}개 이동?`)) { Promise.all(Array.from(c).flatMap(cb => { const id = cb.getAttribute('data-id'); if(t !== nt) { const pd = posts[t][id]; return [postsRef.child(nt).push(pd), postsRef.child(t).child(id).remove()]; } return []; })).then(() => { alert('이동됨.'); document.getElementById(`bulkMoveSelect_${t}`).value = ''; document.getElementById(`selectAll_${t}`).checked = false; }).catch(() => alert('오류.')); } }
 function viewRecJob(j) { const jb = recommendedJobs[j]; if(!jb) return; if(jb.originType && jb.originId && posts[jb.originType] && posts[jb.originType][jb.originId]) viewPost(jb.originType, jb.originId); else { document.getElementById('modalTitle').innerText = jb.title; document.getElementById('modalMeta').innerHTML = jb.region ? `<span class="tag">${escapeHtml(jb.region)}</span>` : ''; document.getElementById('modalContent').innerHTML = linkify(escapeHtml(jb.info).replace(/\n/g, '<br>')); document.getElementById('modalActions').innerHTML = `<button class="btn-action" style="background:#ccc; color:#333;" onclick="closeModal('postModal')">닫기</button>`; document.getElementById('modalMoveArea').style.display = 'none'; document.getElementById('postModal').style.display = 'flex'; } }
-function viewPost(t, id) { if(!posts[t] || !posts[t][id]) { alert('삭제됨.'); return; } const p = posts[t][id]; const au = users[p.authorId] || {}; document.getElementById('modalTitle').innerText = p.title; document.getElementById('modalMeta').innerHTML = `${getProfileImgHTML(au)} <span>작성자: <strong>${escapeHtml(p.author)}</strong></span><span>작성일: ${p.date}</span>${p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''}`; const f = p.files || (p.file ? [p.file] : []); document.getElementById('modalContent').innerHTML = linkify(escapeHtml(p.content).replace(/\n/g, '<br>')) + getFilesHTML(f); const a = document.getElementById('modalActions'); const m = document.getElementById('modalMoveArea'); a.innerHTML = ''; m.innerHTML = ''; m.style.display = 'none'; if(currentUser) { let h = ''; if(currentUser.id === p.authorId || currentUser.id === 'admin') { h += `<button class="btn-action btn-edit" onclick="editPost('${t}', '${id}')">수정</button><button class="btn-action btn-delete" onclick="deletePost('${t}', '${id}')">삭제</button>`; } if(currentUser.id !== p.authorId) { const is = currentUser.scraps && currentUser.scraps[id]; h += `<button class="btn-action btn-scrap" onclick="toggleScrap('${t}', '${id}')">${is ? '스크랩 취소' : '스크랩'}</button>`; } a.innerHTML = h; if(currentUser.id === 'admin') { a.innerHTML += `<button class="btn-action btn-rec" onclick="addPostToRec('${t}', '${id}')">추천 등록</button>`; m.style.display = 'block'; m.innerHTML = `<label style="font-weight:700; margin-right:10px;">게시판 이동:</label><select id="moveSelect"><option value="">선택</option><option value="semi">반도체</option><option value="other">기타</option><option value="ref">자료실</option><option value="free">자유</option></select><button class="btn-action btn-move" onclick="movePost('${t}', '${id}')">이동</button>`; } } currentViewingPost = { type: t, id: id }; renderComments(t, id); document.getElementById('postModal').style.display = 'flex'; }
+function viewPost(t, id) { 
+    if(!posts[t] || !posts[t][id]) { alert('삭제됨.'); return; } 
+    const p = posts[t][id]; 
+    const au = users[p.authorId] || {}; 
+    document.getElementById('modalTitle').innerText = p.title; 
+    document.getElementById('modalMeta').innerHTML = `${getProfileImgHTML(au)} <span>작성자: <strong>${escapeHtml(p.author)}</strong></span><span>작성일: ${p.date}</span>${p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''}${p.semiSubCategory ? `<span class="tag" style="background:#e0e0e0; color:#333;">${escapeHtml(p.semiSubCategory)}</span><span class="tag" style="background:#f0f0f0; color:#555;">${escapeHtml(p.semiSubFilter || '전체')}</span>` : ''}`; 
+    const f = p.files || (p.file ? [p.file] : []); 
+    document.getElementById('modalContent').innerHTML = linkify(escapeHtml(p.content).replace(/\n/g, '<br>')) + getFilesHTML(f); 
+    const a = document.getElementById('modalActions'); 
+    const m = document.getElementById('modalMoveArea'); 
+    a.innerHTML = ''; m.innerHTML = ''; m.style.display = 'none'; 
+    if(currentUser) { 
+        let h = ''; 
+        if(currentUser.id === p.authorId || currentUser.id === 'admin') { 
+            h += `<button class="btn-action btn-edit" onclick="editPost('${t}', '${id}')">수정</button><button class="btn-action btn-delete" onclick="deletePost('${t}', '${id}')">삭제</button>`; 
+        } 
+        if(currentUser.id !== p.authorId) { 
+            const is = currentUser.scraps && currentUser.scraps[id]; 
+            h += `<button class="btn-action btn-scrap" onclick="toggleScrap('${t}', '${id}')">${is ? '스크랩 취소' : '스크랩'}</button>`; 
+        } 
+        a.innerHTML = h; 
+        if(currentUser.id === 'admin') { 
+            a.innerHTML += `<button class="btn-action btn-rec" onclick="addPostToRec('${t}', '${id}')">추천 등록</button>`; 
+            a.innerHTML += `<button class="btn-action" style="background:${p.isPinned ? '#ffcc00' : '#888'}; color:${p.isPinned ? '#1e1e2f' : '#fff'};" onclick="togglePinPost('${t}', '${id}')">${p.isPinned ? '공지 해제' : '공지 등록'}</button>`; 
+            m.style.display = 'block'; 
+            m.innerHTML = `<label style="font-weight:700; margin-right:10px;">게시판 이동:</label><select id="moveSelect"><option value="">선택</option><option value="semi">반도체</option><option value="other">기타</option><option value="ref">자료실</option><option value="free">자유</option></select><button class="btn-action btn-move" onclick="movePost('${t}', '${id}')">이동</button>`; 
+        } 
+    } 
+    currentViewingPost = { type: t, id: id }; 
+    renderComments(t, id); 
+    document.getElementById('postModal').style.display = 'flex'; 
+}
 function renderComments(t, id) { const p = posts[t][id]; const cs = p.comments || {}; const ca = Object.keys(cs).map(k => ({ id: k, ...cs[k] })).sort((a,b) => a.timestamp - b.timestamp); document.getElementById('commentCount').innerText = ca.length; const l = document.getElementById('commentList'); if(ca.length === 0) l.innerHTML = `<p style="color:#999; font-size:14px;">댓글 없음.</p>`; else l.innerHTML = ca.map(c => { const au = users[c.authorId] || { nickname: c.author, id: c.authorId }; const is = (currentUser && (currentUser.id === c.authorId || currentUser.id === 'admin')); const db = is ? `<button class="comment-delete-btn" onclick="deleteComment('${t}', '${id}', '${c.id}')">삭제</button>` : ''; return `<div class="comment-item"><div class="comment-meta"><div class="comment-author">${getProfileImgHTML(au)} ${escapeHtml(c.author)}</div><div><span class="comment-date">${new Date(c.timestamp).toLocaleString()}</span>${db}</div></div><div class="comment-content">${linkify(escapeHtml(c.content))}</div></div>`; }).join(''); }
 async function addComment() { if(!currentViewingPost.type || !currentViewingPost.id) return; const i = document.getElementById('commentInput'); const c = i.value.trim(); if(!c) { alert('내용 입력.'); return; } let a = '익명', aid = 'guest'; if(currentUser) { a = currentUser.nickname; aid = currentUser.id; } else { a = await getAnonName(); } postsRef.child(currentViewingPost.type).child(currentViewingPost.id).child('comments').push({ author: a, authorId: aid, content: c, timestamp: Date.now() }).then(() => i.value = '').catch(() => alert('실패.')); }
 function deleteComment(t, id, cid) { if(!confirm('삭제?')) return; postsRef.child(t).child(id).child('comments').child(cid).remove().then(() => alert('삭제됨.')).catch(() => alert('실패.')); }
@@ -59,6 +250,15 @@ function handleCommentKeyPress(e) { if (e.key === 'Enter') addComment(); }
 function toggleScrap(t, id) { const sr = usersRef.child(currentUser.id).child('scraps').child(id); if(currentUser.scraps && currentUser.scraps[id]) { sr.remove(); alert('스크랩 취소.'); } else { sr.set(true); alert('스크랩 됨.'); } }
 function addPostToRec(t, id) { const p = posts[t][id]; recJobsRef.push({ title: p.title, info: p.content, region: p.region || '미지정', originType: t, originId: id }); alert('추천 등록 완료.'); closeModal('postModal'); }
 function movePost(t, id) { const nt = document.getElementById('moveSelect').value; if(!nt) { alert('게시판 선택.'); return; } if(nt === t) { alert('같은 게시판.'); return; } const p = posts[t][id]; postsRef.child(nt).push(p); postsRef.child(t).child(id).remove(); alert('이동됨.'); closeModal('postModal'); }
+
+// 공지 지정 토글 함수
+function togglePinPost(t, id) {
+    const p = posts[t][id];
+    postsRef.child(t).child(id).update({ isPinned: !p.isPinned }).then(() => {
+        alert(p.isPinned ? '공지 해제됨.' : '공지 등록됨.');
+    });
+}
+
 function editPost(t, id) { const p = posts[t][id]; editingFiles = p.files || (p.file ? [p.file] : []); document.getElementById('modalTitle').innerHTML = `<input type="text" id="editTitle" value="${escapeHtml(p.title)}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">`; document.getElementById('modalContent').innerHTML = `<textarea id="editContent" style="width:100%; height:150px; padding:10px; border:1px solid #ccc; border-radius:5px;">${escapeHtml(p.content)}</textarea>${renderEditFileArea()}`; document.getElementById('modalActions').innerHTML = `<button class="btn-action btn-edit" onclick="savePost('${t}', '${id}')">저장</button><button class="btn-action" style="background:#ccc; color:#333;" onclick="viewPost('${t}', '${id}')">취소</button>`; document.getElementById('modalMoveArea').style.display = 'none'; }
 function renderEditFileArea() { let h = '<div id="editFileArea">'; if(editingFiles && editingFiles.length > 0) editingFiles.forEach((f, i) => h += `<div class="edit-file-item"><span>${escapeHtml(f.name)}</span><button class="btn-action btn-delete" style="margin:0; padding:5px 10px;" onclick="removeEditingFile(${i})">삭제</button></div>`); h += `<div class="file-upload-wrapper"><label class="file-upload-label" for="editFile">📎 새 파일</label><input type="file" id="editFile" multiple style="display:none;" onchange="document.getElementById('editFileName').innerText = this.files.length > 0 ? this.files.length + '개 선택' : (editingFiles.length > 0 ? '기존 유지' : '없음');"><div class="file-name-display" id="editFileName">${editingFiles.length > 0 ? '기존 유지' : '없음'}</div></div></div>`; return h; }
 function removeEditingFile(i) { editingFiles.splice(i, 1); document.getElementById('modalContent').innerHTML = document.getElementById('modalContent').innerHTML.split('<div id="editFileArea">')[0] + renderEditFileArea(); }
