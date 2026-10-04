@@ -53,7 +53,7 @@
         .chat-box { flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-screen { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; background: #f8f9fa; }
         
-        /* 채팅 메시지 부분 수정: 아이콘 찌부 방지 및 닉네임 세로 출력 방지 */
+        /* 채팅 메시지 부분 수정 */
         .chat-message { 
             margin-bottom: 12px; 
             font-size: 14px; 
@@ -61,6 +61,14 @@
             align-items: flex-start; 
             gap: 6px; 
             word-break: break-all; 
+            padding: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: -5px;
+        }
+        .chat-message:hover { 
+            background-color: rgba(0,0,0,0.05); 
         }
         .chat-message .user { 
             font-weight: 700; 
@@ -69,11 +77,63 @@
             flex-shrink: 0; 
         }
         .chat-text a, .link-in-text { color: #1565c0; text-decoration: underline; font-weight: 700; word-break: break-all; }
+        
+        /* 답장 인용구 스타일 */
+        .chat-reply-quote {
+            display: flex;
+            gap: 5px;
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-bottom: 4px;
+            border-left: 3px solid #888;
+            font-size: 12px;
+            color: #555;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .chat-reply-quote strong { color: #333; margin-right: 5px; }
+        .chat-reply-quote .reply-text {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        /* 답장 입력 미리보기 */
+        .reply-preview-area {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f0f2f5;
+            border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 5px;
+        }
+        .reply-preview-area .reply-content {
+            border-left: 3px solid #1e1e2f;
+            padding-left: 10px;
+            font-size: 12px;
+            color: #555;
+            overflow: hidden;
+            flex: 1;
+        }
+        .reply-preview-area .reply-content strong { color: #1e1e2f; }
+        .reply-preview-area .reply-cancel {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #888;
+            padding: 0 5px;
+            flex-shrink: 0;
+        }
+
         .chat-input-area { display: flex; gap: 10px; flex-shrink: 0; }
         .chat-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         .btn-send { background: #1e1e2f; color: #fff; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; }
 
-        /* 프로필 이미지 및 아이콘 찌부 방지 수정 */
         .profile-img { 
             width: 24px; height: 24px; border-radius: 50%; object-fit: cover; vertical-align: middle; 
             flex-shrink: 0; margin-top: 2px; 
@@ -215,158 +275,33 @@
 
         .footer-counter { max-width: 1280px; margin: 0 auto; width: 100%; text-align: right; padding: 10px 20px; font-size: 11px; color: #999; box-sizing: border-box; background: #e8eaed; }
 
-        /* 모바일 반응형 - 완벽 수정 */
         @media (max-width: 768px) {
-            /* 핵심 수정: 컨테이너를 세로 배열로 변경하여 사이드바가 상단에 뜨도록 함 */
-            .app-wrapper { 
-                flex-direction: column; 
-                max-width: 100%;
-            }
-            
-            /* 사이드바를 상단 고정 헤더로 변환 */
-            .sidebar { 
-                width: 100%; 
-                min-height: auto; 
-                flex-direction: column; 
-                padding: 15px;
-                position: sticky; 
-                top: 0; 
-                z-index: 1000;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            }
-            
-            /* 로고 컨테이너 */
-            .logo-container { 
-                margin: 0 0 10px 0; 
-                padding: 0;
-                text-align: center;
-            }
-            .logo-img { 
-                width: 120px;
-            }
-            
-            /* 네비게이션 메뉴를 가로 스크롤로 */
-            .nav-menu { 
-                display: flex; 
-                gap: 8px; 
-                margin: 0 0 10px 0;
-                width: 100%;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                padding-bottom: 5px;
-            }
-            .nav-menu li { 
-                margin-bottom: 0;
-                flex-shrink: 0;
-            }
-            .nav-menu a { 
-                padding: 8px 12px; 
-                font-size: 13px;
-                white-space: nowrap;
-            }
-            
-            /* 인증 메뉴 */
-            .auth-menu { 
-                border-top: 1px solid #3a3a50; 
-                padding-top: 10px;
-                margin: 0;
-            }
-            .auth-menu a { 
-                padding: 8px;
-                font-size: 13px;
-            }
-            
-            /* 메인 컨텐츠 패딩 축소 */
-            .main-content { 
-                padding: 20px 15px;
-                gap: 20px;
-            }
-            
-            /* 홈 그리드 세로 배치 */
-            .home-grid { 
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            /* 추천 알바 카드 높이 자동 */
-            .home-card { 
-                height: auto;
-                min-height: 280px;
-                padding: 15px;
-            }
-            
-            /* 추천 알바 리스트 세로 */
-            .job-list {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
-            /* 채팅 박스 높이 고정 */
-            .chat-box {
-                height: 300px;
-            }
-            
-            /* 메인 보드 세로 배치 */
-            .main-board-container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            /* 검색 영역 세로 */
-            .search-area {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            /* 게시판 패딩 축소 */
-            .board-container {
-                padding: 20px 15px;
-            }
-            
-            /* 게시글 아이템 간격 축소 */
-            .post-item {
-                gap: 10px;
-            }
-            .admin-checkbox-label {
-                padding: 10px;
-                min-width: 40px;
-            }
-            
-            /* 모달 크기 조정 */
-            .modal-content {
-                width: 95%;
-                padding: 20px;
-                max-height: 90vh;
-            }
-            .modal-title {
-                font-size: 18px;
-            }
-            .modal-meta {
-                font-size: 12px;
-                gap: 10px;
-            }
-            
-            /* 채팅 모달 크기 */
-            .chat-modal-content {
-                height: 90vh;
-                padding: 20px;
-            }
-            
-            /* 마이페이지 세로 정렬 */
-            .mypage-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-            .mypage-info {
-                max-width: 100%;
-            }
-            
-            /* 푸터 폰트 축소 */
-            .footer-counter {
-                font-size: 10px;
-                padding: 8px 15px;
-            }
+            .app-wrapper { flex-direction: column; max-width: 100%; }
+            .sidebar { width: 100%; min-height: auto; flex-direction: column; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+            .logo-container { margin: 0 0 10px 0; padding: 0; text-align: center; }
+            .logo-img { width: 120px; }
+            .nav-menu { display: flex; gap: 8px; margin: 0 0 10px 0; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 5px; }
+            .nav-menu li { margin-bottom: 0; flex-shrink: 0; }
+            .nav-menu a { padding: 8px 12px; font-size: 13px; white-space: nowrap; }
+            .auth-menu { border-top: 1px solid #3a3a50; padding-top: 10px; margin: 0; }
+            .auth-menu a { padding: 8px; font-size: 13px; }
+            .main-content { padding: 20px 15px; gap: 20px; }
+            .home-grid { grid-template-columns: 1fr; gap: 20px; }
+            .home-card { height: auto; min-height: 280px; padding: 15px; }
+            .job-list { grid-template-columns: 1fr; gap: 10px; }
+            .chat-box { height: 300px; }
+            .main-board-container { grid-template-columns: 1fr; gap: 20px; }
+            .search-area { flex-direction: column; gap: 10px; }
+            .board-container { padding: 20px 15px; }
+            .post-item { gap: 10px; }
+            .admin-checkbox-label { padding: 10px; min-width: 40px; }
+            .modal-content { width: 95%; padding: 20px; max-height: 90vh; }
+            .modal-title { font-size: 18px; }
+            .modal-meta { font-size: 12px; gap: 10px; }
+            .chat-modal-content { height: 90vh; padding: 20px; }
+            .mypage-header { flex-direction: column; text-align: center; gap: 15px; }
+            .mypage-info { max-width: 100%; }
+            .footer-counter { font-size: 10px; padding: 8px 15px; }
         }
     </style>
 </head>
@@ -405,6 +340,13 @@
                             <button class="title-btn" onclick="openChatModal()">크게 보기</button>
                         </div>
                         <div class="chat-screen" id="chatScreen"></div>
+                        
+                        <!-- 답장 미리보기 (메인) -->
+                        <div class="reply-preview-area" id="replyPreviewMain">
+                            <div class="reply-content"></div>
+                            <button class="reply-cancel" onclick="cancelReply()">&times;</button>
+                        </div>
+
                         <div class="chat-input-area">
                             <input type="text" id="chatInput" class="chat-input" placeholder="메시지 입력 (URL 자동 링크)" onkeypress="handleKeyPress(event)">
                             <button class="btn-send" onclick="sendMessage(false)">전송</button>
@@ -643,6 +585,13 @@
             <button class="modal-close" onclick="closeModal('chatModal')">&times;</button>
             <h2 style="margin-bottom:20px;">💬 실시간 채팅 (전체화면)</h2>
             <div class="chat-screen" id="chatModalScreen"></div>
+            
+            <!-- 답장 미리보기 (모달) -->
+            <div class="reply-preview-area" id="replyPreviewModal">
+                <div class="reply-content"></div>
+                <button class="reply-cancel" onclick="cancelReply()">&times;</button>
+            </div>
+
             <div class="chat-input-area">
                 <input type="text" id="chatModalInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleModalKeyPress(event)">
                 <button class="btn-send" onclick="sendMessage(true)">전송</button>
@@ -679,6 +628,7 @@
         let editingFiles = [];
         let tempSelectedFiles = [];
         let currentViewingPost = { type: null, id: null };
+        let currentReply = null; // 답장 대상 메시지
         
         const savedUser = sessionStorage.getItem('currentUser');
         if(savedUser) currentUser = JSON.parse(savedUser);
@@ -746,15 +696,35 @@
             renderHomeRecJobs();
         });
 
+        // 채팅 렌더링 시 답장 인용구 처리 포함
         chatRef.on('value', (snapshot) => {
             const chatData = snapshot.val() || {};
-            const chatArray = Object.values(chatData).sort((a,b) => a.timestamp - b.timestamp);
+            const chatArray = Object.entries(chatData).map(([key, val]) => ({ key, ...val })).sort((a,b) => a.timestamp - b.timestamp);
             const chatHtml = chatArray.map(c => {
                 let tempUser = users[c.authorId];
                 if(!tempUser) {
                     tempUser = { nickname: c.author, id: c.author }; 
                 }
-                return `<div class="chat-message">${getProfileImgHTML(tempUser)} <span class="user">${escapeHtml(c.author)}:</span> <span class="chat-text">${linkify(escapeHtml(c.message))}</span></div>`;
+
+                let replyQuoteHtml = '';
+                if(c.replyTo) {
+                    replyQuoteHtml = `<div class="chat-reply-quote">
+                        <strong>${escapeHtml(c.replyTo.author)}:</strong>
+                        <span class="reply-text">${escapeHtml(c.replyTo.message)}</span>
+                    </div>`;
+                }
+
+                // HTML attribute에 넣기 위해 엔티티화 (onclick에서 역으로 디코딩하여 안전하게 처리)
+                const dataAttrAuthor = escapeHtml(c.author).replace(/"/g, '&quot;');
+                const dataAttrMsg = escapeHtml(c.message).replace(/"/g, '&quot;');
+
+                return `<div class="chat-message" onclick="setReply('${c.key}', '${dataAttrAuthor}', '${dataAttrMsg}')">
+                    ${getProfileImgHTML(tempUser)} 
+                    <div class="chat-content-wrapper">
+                        ${replyQuoteHtml}
+                        <div><span class="user">${escapeHtml(c.author)}:</span> <span class="chat-text">${linkify(escapeHtml(c.message))}</span></div>
+                    </div>
+                </div>`;
             }).join('');
             document.getElementById('chatScreen').innerHTML = chatHtml;
             document.getElementById('chatModalScreen').innerHTML = chatHtml;
@@ -762,10 +732,8 @@
             document.getElementById('chatModalScreen').scrollTop = document.getElementById('chatModalScreen').scrollHeight;
         });
 
-        // 실시간 채팅 입력 감지 (새로운 채팅이 DB에 추가될 때)
         chatRef.limitToLast(1).on('child_added', (snapshot) => {
             const data = snapshot.val();
-            // 10초 이내에 작성된 메시지라면 실제 사람이 친 것으로 간주하고 가짜 채팅 중지
             if(data && (Date.now() - data.timestamp < 10000)) {
                 stopFakeChat();
             }
@@ -790,6 +758,48 @@
             return text.replace(urlRegex, function(url) {
                 return `<a href="${url}" target="_blank" class="link-in-text">${url}</a>`;
             });
+        }
+
+        // 답장 설정 함수
+        function setReply(key, encodedAuthor, encodedMsg) {
+            // HTML Entity 디코딩
+            const txt = document.createElement("textarea");
+            txt.innerHTML = encodedAuthor;
+            const author = txt.value;
+            txt.innerHTML = encodedMsg;
+            const msg = txt.value;
+
+            const shortMsg = msg.length > 50 ? msg.substring(0, 50) + '...' : msg;
+            
+            currentReply = { id: key, author, message: shortMsg };
+            
+            const mainPreview = document.getElementById('replyPreviewMain');
+            const modalPreview = document.getElementById('replyPreviewModal');
+            const previewHtml = `<strong>${escapeHtml(author)}</strong>에게 답장<br>${escapeHtml(shortMsg)}`;
+            
+            if(mainPreview) {
+                mainPreview.querySelector('.reply-content').innerHTML = previewHtml;
+                mainPreview.style.display = 'flex';
+            }
+            if(modalPreview) {
+                modalPreview.querySelector('.reply-content').innerHTML = previewHtml;
+                modalPreview.style.display = 'flex';
+            }
+
+            if(document.getElementById('chatModal').style.display === 'flex') {
+                document.getElementById('chatModalInput').focus();
+            } else {
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        // 답장 취소 함수
+        function cancelReply() {
+            currentReply = null;
+            const mainPreview = document.getElementById('replyPreviewMain');
+            const modalPreview = document.getElementById('replyPreviewModal');
+            if(mainPreview) mainPreview.style.display = 'none';
+            if(modalPreview) modalPreview.style.display = 'none';
         }
 
         function showPage(pageId, element) {
@@ -1729,7 +1739,7 @@
             const input = document.getElementById(inputId);
             const message = input.value.trim();
             if (message !== "") {
-                stopFakeChat(); // 실제 사용자가 채팅을 치면 가짜 채팅 중지
+                stopFakeChat();
 
                 let author = '익명';
                 let authorId = 'guest';
@@ -1742,8 +1752,16 @@
                     authorId = 'guest';
                 }
                 
-                chatRef.push({ author, authorId, message, timestamp: Date.now() });
+                let chatData = { author, authorId, message, timestamp: Date.now() };
+                
+                // 답장 대상이 있다면 데이터에 포함
+                if(currentReply) {
+                    chatData.replyTo = currentReply;
+                }
+                
+                chatRef.push(chatData);
                 input.value = "";
+                cancelReply(); // 전송 후 답장 상태 초기화
             }
         }
         function handleKeyPress(event) { if (event.key === 'Enter') sendMessage(false); }
@@ -1796,7 +1814,14 @@
                 const author = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
                 
                 const tempUser = { nickname: author, id: 'fake_' + author };
-                const html = `<div class="chat-message">${getProfileImgHTML(tempUser)} <span class="user">${escapeHtml(author)}:</span> <span class="chat-text">${linkify(escapeHtml(msg))}</span></div>`;
+                
+                // 가짜 채팅이므로 답장 인용구는 생략하고 단순 텍스트로만 렌더링
+                const html = `<div class="chat-message" onclick="setReply('fake_${Date.now()}', '${escapeHtml(author).replace(/"/g, '&quot;')}', '${escapeHtml(msg).replace(/"/g, '&quot;')}')">
+                    ${getProfileImgHTML(tempUser)} 
+                    <div class="chat-content-wrapper">
+                        <div><span class="user">${escapeHtml(author)}:</span> <span class="chat-text">${linkify(escapeHtml(msg))}</span></div>
+                    </div>
+                </div>`;
                 
                 const chatScreen = document.getElementById('chatScreen');
                 const modalScreen = document.getElementById('chatModalScreen');
@@ -1815,9 +1840,9 @@
         }
 
         function startFakeChat() {
-            if(fakeChatInterval) return; // 이미 실행 중이면 무시
-            appendFakeMessage(); // 즉시 한 번 실행
-            fakeChatInterval = setInterval(appendFakeMessage, 12000); // 12초마다 실행
+            if(fakeChatInterval) return;
+            appendFakeMessage();
+            fakeChatInterval = setInterval(appendFakeMessage, 12000);
         }
 
         function stopFakeChat() {
@@ -1826,13 +1851,11 @@
                 fakeChatInterval = null;
             }
             if(inactivityTimeout) clearTimeout(inactivityTimeout);
-            // 1시간(3600000ms) 뒤 재시작
             inactivityTimeout = setTimeout(() => {
                 startFakeChat();
             }, 3600000); 
         }
 
-        // 페이지 로드 시 가짜 채팅 시작
         startFakeChat();
     </script>
 </body>
