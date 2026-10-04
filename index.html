@@ -193,22 +193,144 @@
 
         .footer-counter { max-width: 1280px; margin: 0 auto; width: 100%; text-align: right; padding: 10px 20px; font-size: 11px; color: #999; box-sizing: border-box; background: #e8eaed; }
 
+        /* 모바일 반응형 - 상단 메인 깔끔하게 정리 */
         @media (max-width: 768px) {
-            .app-wrapper { flex-direction: column; box-shadow: none; } 
-            .sidebar { width: 100%; min-height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px; flex-wrap: wrap; }
-            .logo-container { margin-bottom: 0; margin-top: 0; padding-top: 15px; text-align: left; }
-            .logo-img { width: 120px; }
-            .nav-menu { display: flex; gap: 5px; margin-top: 10px; width: 100%; flex-wrap: wrap; order: 3; }
-            .nav-menu a { padding: 8px 10px; font-size: 13px; }
-            .auth-menu { border-top: none; padding-top: 0; width: auto; order: 2; }
-            .auth-menu a { padding: 8px; font-size: 12px; }
-            .home-grid, .main-board-container { grid-template-columns: 1fr; }
-            .home-card { height: auto; } 
-            .main-content { padding: 15px; }
-            .search-area { flex-direction: column; }
-            .job-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-            .admin-checkbox-label { padding: 10px 15px; min-width: 50px; }
-            .post-item { gap: 15px; }
+            /* 사이드바를 상단 헤더로 변환 */
+            .sidebar { 
+                width: 100%; 
+                min-height: auto; 
+                flex-direction: column; 
+                padding: 15px 15px 10px;
+            }
+            
+            /* 로고 컨테이너 정리 */
+            .logo-container { 
+                margin: 0 0 10px 0; 
+                padding: 0;
+                text-align: center;
+            }
+            .logo-img { 
+                width: 140px;
+            }
+            
+            /* 네비게이션 메뉴를 가로 스크롤로 */
+            .nav-menu { 
+                display: flex; 
+                gap: 5px; 
+                margin: 0 0 10px 0;
+                width: 100%;
+                order: 2;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 5px;
+            }
+            .nav-menu li { 
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+            .nav-menu a { 
+                padding: 8px 12px; 
+                font-size: 13px;
+                white-space: nowrap;
+            }
+            
+            /* 인증 메뉴 */
+            .auth-menu { 
+                border-top: none; 
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                order: 3;
+            }
+            .auth-menu a { 
+                padding: 10px;
+                font-size: 13px;
+            }
+            
+            /* 메인 컨텐츠 */
+            .main-content { 
+                padding: 15px;
+                gap: 20px;
+            }
+            
+            /* 홈 그리드 세로 배치 */
+            .home-grid { 
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            /* 추천 알바 카드 */
+            .home-card { 
+                height: auto;
+                padding: 15px;
+            }
+            
+            /* 추천 알바 리스트 */
+            .job-list {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .job-card {
+                padding: 12px;
+            }
+            
+            /* 채팅 박스 */
+            .chat-box {
+                height: 250px;
+            }
+            
+            /* 메인 보드 컨테이너 */
+            .main-board-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            /* 검색 영역 */
+            .search-area {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .search-select, .search-input {
+                padding: 12px;
+            }
+            
+            /* 게시판 컨테이너 */
+            .board-container {
+                padding: 15px;
+            }
+            
+            /* 게시글 아이템 */
+            .post-item {
+                gap: 15px;
+            }
+            .admin-checkbox-label {
+                padding: 10px 15px;
+                min-width: 50px;
+            }
+            
+            /* 모달 */
+            .modal-content {
+                padding: 20px;
+            }
+            .modal-title {
+                font-size: 18px;
+            }
+            
+            /* 마이페이지 */
+            .mypage-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            .mypage-profile-pic {
+                margin: 0 auto;
+            }
+            
+            /* 푸터 */
+            .footer-counter {
+                font-size: 10px;
+                padding: 8px 15px;
+            }
         }
     </style>
 </head>
@@ -217,7 +339,6 @@
     <div class="app-wrapper">
         <aside class="sidebar">
             <div class="logo-container" onclick="showPage('home', document.querySelector('.nav-link'))">
-                <!-- 로고 이미지 적용 -->
                 <img src="https://z-cdn-media.chatglm.cn/files/1d336aba-7f84-4d6f-b911-2029cdfb962c.png?auth_key=1891092163-a7b4c1d6c439477da8818bbe50291141-0-b5954bc99d85372f1cf3f2f2444b82be" alt="알바의 신 로고" class="logo-img">
             </div>
             <ul class="nav-menu">
