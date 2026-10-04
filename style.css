@@ -247,4 +247,11 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     .mypage-header { flex-direction: column; text-align: center; gap: 15px; }
     .mypage-info { max-width: 100%; }
     .footer-counter { font-size: 10px; padding: 8px 15px; }
+
+    /* 하위 필터 버튼 스타일 */
+.filter-btn { padding: 5px 12px; border: 1px solid #ccc; background: #fff; border-radius: 15px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.2s; }
+.filter-btn:hover { background: #f0f0f0; }
+.filter-btn.active { background: #1e1e2f; color: #fff; border-color: #1e1e2f; }
+.nav-submenu { list-style: none; }
+.nav-sub-link.active { font-weight: 800; color: #fff !important; background: #2a2a40; border-radius: 5px; padding-left: 5px; }
 }
