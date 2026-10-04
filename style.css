@@ -201,13 +201,38 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     .modal-title { font-size: 18px; }
     .modal-meta { font-size: 12px; gap: 10px; }
     
-    /* 모바일 채팅 모달: 10% 더 축소하여 뒤 배경 더 잘 보이게 함 */
+    /* 모바일 채팅 모달: 공간 최대화 및 글자 크기 축소 */
     .chat-modal-content { 
-        width: 85%; 
-        height: 75vh; 
-        padding: 20px; 
-        border-radius: 16px; 
+        width: 100%; 
+        height: 95vh; /* 위아래로 최대한 크게 */
+        padding: 10px; /* 내부 패딩 대폭 축소 */
+        border-radius: 0; /* 모서리 직각으로 공간 극대화 */
     } 
+    
+    /* 채팅방 제목 글자 작게 & 간격 축소 (인라인 스타일 덮어쓰기) */
+    .chat-modal-content h2 { 
+        font-size: 14px !important; 
+        margin-bottom: 5px !important; 
+    }
+    
+    /* 채팅 스크린 여백 축소 */
+    .chat-modal-content .chat-screen { 
+        padding: 8px;
+        margin-bottom: 5px;
+    }
+    
+    /* 채팅 입력창 상하 간격 대폭 축소 */
+    .chat-modal-content .chat-input-area { 
+        gap: 5px;
+    }
+    .chat-modal-content .chat-input { 
+        padding: 8px; 
+        font-size: 14px;
+    }
+    .chat-modal-content .btn-send { 
+        padding: 8px 12px; 
+        font-size: 14px;
+    }
     
     .mypage-header { flex-direction: column; text-align: center; gap: 15px; }
     .mypage-info { max-width: 100%; }
