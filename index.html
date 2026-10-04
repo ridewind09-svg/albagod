@@ -15,7 +15,18 @@
             </div>
             <ul class="nav-menu">
                 <li><a class="nav-link active" onclick="showPage('home', this)">홈</a></li>
-                <li><a class="nav-link" onclick="showPage('semiconductor', this)">반도체현장</a></li>
+                
+                <!-- 반도체현장 하위 메뉴 추가 -->
+                <li>
+                    <a class="nav-link" onclick="toggleSemiSubmenu(this)">반도체현장</a>
+                    <ul class="nav-submenu" style="display: none; padding-left: 20px; margin-top: 5px; list-style:none;">
+                        <li style="margin-bottom: 5px;"><a class="nav-sub-link" onclick="showSemiSubCategory('건축/토목', this)" style="font-size:14px; color:#8a8a9a; display:block; cursor:pointer;">📂 건축/토목</a></li>
+                        <li style="margin-bottom: 5px;"><a class="nav-sub-link" onclick="showSemiSubCategory('설비/유틸', this)" style="font-size:14px; color:#8a8a9a; display:block; cursor:pointer;">📂 설비/유틸</a></li>
+                        <li style="margin-bottom: 5px;"><a class="nav-sub-link" onclick="showSemiSubCategory('안전/감시', this)" style="font-size:14px; color:#8a8a9a; display:block; cursor:pointer;">📂 안전/감시</a></li>
+                        <li style="margin-bottom: 5px;"><a class="nav-sub-link" onclick="showSemiSubCategory('관리자', this)" style="font-size:14px; color:#8a8a9a; display:block; cursor:pointer;">📂 관리자</a></li>
+                    </ul>
+                </li>
+                
                 <li><a class="nav-link" onclick="showPage('otherjobs', this)">기타알바</a></li>
                 <li><a class="nav-link" onclick="showPage('reference', this)">자료실</a></li>
                 <li><a class="nav-link" onclick="showPage('freeboard', this)">자유게시판</a></li>
@@ -75,7 +86,27 @@
                 </div>
             </section>
 
-            <section id="semiconductor" class="page-section"><div class="board-container"><div class="section-title">🔧 반도체현장 게시판</div><div id="semiWriteArea"></div><div class="post-list" id="semiList"></div><div class="bulk-action-bar" id="bulkBar_semi"><label><input type="checkbox" id="selectAll_semi" onchange="toggleAllPosts(this, 'semi')"> 전체 선택</label><button class="btn-action btn-delete" onclick="bulkDeletePosts('semi')">선택 삭제</button><select id="bulkMoveSelect_semi"><option value="">이동할 게시판 선택...</option><option value="other">기타알바</option><option value="ref">자료실</option><option value="free">자유게시판</option></select><button class="btn-action btn-move" onclick="bulkMovePosts('semi')">선택 이동</button></div></div></section>
+            <!-- 반도체현장 섹션 (필터 영역 추가) -->
+            <section id="semiconductor" class="page-section">
+                <div class="board-container">
+                    <div class="section-title">🔧 반도체현장 게시판</div>
+                    <div id="semiFilterArea" style="display:none; margin-bottom:15px; gap:10px; flex-wrap:wrap; background:#f0f2f5; padding:10px; border-radius:8px;"></div>
+                    <div id="semiWriteArea"></div>
+                    <div class="post-list" id="semiList"></div>
+                    <div class="bulk-action-bar" id="bulkBar_semi">
+                        <label><input type="checkbox" id="selectAll_semi" onchange="toggleAllPosts(this, 'semi')"> 전체 선택</label>
+                        <button class="btn-action btn-delete" onclick="bulkDeletePosts('semi')">선택 삭제</button>
+                        <select id="bulkMoveSelect_semi">
+                            <option value="">이동할 게시판 선택...</option>
+                            <option value="other">기타알바</option>
+                            <option value="ref">자료실</option>
+                            <option value="free">자유게시판</option>
+                        </select>
+                        <button class="btn-action btn-move" onclick="bulkMovePosts('semi')">선택 이동</button>
+                    </div>
+                </div>
+            </section>
+
             <section id="otherjobs" class="page-section"><div class="board-container"><div class="section-title">💼 기타알바 게시판</div><div id="otherWriteArea"></div><div class="post-list" id="otherList"></div><div class="bulk-action-bar" id="bulkBar_other"><label><input type="checkbox" id="selectAll_other" onchange="toggleAllPosts(this, 'other')"> 전체 선택</label><button class="btn-action btn-delete" onclick="bulkDeletePosts('other')">선택 삭제</button><select id="bulkMoveSelect_other"><option value="">이동할 게시판 선택...</option><option value="semi">반도체현장</option><option value="ref">자료실</option><option value="free">자유게시판</option></select><button class="btn-action btn-move" onclick="bulkMovePosts('other')">선택 이동</button></div></div></section>
             <section id="reference" class="page-section"><div class="board-container"><div class="section-title">📁 자료실 게시판</div><div id="refWriteArea"></div><div class="post-list" id="refList"></div><div class="bulk-action-bar" id="bulkBar_ref"><label><input type="checkbox" id="selectAll_ref" onchange="toggleAllPosts(this, 'ref')"> 전체 선택</label><button class="btn-action btn-delete" onclick="bulkDeletePosts('ref')">선택 삭제</button><select id="bulkMoveSelect_ref"><option value="">이동할 게시판 선택...</option><option value="semi">반도체현장</option><option value="other">기타알바</option><option value="free">자유게시판</option></select><button class="btn-action btn-move" onclick="bulkMovePosts('ref')">선택 이동</button></div></div></section>
             <section id="freeboard" class="page-section"><div class="board-container"><div class="section-title">🗣️ 자유게시판</div><div id="freeWriteArea"></div><div class="post-list" id="freeList"></div><div class="bulk-action-bar" id="bulkBar_free"><label><input type="checkbox" id="selectAll_free" onchange="toggleAllPosts(this, 'free')"> 전체 선택</label><button class="btn-action btn-delete" onclick="bulkDeletePosts('free')">선택 삭제</button><select id="bulkMoveSelect_free"><option value="">이동할 게시판 선택...</option><option value="semi">반도체현장</option><option value="other">기타알바</option><option value="ref">자료실</option></select><button class="btn-action btn-move" onclick="bulkMovePosts('free')">선택 이동</button></div></div></section>
@@ -90,7 +121,7 @@
 
     <div id="postModal" class="modal-overlay"><div class="modal-content"><button class="modal-close" onclick="closeModal('postModal')">&times;</button><div class="modal-title" id="modalTitle"></div><div class="modal-meta" id="modalMeta"></div><div class="modal-body" id="modalContent"></div><div class="modal-actions" id="modalActions"></div><div class="modal-move-area" id="modalMoveArea" style="display:none;"></div><div class="comment-section"><h3>💬 댓글 (<span id="commentCount">0</span>)</h3><div class="comment-list" id="commentList"></div><div class="comment-form"><input type="text" id="commentInput" class="comment-input" placeholder="댓글을 입력하세요" onkeypress="handleCommentKeyPress(event)"><button class="comment-submit" onclick="addComment()">등록</button></div></div></div></div>
     <div id="socialModal" class="modal-overlay"><div class="modal-content nickname-modal-content"><button class="modal-close" onclick="closeModal('socialModal')">&times;</button><h2>회원정보 및 전화번호 인증</h2><p style="color:#666; margin-top:10px; font-size:14px;"><span id="socialProviderName"></span> 로그인을 위한 추가 정보를 입력해주세요.</p><input type="text" id="socialNicknameInput" placeholder="사용할 닉네임"><input type="text" id="socialNameInput" placeholder="이름"><div class="phone-verify-area"><input type="text" id="socialPhoneInput" placeholder="휴대폰 번호 ('-' 없이 입력)"><button onclick="sendVerificationCode()">인증요청</button></div><input type="text" id="socialVerifyCodeInput" placeholder="인증번호 4자리 입력"><button class="btn-auth" onclick="confirmSocialLogin()">가입 및 로그인</button></div></div>
-    <div id="chatModal" class="modal-overlay"><div class="modal-content chat-modal-content"><button class="modal-close" onclick="closeModal('chatModal')">&times;</button><h2 style="margin-bottom:20px;">💬 실시간 채팅 (전체화면)</h2><div class="chat-screen" id="chatModalScreen"></div><div class="new-message-alert" id="newMsgAlertModal" onclick="scrollToBottom('chatModalScreen', 'newMsgAlertModal')">새 메시지 <span class="count">0</span> ↓</div><div class="reply-preview-area" id="replyPreviewModal"><div class="reply-content"></div><button class="reply-cancel" onclick="cancelReply()">&times;</button></div><div class="chat-input-area"><input type="text" id="chatModalInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleModalKeyPress(event)"><button class="btn-send" onclick="sendMessage(true)">전송</button></div></div></div>
+    <div id="chatModal" class="modal-overlay"><div class="modal-content chat-modal-content"><button class="modal-close" onclick="closeModal('chatModal')">&times;</button><h2>💬 실시간 채팅</h2><div class="chat-screen" id="chatModalScreen"></div><div class="new-message-alert" id="newMsgAlertModal" onclick="scrollToBottom('chatModalScreen', 'newMsgAlertModal')">새 메시지 <span class="count">0</span> ↓</div><div class="reply-preview-area" id="replyPreviewModal"><div class="reply-content"></div><button class="reply-cancel" onclick="cancelReply()">&times;</button></div><div class="chat-input-area"><input type="text" id="chatModalInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleModalKeyPress(event)"><button class="btn-send" onclick="sendMessage(true)">전송</button></div></div></div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
