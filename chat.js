@@ -19,15 +19,24 @@ function handleNewChatMessage(key, c) {
     [mainScreen, modalScreen].forEach(screen => { if(!screen) return; const isNearBottom = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 100; screen.insertAdjacentHTML('beforeend', html); if(!chatInitialized || isNearBottom) { screen.scrollTop = screen.scrollHeight; } else { if(screen.id === 'chatScreen') { unreadMainCount++; updateNewMessageAlert('newMsgAlertMain', unreadMainCount); } else { unreadModalCount++; updateNewMessageAlert('newMsgAlertModal', unreadModalCount); } } });
 }
 
+// 마스터 권한 뺴앗기 로직 (8초 이상 갱신 없으면 죽은 마스터로 판단)
 chatMasterRef.transaction((currentMaster) => {
-    if (!currentMaster) {
+    if (!currentMaster || (Date.now() - (currentMaster.timestamp || 0) > 8000)) {
         isMaster = true;
-        return sessionId;
+        return { sessionId: sessionId, timestamp: Date.now() };
     }
 }, (error, committed) => {
     if (error) { console.error('Master transaction failed:', error); } 
     else if (committed && isMaster) {
         chatMasterRef.onDisconnect().remove();
+        
+        // 마스터 생존 알리기 (3초마다 서버에 심장 뜀)
+        if(window.masterPingInterval) clearInterval(window.masterPingInterval);
+        window.masterPingInterval = setInterval(() => {
+            chatMasterRef.update({ timestamp: Date.now() });
+        }, 3000);
+
+        // 마지막 채팅 기준 인덱스 세팅 후 시작
         chatRef.limitToLast(1).once('value').then(snap => {
             const lastChatData = snap.val();
             if(lastChatData) {
@@ -51,13 +60,16 @@ chatMasterRef.transaction((currentMaster) => {
             startFakeChatGenerator();
         });
     } else {
-        setInterval(() => {
+        // 마스터가 아닌 자는 5초마다 마스터가 죽었는지 확인. 죽었으면 새로고침해서 뺴앗으러 감
+        if(window.masterCheckInterval) clearInterval(window.masterCheckInterval);
+        window.masterCheckInterval = setInterval(() => {
             chatMasterRef.once('value').then(snap => {
-                if (!snap.val()) {
+                const masterData = snap.val();
+                if (!masterData || (Date.now() - (masterData.timestamp || 0) > 8000)) {
                     location.reload(); 
                 }
             });
-        }, 15000);
+        }, 5000);
     }
 });
 
@@ -284,7 +296,7 @@ const rawScript = `가퐈 : 죄송요 저는 낼 내려가는 일인입니다. �
 const fakeChatLog = rawScript.split('\n').map(s => s.trim()).filter(s => s.length > 0);
 let fakeScriptIndex = 0; 
 let fakeChatInterval = null; 
-let fakeChatTimeout = null; // 랜덤 타이머용 변수 추가
+let fakeChatTimeout = null; 
 let inactivityTimeout = null; 
 let lastFakeAuthor = '익명';
 
@@ -314,12 +326,10 @@ function appendFakeMessage() {
     fakeScriptIndex++;
 }
 
-// 3~9초 랜덤 대기 시간 생성
 function getRandomDelay() {
-    return Math.floor(Math.random() * 7000) + 3000; // 3000ms ~ 9999ms (3~9.9초)
+    return Math.floor(Math.random() * 7000) + 3000; // 3초 ~ 9.9초
 }
 
-// 재귀 호출로 랜덤 간격 실행
 function scheduleNextFakeMessage() {
     fakeChatTimeout = setTimeout(() => {
         appendFakeMessage();
@@ -329,7 +339,6 @@ function scheduleNextFakeMessage() {
 
 function startFakeChatGenerator() { 
     if(fakeChatInterval || fakeChatTimeout) return; 
-    // 즉시 올리지 않고 처음부터 3~9초 랜덤 타이머만 설정
     scheduleNextFakeMessage(); 
 }
 
