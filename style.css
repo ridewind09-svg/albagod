@@ -309,15 +309,23 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
 }
 /* === 강제 적용 스타일 === */
 
-/* PC 삼각형 아이콘 작게 & 간격 벌리기 강제 적용 */
+/* 1. 기본 (모바일 원래 좋았던 크기 유지) */
 .toggle-icon {
-    font-size: 7px !important;
-    margin-left: 10px !important;
+    font-size: 10px !important;
+    margin-left: 5px !important;
     vertical-align: middle !important;
     display: inline-block !important;
 }
 
-/* 모바일 채팅창 상하 10% 확장 강제 적용 */
+/* 2. PC 전용 (화면 너비가 769px 이상일 때만 작게 & 멀리 적용) */
+@media (min-width: 769px) {
+    .toggle-icon {
+        font-size: 7px !important;
+        margin-left: 10px !important;
+    }
+}
+
+/* 3. 모바일 채팅창 상하 10% 확장 유지 */
 @media (max-width: 768px) {
     .chat-modal-content { 
         width: 88% !important; 
