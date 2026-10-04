@@ -307,3 +307,24 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     box-shadow: 0 4px 8px rgba(30, 30, 47, 0.3);
     transform: translateY(-1px);
 }
+/* === 강제 적용 스타일 === */
+
+/* PC 삼각형 아이콘 작게 & 간격 벌리기 강제 적용 */
+.toggle-icon {
+    font-size: 7px !important;
+    margin-left: 10px !important;
+    vertical-align: middle !important;
+    display: inline-block !important;
+}
+
+/* 모바일 채팅창 상하 10% 확장 강제 적용 */
+@media (max-width: 768px) {
+    .chat-modal-content { 
+        width: 88% !important; 
+        height: 80vh !important; 
+        max-height: 80vh !important;
+        padding: 5px !important; 
+        border-radius: 12px !important; 
+        overflow: hidden !important;
+    } 
+}
