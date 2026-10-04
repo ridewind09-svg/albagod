@@ -156,9 +156,9 @@ function renderSemiDescription() {
         return; 
     }
     area.style.display = 'block';
-    area.innerHTML = `<div style="background:#f0f2f5; padding:12px 15px; border-radius:8px; font-size:14px; color:#555; font-weight:700; line-height:1.5;">
+    area.innerHTML = `<div style="background:#f0f2f5; padding:15px 20px; border-radius:8px; font-size:16px; color:#333; font-weight:700; line-height:1.6;">
         <span style="color:#1e1e2f; font-weight:800;">[${currentSemiSubCategory}]</span> 관련 게시물입니다. <br>
-        <span style="font-size:12px; color:#777; font-weight:400;">(예: ${semiSubCategories[currentSemiSubCategory]})</span>
+        <span style="font-size:15px; color:#555; font-weight:400;">(예: ${semiSubCategories[currentSemiSubCategory]})</span>
     </div>`;
 }
 // =================================================================
@@ -176,7 +176,7 @@ function checkWriteAuth(p) {
         let subCatHtml = '';
         if (t === 'semi') {
             const cats = Object.keys(semiSubCategories);
-            subCatHtml = `<select id="semiSubCategorySelect" style="margin-bottom:15px;"><option value="">하위 카테고리 (필수)</option>${cats.map(c => `<option value="${c}">${c}</option>`).join('')}</select>`;
+            subCatHtml = `<select id="semiSubCategorySelect" style="margin-bottom:15px;"><option value="">하위 메뉴 (필수)</option>${cats.map(c => `<option value="${c}">${c}</option>`).join('')}</select>`;
         }
         a.innerHTML = `<div class="write-form"><h3 style="margin-bottom:15px;">글쓰기</h3>${subCatHtml}${ij ? `<select id="${t}Region"><option value="">근무 지역 (필수)</option><option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option><option value="온라인">온라인</option></select>` : ''}<input type="text" id="${t}Title" placeholder="제목"><textarea id="${t}Content" placeholder="내용 (https://... 자동 링크)"></textarea><div class="file-upload-wrapper"><label class="file-upload-label" for="${t}File">📎 파일 첨부 (이미지/문서 10개, 동영상 1개)</label><input type="file" id="${t}File" multiple onchange="handleFileSelect('${t}', this)"><div class="file-name-display" id="${t}FileName">선택된 파일 없음</div></div><button class="btn-write" onclick="writePost('${t}')">작성 완료</button></div>`; 
     } 
@@ -364,7 +364,7 @@ function writePost(t) {
     let subCat = null;
     if (t === 'semi') {
         subCat = document.getElementById('semiSubCategorySelect')?.value || null;
-        if (!subCat) { alert('하위 카테고리 선택.'); return; }
+        if (!subCat) { alert('하위 메뉴를 선택해주세요.'); return; }
     }
 
     const tv = ti.value, cv = ci.value, rv = ri ? ri.value : '지역 없음'; 
