@@ -66,48 +66,26 @@
         .main-board-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .post-list { display: flex; flex-direction: column; gap: 15px; }
         
-        /* 게시글 아이템: 간격 대폭 벌리기 */
         .post-item { 
             padding: 15px 0; 
             border-bottom: 1px solid #f0f0f0; 
             transition: all 0.2s; 
             display: flex; 
-            gap: 30px; /* 간격 30px로 대폭 확대 */
+            gap: 30px; 
             align-items: center; 
         }
         .post-item:last-child { border-bottom: none; }
         
-        /* 관리자 전용 체크박스 영역 (클릭 영역 넓힘, 게시글 클릭 방지) */
         .admin-checkbox-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px 25px; /* 좌우 패딩 25px로 넓게 설정 */
-            cursor: pointer;
-            flex-shrink: 0;
-            background: #f9f9f9;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            transition: background 0.2s;
-            min-width: 80px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 15px 25px; cursor: pointer; flex-shrink: 0;
+            background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;
+            transition: background 0.2s; min-width: 80px;
         }
-        .admin-checkbox-label:hover {
-            background: #e3f2fd;
-            border-color: #90caf9;
-        }
-        .admin-checkbox {
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            margin: 0;
-        }
+        .admin-checkbox-label:hover { background: #e3f2fd; border-color: #90caf9; }
+        .admin-checkbox { width: 24px; height: 24px; cursor: pointer; margin: 0; }
 
-        /* 게시글 내용 영역 (클릭 영역 분리) */
-        .content-area {
-            flex: 1;
-            cursor: pointer;
-            padding: 5px 0;
-        }
+        .content-area { flex: 1; cursor: pointer; padding: 5px 0; }
         .content-area:hover h3 { text-decoration: underline; }
         .post-item h3 { font-size: 16px; margin-bottom: 8px; color: #1e1e2f; font-weight: 700; }
         .post-item p { font-size: 13px; color: #777; margin-bottom: 8px; line-height: 1.5; }
@@ -115,7 +93,6 @@
         .post-item .meta .view-btn { color: #1565c0; font-weight: 700; margin-left: 10px; }
         .tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; }
 
-        /* 관리자 일괄 작업바 */
         .bulk-action-bar { display: none; margin-top: 20px; padding: 15px; background: #f0f2f5; border-radius: 8px; gap: 15px; align-items: center; flex-wrap: wrap; }
         .bulk-action-bar.active { display: flex; }
         .bulk-action-bar select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; flex: 1; min-width: 150px; max-width: 250px; }
@@ -177,7 +154,7 @@
         .modal-close { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #333; font-weight: 800; }
         
         .modal-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; border-bottom: 2px solid #1e1e2f; padding-bottom: 10px; }
-        .modal-meta { font-size: 14px; color: #999; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; }
+        .modal-meta { font-size: 14px; color: #999; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .modal-body { font-size: 16px; line-height: 1.6; color: #333; white-space: pre-wrap; margin-bottom: 20px; word-break: break-all; }
         .modal-actions { text-align: right; }
         .btn-action { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; margin-left: 10px; margin-top: 5px; }
@@ -188,6 +165,20 @@
         .btn-move { background: #607d8b; color: #fff; }
         .modal-move-area { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ccc; text-align: right; }
         .modal-move-area select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-left: 10px; }
+
+        /* 댓글 영역 스타일 */
+        .comment-section { margin-top: 30px; border-top: 1px dashed #ccc; padding-top: 20px; }
+        .comment-section h3 { font-size: 16px; font-weight: 800; margin-bottom: 15px; color: #1e1e2f; }
+        .comment-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .comment-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
+        .comment-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .comment-author { font-weight: 700; font-size: 14px; color: #1e1e2f; display: flex; align-items: center; gap: 5px; }
+        .comment-date { font-size: 12px; color: #999; }
+        .comment-content { font-size: 14px; color: #444; line-height: 1.5; }
+        .comment-delete-btn { font-size: 12px; color: #d32f2f; cursor: pointer; background: none; border: none; padding: 0; }
+        .comment-form { display: flex; gap: 10px; }
+        .comment-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .comment-submit { background: #1e1e2f; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; white-space: nowrap; }
 
         .nickname-modal-content { text-align: center; }
         .nickname-modal-content input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
@@ -464,6 +455,16 @@
             <div class="modal-body" id="modalContent"></div>
             <div class="modal-actions" id="modalActions"></div>
             <div class="modal-move-area" id="modalMoveArea" style="display:none;"></div>
+            
+            <!-- 댓글 섹션 추가 -->
+            <div class="comment-section">
+                <h3>💬 댓글 (<span id="commentCount">0</span>)</h3>
+                <div class="comment-list" id="commentList"></div>
+                <div class="comment-form">
+                    <input type="text" id="commentInput" class="comment-input" placeholder="댓글을 입력하세요" onkeypress="handleCommentKeyPress(event)">
+                    <button class="comment-submit" onclick="addComment()">등록</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -527,6 +528,7 @@
         let recommendedJobs = {};
         let editingFiles = [];
         let tempSelectedFiles = [];
+        let currentViewingPost = { type: null, id: null }; // 현재 보고 있는 게시글 정보 (댓글용)
         
         const savedUser = sessionStorage.getItem('currentUser');
         if(savedUser) currentUser = JSON.parse(savedUser);
@@ -583,6 +585,10 @@
             posts = snapshot.val() || { semi: {}, other: {}, free: {}, ref: {} };
             renderPosts();
             if(document.getElementById('home').classList.contains('active')) searchJobs();
+            // 상세보기 창이 열려있을 때 댓글 새로고침
+            if(currentViewingPost.type && currentViewingPost.id) {
+                renderComments(currentViewingPost.type, currentViewingPost.id);
+            }
         });
 
         recJobsRef.on('value', (snapshot) => {
@@ -992,7 +998,7 @@
                 const newPost = { 
                     title: titleValue, content: contentValue, 
                     author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(),
-                    region: regionValue, files: filesDataArray
+                    region: regionValue, files: filesDataArray, comments: {}
                 };
                 newPostRef.set(newPost).then(() => {
                     alert('글이 성공적으로 작성되었습니다!');
@@ -1085,7 +1091,6 @@
             return html;
         }
 
-        // 게시글 렌더링 (클릭 영역 분리 및 간격 대폭 확보)
         function renderPosts() {
             ['semi', 'other', 'free', 'ref'].forEach(type => {
                 const listId = type === 'ref' ? 'refList' : `${type}List`;
@@ -1106,8 +1111,9 @@
                         const authorUser = users[p.authorId];
                         const regionTag = p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : '';
                         const fileIcon = (p.files && p.files.length > 0) || p.file ? ' 📎' : '';
+                        const commentCount = p.comments ? Object.keys(p.comments).length : 0;
+                        const commentIcon = commentCount > 0 ? ` 💬${commentCount}` : '';
                         
-                        // 체크박스 영역과 게시글 내용 영역을 분리
                         const checkboxHtml = (currentUser && currentUser.id === 'admin') 
                             ? `<label class="admin-checkbox-label"><input type="checkbox" class="admin-checkbox" data-type="${type}" data-id="${p.id}"></label>` 
                             : '';
@@ -1115,7 +1121,7 @@
                         return `<div class="post-item">
                             ${checkboxHtml}
                             <div class="content-area" onclick="viewPost('${type}', '${p.id}')">
-                                <h3>${regionTag} ${escapeHtml(p.title)}${fileIcon}</h3>
+                                <h3>${regionTag} ${escapeHtml(p.title)}${fileIcon}${commentIcon}</h3>
                                 <p>${linkify(escapeHtml(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content))}</p>
                                 <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(p.author)} | ${p.date} <span class="view-btn">[클릭하여 보기]</span></div>
                             </div>
@@ -1143,14 +1149,12 @@
             }).join('');
         }
 
-        // 관리자: 전체 선택/해제
         function toggleAllPosts(checkAll, type) {
             document.querySelectorAll(`.admin-checkbox[data-type="${type}"]`).forEach(cb => {
                 cb.checked = checkAll.checked;
             });
         }
 
-        // 관리자: 일괄 삭제
         function bulkDeletePosts(type) {
             const checked = document.querySelectorAll(`.admin-checkbox[data-type="${type}"]:checked`);
             if(checked.length === 0) { alert('삭제할 게시글을 선택해주세요.'); return; }
@@ -1168,7 +1172,6 @@
             }
         }
 
-        // 관리자: 일괄 이동
         function bulkMovePosts(type) {
             const checked = document.querySelectorAll(`.admin-checkbox[data-type="${type}"]:checked`);
             const newType = document.getElementById(`bulkMoveSelect_${type}`).value;
@@ -1261,7 +1264,91 @@
                     `;
                 }
             }
+            
+            // 현재 보고 있는 게시글 설정 및 댓글 렌더링
+            currentViewingPost = { type, id: postId };
+            renderComments(type, postId);
+            
             document.getElementById('postModal').style.display = 'flex';
+        }
+
+        // 댓글 렌더링
+        function renderComments(type, postId) {
+            const post = posts[type][postId];
+            const comments = post.comments || {};
+            const commentArray = Object.keys(comments).map(key => ({ id: key, ...comments[key] })).sort((a,b) => a.timestamp - b.timestamp);
+            
+            document.getElementById('commentCount').innerText = commentArray.length;
+            
+            const list = document.getElementById('commentList');
+            if(commentArray.length === 0) {
+                list.innerHTML = `<p style="color:#999; font-size:14px;">아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>`;
+            } else {
+                list.innerHTML = commentArray.map(c => {
+                    const authorUser = users[c.authorId] || { nickname: c.author, id: c.authorId };
+                    const isAuthor = (currentUser && (currentUser.id === c.authorId || currentUser.id === 'admin'));
+                    const deleteBtn = isAuthor ? `<button class="comment-delete-btn" onclick="deleteComment('${type}', '${postId}', '${c.id}')">삭제</button>` : '';
+                    
+                    return `<div class="comment-item">
+                        <div class="comment-meta">
+                            <div class="comment-author">${getProfileImgHTML(authorUser)} ${escapeHtml(c.author)}</div>
+                            <div>
+                                <span class="comment-date">${new Date(c.timestamp).toLocaleString()}</span>
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                        <div class="comment-content">${linkify(escapeHtml(c.content))}</div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        // 댓글 추가
+        async function addComment() {
+            if(!currentViewingPost.type || !currentViewingPost.id) return;
+            
+            const input = document.getElementById('commentInput');
+            const content = input.value.trim();
+            if(!content) { alert('댓글 내용을 입력해주세요.'); return; }
+            
+            let author = '익명';
+            let authorId = 'guest';
+            
+            if(currentUser) {
+                author = currentUser.nickname;
+                authorId = currentUser.id;
+            } else {
+                author = await getAnonName();
+            }
+            
+            const commentRef = postsRef.child(currentViewingPost.type).child(currentViewingPost.id).child('comments').push();
+            commentRef.set({
+                author: author,
+                authorId: authorId,
+                content: content,
+                timestamp: Date.now()
+            }).then(() => {
+                input.value = '';
+            }).catch(err => {
+                alert('댓글 등록에 실패했습니다.');
+            });
+        }
+
+        // 댓글 삭제
+        function deleteComment(type, postId, commentId) {
+            if(!confirm('댓글을 삭제하시겠습니까?')) return;
+            
+            postsRef.child(type).child(postId).child('comments').child(commentId).remove()
+                .then(() => {
+                    alert('댓글이 삭제되었습니다.');
+                })
+                .catch(err => {
+                    alert('댓글 삭제에 실패했습니다.');
+                });
+        }
+
+        function handleCommentKeyPress(event) {
+            if (event.key === 'Enter') addComment();
         }
 
         function toggleScrap(type, postId) {
