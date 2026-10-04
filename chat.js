@@ -329,8 +329,8 @@ function scheduleNextFakeMessage() {
 
 function startFakeChatGenerator() { 
     if(fakeChatInterval || fakeChatTimeout) return; 
-    appendFakeMessage(); // 시작할 때 즉시 1개 출력
-    scheduleNextFakeMessage(); // 랜덤 타이머 시작
+    // 즉시 올리지 않고 처음부터 3~9초 랜덤 타이머만 설정
+    scheduleNextFakeMessage(); 
 }
 
 function stopFakeChatGenerator() { 
