@@ -310,9 +310,11 @@ me to
 주무세요~~Goodnight`;
 const fakeScript = rawScript.split('\n').map(s => s.trim()).filter(s => s.length > 0);
 let fakeScriptIndex = 0; let fakeChatInterval = null; let inactivityTimeout = null; 
-let currentSpeaker = null;
-let responders = [];
-let msgAfterQuestionCount = 0;
+
+// 채팅 흐름 제어 변수
+let questioner = null; // 질문자
+let responders = []; // 답변자 풀
+let currentResponderIndex = 0; // 답변자 순서
 
 function appendFakeMessage() {
     const mtp = Math.floor(Math.random() * 3) + 1; 
@@ -323,27 +325,35 @@ function appendFakeMessage() {
         let author;
 
         if(msg.includes('?')) {
-            currentSpeaker = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
-            const available = fakeNicknames.filter(n => n !== currentSpeaker);
-            available.sort(() => Math.random() - 0.5);
-            responders = available.slice(0, 2 + Math.floor(Math.random() * 2));
+            // 물음표가 포함된 문장이면 새로운 질문자를 할당
+            questioner = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+            author = questioner;
             
-            author = currentSpeaker;
-            msgAfterQuestionCount = 0;
+            // 질문자를 제외한 답변자 풀 생성 (2~3명)
+            const available = fakeNicknames.filter(n => n !== questioner);
+            available.sort(() => Math.random() - 0.5);
+            responders = available.slice(0, 2 + Math.floor(Math.random() * 2)); 
+            currentResponderIndex = 0;
         } else {
-            if(currentSpeaker === null) {
+            // 물음표가 없는 답변 문장이면
+            if (responders.length === 0) {
+                // 초기 상태나 답변자가 없으면 아무나
                 author = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
             } else {
-                msgAfterQuestionCount++;
-                if(msgAfterQuestionCount <= 2 && Math.random() < 0.5) {
-                    author = currentSpeaker;
-                } else {
-                    author = responders[Math.floor(Math.random() * responders.length)];
-                }
+                // 답변자들끼리 돌아가면서 말하게 함 (질문자는 절대 여기서 말하지 않음)
+                author = responders[currentResponderIndex % responders.length];
+                currentResponderIndex++;
             }
         }
 
-        chatRef.push({ author: author, authorId: sessionId, message: msg, timestamp: firebase.database.ServerValue.TIMESTAMP });
+        // DB에 채팅 푸시 (마스터만 실행하므로 중복 없이 모두에게 동기화됨)
+        chatRef.push({ 
+            author: author, 
+            authorId: sessionId, // 마스터 본인 ID로 설정 (실제 사용자로 인식 안되게)
+            message: msg, 
+            timestamp: firebase.database.ServerValue.TIMESTAMP 
+        });
+        
         fakeScriptIndex++;
     }
 }
@@ -355,9 +365,18 @@ function startFakeChatGenerator() {
 }
 
 function stopFakeChatGenerator() { 
-    if(fakeChatInterval) { clearInterval(fakeChatInterval); fakeChatInterval = null; } 
+    if(fakeChatInterval) { 
+        clearInterval(fakeChatInterval); 
+        fakeChatInterval = null; 
+    } 
     if(inactivityTimeout) clearTimeout(inactivityTimeout); 
+    // 2분(120000ms) 뒤 마스터 기준 가짜 채팅 재개
     inactivityTimeout = setTimeout(() => startFakeChatGenerator(), 120000); 
 } 
 
-window.addEventListener('load', () => { if (window.innerWidth <= 768) openChatModal(); });
+// 모바일에서 첫 접속 시 채팅 크게 보기 자동 실행
+window.addEventListener('load', () => {
+    if (window.innerWidth <= 768) {
+        openChatModal();
+    }
+});
