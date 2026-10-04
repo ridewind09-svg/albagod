@@ -80,7 +80,16 @@ function deleteRecJob(i) { recJobsRef.child(i).remove(); alert('삭제됨.'); }
 function renderAdminRecJobs() { const l = document.getElementById('adminRecJobList'); const j = Object.keys(recommendedJobs).map(k => ({ id: k, ...recommendedJobs[k] })); if(j.length === 0) l.innerHTML = `<p style="color:#999;">없음.</p>`; else l.innerHTML = j.map(x => `<div class="job-card"><div class="job-title">${escapeHtml(x.title)}</div><div class="job-info">${escapeHtml(x.info.length > 30 ? x.info.substring(0, 30) + '...' : x.info)}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${x.id}')">삭제</button></div>`).join(''); }
 function renderHomeRecJobs() { const l = document.getElementById('homeJobList'); const j = Object.keys(recommendedJobs).map(k => ({ id: k, ...recommendedJobs[k] })).reverse().slice(0, 4); if(j.length === 0) l.innerHTML = `<p style="color:#999;">없음.</p>`; else l.innerHTML = j.map(x => `<div class="job-card" onclick="viewRecJob('${x.id}')"><div class="job-title">${x.region ? `<span class="tag">${escapeHtml(x.region)}</span>` : ''} ${escapeHtml(x.title)}</div><div class="job-info">${escapeHtml(x.info.length > 50 ? x.info.substring(0, 50) + '...' : x.info)}</div></div>`).join(''); }
 function searchJobs() { const i = document.getElementById('jobSearchInput').value.toUpperCase(), r = document.getElementById('searchRegion').value; const res = []; ['semi', 'other'].forEach(t => { const tp = posts[t] || {}; Object.keys(tp).forEach(k => { const p = tp[k]; p.id = k; if((p.title + p.content + p.author).toUpperCase().indexOf(i) > -1 && (!r || p.region === r)) res.push({ type: t, post: p }); }); }); const d = document.getElementById('searchResults'); if(i === "" && r === "") { d.innerHTML = `<p style="color:#999;">검색어 입력.</p>`; return; } if (res.length === 0) d.innerHTML = `<p style="color:#999;">결과 없음.</p>`; else d.innerHTML = res.map(x => `<div class="post-item"><div class="content-area" onclick="viewPost('${x.type}', '${x.post.id}')"><h3>${x.post.region ? `<span class="tag">${escapeHtml(x.post.region)}</span>` : ''} ${escapeHtml(x.post.title)}</h3><p>${linkify(escapeHtml(x.post.content.length > 50 ? x.post.content.substring(0, 50) + '...' : x.post.content))}</p><div class="meta">${getProfileImgHTML(users[x.post.authorId])} ${escapeHtml(x.post.author)} | ${x.post.date}</div></div></div>`).join(''); }
-function openChatModal() { const ms = document.getElementById('chatScreen'); const mds = document.getElementById('chatModalScreen'); mds.innerHTML = ms.innerHTML; mds.scrollTop = mds.scrollHeight; document.getElementById('chatModal').style.display = 'flex'; document.getElementById('chatModalInput').focus(); }
+
+// 채팅 모달 열기 (커서 자동 이동 제거)
+function openChatModal() { 
+    const ms = document.getElementById('chatScreen'); 
+    const mds = document.getElementById('chatModalScreen'); 
+    mds.innerHTML = ms.innerHTML; 
+    mds.scrollTop = mds.scrollHeight; 
+    document.getElementById('chatModal').style.display = 'flex'; 
+}
+
 async function sendMessage(isModal) { const i = document.getElementById(isModal ? 'chatModalInput' : 'chatInput'); const m = i.value.trim(); if (m !== "") { stopFakeChat(); let a = '익명', aid = 'guest'; if (currentUser) { a = currentUser.nickname; aid = currentUser.id; } else { a = await getAnonName(); aid = 'guest'; } let cd = { author: a, authorId: aid, message: m, timestamp: Date.now() }; if(currentReply) cd.replyTo = currentReply; chatRef.push(cd); i.value = ""; cancelReply(); } }
 function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(false); }
 function handleModalKeyPress(e) { if (e.key === 'Enter') sendMessage(true); }
@@ -302,3 +311,10 @@ function appendFakeMessage() {
 function startFakeChat() { if(fakeChatInterval) return; appendFakeMessage(); fakeChatInterval = setInterval(appendFakeMessage, 12000); }
 function stopFakeChat() { if(fakeChatInterval) { clearInterval(fakeChatInterval); fakeChatInterval = null; } if(inactivityTimeout) clearTimeout(inactivityTimeout); inactivityTimeout = setTimeout(() => startFakeChat(), 120000); } 
 startFakeChat();
+
+// 모바일에서 첫 접속 시 채팅 크게 보기 자동 실행
+window.addEventListener('load', () => {
+    if (window.innerWidth <= 768) {
+        openChatModal();
+    }
+});
