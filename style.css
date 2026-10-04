@@ -200,7 +200,15 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     .modal-content { width: 95%; padding: 20px; max-height: 90vh; }
     .modal-title { font-size: 18px; }
     .modal-meta { font-size: 12px; gap: 10px; }
-    .chat-modal-content { height: 90vh; padding: 20px; }
+    
+    /* 모바일 채팅 모달: 화면보다 약간 작게하여 뒤 배경 보이게 함 */
+    .chat-modal-content { 
+        width: 95%; 
+        height: 85vh; 
+        padding: 20px; 
+        border-radius: 16px; 
+    } 
+    
     .mypage-header { flex-direction: column; text-align: center; gap: 15px; }
     .mypage-info { max-width: 100%; }
     .footer-counter { font-size: 10px; padding: 8px 15px; }
