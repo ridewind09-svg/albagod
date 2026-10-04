@@ -201,38 +201,47 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     .modal-title { font-size: 18px; }
     .modal-meta { font-size: 12px; gap: 10px; }
     
-    /* 모바일 채팅 모달: 모달 자체는 작게 유지(배경 보이게), 내부 여백 싹 다 없애서 채팅스크린만 키움 */
+    /* 모바일 채팅 모달: 틀 크기를 화면 절반(55vh)으로 확 줄여서 뒷배경 확실히 보이게 함 */
     .chat-modal-content { 
-        width: 88%; 
-        height: 72vh; /* 모달 틀 자체는 기존대로 작게 유지 */
-        padding: 8px; /* 내부 테두리 여백 최소화 */
-        border-radius: 12px; 
+        width: 85% !important; 
+        height: 55vh !important; 
+        max-height: 55vh !important;
+        padding: 5px !important; 
+        border-radius: 12px !important; 
+        overflow: hidden !important;
     } 
     
-    /* 제목 영역 극한으로 축소 */
+    /* 닫기 버튼 */
+    .chat-modal-content .modal-close { top: 2px; right: 5px; font-size: 18px; }
+    
+    /* 제목 공간 극한 축소 (이전에 HTML에서 style="margin-bottom:20px;" 지우신 거 확인 필수) */
     .chat-modal-content h2 { 
-        font-size: 13px !important; 
-        margin-bottom: 3px !important; 
+        font-size: 12px !important; 
+        margin: 2px 0 5px 0 !important; 
+        text-align: center;
     }
     
-    /* 채팅 스크린 영역 패딩/마진 축소 (남은 공간 모두 차지하여 길어짐) */
+    /* 채팅 스크린 영역 여백 제거하여 길게 씀 */
     .chat-modal-content .chat-screen { 
-        padding: 8px;
-        margin-bottom: 5px;
+        padding: 8px !important;
+        margin-bottom: 0 !important;
+        flex: 1 !important;
+        min-height: 0 !important;
     }
     
-    /* 입력칸 상하 간격 완전 축소 */
+    /* 입력칸 간격 완전 축소 */
     .chat-modal-content .chat-input-area { 
-        gap: 5px;
-        margin-top: 0;
+        gap: 5px !important;
+        margin-top: 5px !important;
+        margin-bottom: 3px !important;
     }
     .chat-modal-content .chat-input { 
-        padding: 6px 8px; 
-        font-size: 14px;
+        padding: 6px 8px !important; 
+        font-size: 14px !important;
     }
     .chat-modal-content .btn-send { 
-        padding: 6px 10px; 
-        font-size: 14px;
+        padding: 6px 10px !important; 
+        font-size: 14px !important;
     }
     
     .mypage-header { flex-direction: column; text-align: center; gap: 15px; }
