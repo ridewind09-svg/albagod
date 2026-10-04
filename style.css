@@ -203,9 +203,9 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     
     /* 모바일 채팅 모달: 틀 크기를 화면 절반(55vh)으로 확 줄여서 뒷배경 확실히 보이게 함 */
     .chat-modal-content { 
-        width: 85% !important; 
-        height: 55vh !important; 
-        max-height: 55vh !important;
+        width: 88% !important; 
+        height: 80vh !important; /* 70vh에서 80vh로 10% 확장 */
+        max-height: 80vh !important;
         padding: 5px !important; 
         border-radius: 12px !important; 
         overflow: hidden !important;
