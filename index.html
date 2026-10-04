@@ -740,6 +740,15 @@
             document.getElementById('chatModalScreen').scrollTop = document.getElementById('chatModalScreen').scrollHeight;
         });
 
+        // 실시간 채팅 입력 감지 (새로운 채팅이 DB에 추가될 때)
+        chatRef.limitToLast(1).on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            // 10초 이내에 작성된 메시지라면 실제 사람이 친 것으로 간주하고 가짜 채팅 중지
+            if(data && (Date.now() - data.timestamp < 10000)) {
+                stopFakeChat();
+            }
+        });
+
         function updateUserCount() {
             const el = document.getElementById('userCount');
             if(el) el.innerText = Object.keys(users).length;
@@ -1698,6 +1707,8 @@
             const input = document.getElementById(inputId);
             const message = input.value.trim();
             if (message !== "") {
+                stopFakeChat(); // 실제 사용자가 채팅을 치면 가짜 채팅 중지
+
                 let author = '익명';
                 let authorId = 'guest';
 
@@ -1715,6 +1726,92 @@
         }
         function handleKeyPress(event) { if (event.key === 'Enter') sendMessage(false); }
         function handleModalKeyPress(event) { if (event.key === 'Enter') sendMessage(true); }
+
+
+        // =========================================================
+        // 가짜 채팅 (스크린세이버) 시스템
+        // =========================================================
+        const fakeNicknames = ['알바고수', '평택일번지', '주차왕', '궁금해요', '현직러', '친절맨', '도우미'];
+        const fakeScript = [
+            "평택7번게이트 근처 무료주차장있나요?",
+            "죄송요 저는 낼 내려가는 일인입니다. 고수분들이 답해주실거에요",
+            "무료 주차장은 없습니다",
+            "7번 게이트 입문 하시는 거라면 그린존 일하시는거 같은데 개서식당이나 정성 식당 식권 식사하시며 주차하시고 식당 버스 이용하시는게 빠를듯요",
+            "개성식당 정성식당",
+            "숙소는 고덕여염리이라서요",
+            "그러면 차량 이용은 힘드시고 자전거나 오토바이뿐 입니다",
+            "걷기에는 좀 힘들고요",
+            "네",
+            "회사 어디에 입사 하셨나요?",
+            "광건요",
+            "광건이라면 칸막이 공사죠? 탭동인가요?",
+            "5동은 식사하고 주차가능 하는곳 아실까요?",
+            "p4요 복합동요",
+            "5번 게이트 도 그린동 탭동 복합동이라 주차 불가입니다",
+            "5번 게이트 입문하시면 빨라요 복합동 2번게이트도 괞찬고요",
+            "걸어서10분안으로주차 가능한곳은요",
+            "없음니다",
+            "물산이아니고 E&J이라서요",
+            "정성한식 뷔페 찍고 빌라쪽 쭉 올라가시면 아침 빠른시간 군데군데 주차 자리 있어요 그리고 걸어서 오면 10분 거리입니다 5번게이트",
+            "2번개이트에서 걸어서 10분 거리에 유료주차장은 있어요. 월주차 33만원 입니다.",
+            "네 E&a 5번게이트 복합동 맞습니다",
+            "주차편하게 하실거면 월 주차 해야되욤",
+            "2 7 5게이트사용 가능한데",
+            "2번게이트 사용 이 애매해서요 물산 이 오픈안하면.못들어가서요",
+            "5게이트나 7번게이트 이용하시면 호이스트 이용하실껀데 출퇴근 시간은 대기줄 길어요"
+        ];
+        let fakeScriptIndex = 0;
+        let fakeChatInterval = null;
+        let inactivityTimeout = null;
+
+        function appendFakeMessage() {
+            const messagesToPush = Math.floor(Math.random() * 3) + 1; // 1~3개 랜덤 출력
+            
+            for(let i=0; i<messagesToPush; i++) {
+                if(fakeScriptIndex >= fakeScript.length) fakeScriptIndex = 0; // 끝나면 다시 처음부터
+                
+                const msg = fakeScript[fakeScriptIndex];
+                const author = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+                
+                const tempUser = { nickname: author, id: 'fake_' + author };
+                const html = `<div class="chat-message">${getProfileImgHTML(tempUser)} <span class="user">${escapeHtml(author)}:</span> <span class="chat-text">${linkify(escapeHtml(msg))}</span></div>`;
+                
+                const chatScreen = document.getElementById('chatScreen');
+                const modalScreen = document.getElementById('chatModalScreen');
+                
+                if(chatScreen) {
+                    chatScreen.insertAdjacentHTML('beforeend', html);
+                    chatScreen.scrollTop = chatScreen.scrollHeight;
+                }
+                if(modalScreen) {
+                    modalScreen.insertAdjacentHTML('beforeend', html);
+                    modalScreen.scrollTop = modalScreen.scrollHeight;
+                }
+                
+                fakeScriptIndex++;
+            }
+        }
+
+        function startFakeChat() {
+            if(fakeChatInterval) return; // 이미 실행 중이면 무시
+            appendFakeMessage(); // 즉시 한 번 실행
+            fakeChatInterval = setInterval(appendFakeMessage, 12000); // 12초마다 실행
+        }
+
+        function stopFakeChat() {
+            if(fakeChatInterval) {
+                clearInterval(fakeChatInterval);
+                fakeChatInterval = null;
+            }
+            if(inactivityTimeout) clearTimeout(inactivityTimeout);
+            // 1시간(3600000ms) 뒤 재시작
+            inactivityTimeout = setTimeout(() => {
+                startFakeChat();
+            }, 3600000); 
+        }
+
+        // 페이지 로드 시 가짜 채팅 시작
+        startFakeChat();
     </script>
 </body>
 </html>
