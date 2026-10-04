@@ -17,15 +17,15 @@
                 <li><a class="nav-link active" onclick="showPage('home', this)">홈</a></li>
                 
                 <!-- 반도체현장 하위 메뉴 추가 -->
-                <li>
-                    <a class="nav-link" onclick="toggleSemiSubmenu(this)">반도체현장</a>
-                    <ul class="nav-submenu" style="display: none; padding-left: 20px; margin-top: 5px; list-style:none;">
-                        <li style="margin-bottom: 5px;"><a class="nav-sub-link" onclick="showSemiSubCategory('건축/토목', this)" style="font-size:14px; color:#8a8a9a; display:block; cursor:pointer;">📂 건축/토목</a></li>
-                        <li style="margin-bottom: 5px;"><a class="nav-sub-link" onclick="showSemiSubCategory('설비/유틸', this)" style="font-size:14px; color:#8a8a9a; display:block; cursor:pointer;">📂 설비/유틸</a></li>
-                        <li style="margin-bottom: 5px;"><a class="nav-sub-link" onclick="showSemiSubCategory('안전/감시', this)" style="font-size:14px; color:#8a8a9a; display:block; cursor:pointer;">📂 안전/감시</a></li>
-                        <li style="margin-bottom: 5px;"><a class="nav-sub-link" onclick="showSemiSubCategory('관리자', this)" style="font-size:14px; color:#8a8a9a; display:block; cursor:pointer;">📂 관리자</a></li>
-                    </ul>
-                </li>
+<li>
+    <a class="nav-link" onclick="toggleSemiSubmenu(this)">반도체현장 <span class="toggle-icon">▶</span></a>
+    <ul class="nav-submenu" style="display: none; padding-left: 15px; margin-top: 5px; margin-bottom: 10px; list-style:none;">
+        <li style="margin-bottom: 2px;"><a class="nav-sub-link" onclick="showSemiSubCategory('건축/토목', this)"><span class="sub-icon">└</span> 건축/토목</a></li>
+        <li style="margin-bottom: 2px;"><a class="nav-sub-link" onclick="showSemiSubCategory('설비/유틸', this)"><span class="sub-icon">└</span> 설비/유틸</a></li>
+        <li style="margin-bottom: 2px;"><a class="nav-sub-link" onclick="showSemiSubCategory('안전/감시', this)"><span class="sub-icon">└</span> 안전/감시</a></li>
+        <li style="margin-bottom: 2px;"><a class="nav-sub-link" onclick="showSemiSubCategory('관리자', this)"><span class="sub-icon">└</span> 관리자</a></li>
+    </ul>
+</li>
                 
                 <li><a class="nav-link" onclick="showPage('otherjobs', this)">기타알바</a></li>
                 <li><a class="nav-link" onclick="showPage('reference', this)">자료실</a></li>
