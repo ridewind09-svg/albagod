@@ -4,7 +4,7 @@ const sessionId = Math.random().toString(36).substring(2);
 let isMaster = false;
 let chatInitialized = false; 
 let unreadMainCount = 0; 
-let unreadModalCount = 0;
+let unreadModalCount = 0; 
 let currentReply = null;
 
 function handleNewChatMessage(key, c) {
@@ -59,8 +59,10 @@ function openChatModal() {
     const ms = document.getElementById('chatScreen'); 
     const mds = document.getElementById('chatModalScreen'); 
     mds.innerHTML = ms.innerHTML; 
-    mds.scrollTop = mds.scrollHeight; 
     document.getElementById('chatModal').style.display = 'flex'; 
+    setTimeout(() => {
+        mds.scrollTop = mds.scrollHeight; 
+    }, 100);
 }
 
 async function sendMessage(isModal) { 
@@ -81,7 +83,8 @@ async function sendMessage(isModal) {
 function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(false); }
 function handleModalKeyPress(e) { if (e.key === 'Enter') sendMessage(true); }
 
-const fakeNicknames = ['알바고수', '평택일번지', '주차왕', '궁금해요', '현직러', '친절맨', '도우미', '서울촌놈', '반장님', '기능공'];
+// 닉네임 리스트
+const fakeNicknames = ['돈돈쓰', '배봉주', '크롱', '버티자', '춘봉', '빼꼬미', '여보세요', '성지윤', '반평택', '카우보이', '응망마틴', '고덕', '유단자', '질린다', '마린', '토마토', '포비돈', 'zoeh', '네로', '배관', '순풍', '웃자', '칸마귀', '길구', '보리', '인생은', '캐디', '르네', '겨울', '바닐라'];
 const rawScript = `평택7번게이트 근처 무료주차장있나요?
 죄송요 저는 낼 내려가는 일인입니다. 고수분들이 답해주실거에요
 무료 주차장은 없습니다
@@ -97,9 +100,9 @@ const rawScript = `평택7번게이트 근처 무료주차장있나요?
 5동은 식사하고 주차가능 하는곳 아실까요?
 p4요 복합동요
 5번 게이트 도 그린동 탭동 복합동이라 주차 불가입니다
-5번 게이트 입문하시면 빨라요 복합동 2번게이트도 괞찬고요
+5번 게이트 입문하시면 빨라요 복합동 2번게이트도 괜찮고요
 걸어서10분안으로주차 가능한곳은요
-없음니다
+없습니다
 물산이아니고 E&J이라서요
 정성한식 뷔페 찍고 빌라쪽 쭉 올라가시면 아침 빠른시간 군데군데 주차 자리 있어요 그리고 걸어서 오면 10분 거리입니다 5번게이트
 2번개이트에서 걸어서 10분 거리에 유료주차장은 있어요. 월주차 33만원 입니다.
@@ -138,7 +141,7 @@ P4로 가는데 7번게이트로 가면 금방일까요?
 어찌되었던 2게이트기준 6시 30분전에 들어가시는게 편함니다
 네
 지금 상황이 별루 인거죠?
-2게이트 좀더 일칙들어가시든데요 기공블들도요
+2게이트 좀더 일찍들어가시든데요 기공블들도요
 p4는마무리고요 p5들어가야죠
 일단 소주 몇잔 더 드시고 몇일 더 쉬시다 1일부터 P5고고 하세요
 지금 들어가심 젤 힘들때 들어가시는거궁P5도 시작할땐 림듭니다
@@ -154,7 +157,7 @@ P5 복합동 안감 입니다.
 아 더 지옥이에요?
 용인 출퇴근지욕 2차선ㅜㅜ
 저는 p4 안감임다 ㅋㅋ 안감 별로네여 후
-네 평택 2배라고 생각하심되요 저 한달하고 지처서 평택서 청주 1시간30분 출퇴근 ㅣ년 보다 더힘듬요
+네 평택 2배라고 생각하심되요 저 한달하고 지쳐서 평택서 청주 1시간30분 출퇴근 ㅣ년 보다 더힘듬요
 여염에서 5번 게이트 맨날 걸어서 출퇴근하는데 이것도 빡셈유 후
 아뇨 전 편하게 했어요 경기도 굉주 가 집이였는데 회사에서 숙소 얻어 줬어요
 저도 소개 였구 직발 이었는데
@@ -242,7 +245,7 @@ P4 안감은 젊은 사람 위주인듯. 블랙조끼 유니폼은 P5 파란색 
 경리단길이 이태원1동 이에요 내고향
 오호
 여러분들도 행복 편안한 밤되세요~
-감솨요
+감사요
 저 팽성에서 3년 살다 이사 나왔읍니다
 낼 일하시렴 주무셔야 겠네요. 저는 다시 내려가서 도돌이 해야해요ㅠㅠ
 미군 가족들 ㅠ 대박 주말마다 파티하심ㅇᆢㄷ
@@ -258,36 +261,49 @@ P4 안감은 젊은 사람 위주인듯. 블랙조끼 유니폼은 P5 파란색 
 me to
 주무세요~~Goodnight`;
 const fakeScript = rawScript.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-let fakeScriptIndex = 0; let fakeChatInterval = null; let inactivityTimeout = null;
-let currentSpeaker = null;
+let fakeScriptIndex = 0; let fakeChatInterval = null; let inactivityTimeout = null; 
 
-function getRandomResponder(excludeName) {
-    const available = fakeNicknames.filter(n => n !== excludeName);
-    return available[Math.floor(Math.random() * available.length)];
-}
+// 1:1 대화 흐름 제어 변수
+let speakerA = null; // 질문자
+let speakerB = null; // 답변자
+let lastSpeaker = null; // 마지막으로 말한 사람
 
 function appendFakeMessage() {
     const mtp = Math.floor(Math.random() * 3) + 1; 
     for(let i=0; i<mtp; i++) {
         if(fakeScriptIndex >= fakeScript.length) fakeScriptIndex = 0; 
+        
         const msg = fakeScript[fakeScriptIndex];
         let author;
+
         if(msg.includes('?')) {
-            currentSpeaker = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
-            author = currentSpeaker;
+            // 물음표가 있는 문장(질문)이면 새로운 대화 파트너를 설정
+            speakerA = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+            do {
+                speakerB = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+            } while (speakerB === speakerA);
+            
+            // 질문은 무조건 A가 함
+            author = speakerA;
+            lastSpeaker = speakerA;
         } else {
-            if(Math.random() < 0.8) {
-                author = getRandomResponder(currentSpeaker);
+            // 물음표가 없는 답변/리액션 문장은 A와 B가 번갈아 가며 말함
+            if (lastSpeaker === speakerA) {
+                author = speakerB;
             } else {
-                author = currentSpeaker;
+                author = speakerA;
             }
+            lastSpeaker = author;
         }
-        chatRef.push({
-            author: author,
-            authorId: sessionId, 
-            message: msg,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
+
+        // DB에 채팅 푸시 (마스터만 실행하므로 중복 없이 모두에게 동기화됨)
+        chatRef.push({ 
+            author: author, 
+            authorId: sessionId, // 마스터 본인 ID로 설정 (실제 사용자로 인식 안되게)
+            message: msg, 
+            timestamp: firebase.database.ServerValue.TIMESTAMP 
         });
+        
         fakeScriptIndex++;
     }
 }
@@ -304,9 +320,11 @@ function stopFakeChatGenerator() {
         fakeChatInterval = null; 
     } 
     if(inactivityTimeout) clearTimeout(inactivityTimeout); 
+    // 2분(120000ms) 뒤 마스터 기준 가짜 채팅 재개
     inactivityTimeout = setTimeout(() => startFakeChatGenerator(), 120000); 
 } 
 
+// 모바일에서 첫 접속 시 채팅 크게 보기 자동 실행
 window.addEventListener('load', () => {
     if (window.innerWidth <= 768) {
         openChatModal();
