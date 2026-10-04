@@ -65,7 +65,17 @@
 
         .main-board-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .post-list { display: flex; flex-direction: column; gap: 15px; }
-        .post-item { padding: 15px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: all 0.2s; display: flex; gap: 10px; align-items: flex-start; }
+        
+        /* 게시글 아이템: 간격 벌리기 및 클릭 영역 분리 */
+        .post-item { 
+            padding: 15px 0; 
+            border-bottom: 1px solid #f0f0f0; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            display: flex; 
+            gap: 20px; /* 체크박스와 내용 사이 간격 확대 */
+            align-items: flex-start; 
+        }
         .post-item:hover { padding-left: 10px; padding-right: 10px; }
         .post-item:last-child { border-bottom: none; }
         .post-item .content-area { flex: 1; }
@@ -75,11 +85,26 @@
         .post-item .meta .view-btn { color: #1565c0; font-weight: 700; margin-left: 10px; }
         .tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; }
 
-        /* 관리자 전용 체크박스 및 일괄 작업바 */
-        .admin-checkbox { width: 20px; height: 20px; margin-top: 4px; cursor: pointer; flex-shrink: 0; }
+        /* 관리자 전용 체크박스 (클릭 영역 넓힘) */
+        .admin-checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 10px 10px 15px; /* 클릭 영역을 넓히기 위한 패딩 */
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .admin-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* 관리자 일괄 작업바 */
         .bulk-action-bar { display: none; margin-top: 20px; padding: 15px; background: #f0f2f5; border-radius: 8px; gap: 15px; align-items: center; flex-wrap: wrap; }
         .bulk-action-bar.active { display: flex; }
         .bulk-action-bar select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; flex: 1; min-width: 150px; max-width: 250px; }
+        .bulk-action-bar label { font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 
         .job-posting-section { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 25px; }
         .search-area { margin-bottom: 25px; display: flex; gap: 15px; }
@@ -276,9 +301,8 @@
                     <div class="section-title">🔧 반도체현장 게시판</div>
                     <div id="semiWriteArea"></div>
                     <div class="post-list" id="semiList"></div>
-                    <!-- 관리자 일괄 작업바 -->
                     <div class="bulk-action-bar" id="bulkBar_semi">
-                        <input type="checkbox" id="selectAll_semi" onchange="toggleAllPosts(this, 'semi')"> <label for="selectAll_semi">전체 선택</label>
+                        <label><input type="checkbox" id="selectAll_semi" onchange="toggleAllPosts(this, 'semi')"> 전체 선택</label>
                         <button class="btn-action btn-delete" onclick="bulkDeletePosts('semi')">선택 삭제</button>
                         <select id="bulkMoveSelect_semi">
                             <option value="">이동할 게시판 선택...</option>
@@ -296,9 +320,8 @@
                     <div class="section-title">💼 기타알바 게시판</div>
                     <div id="otherWriteArea"></div>
                     <div class="post-list" id="otherList"></div>
-                    <!-- 관리자 일괄 작업바 -->
                     <div class="bulk-action-bar" id="bulkBar_other">
-                        <input type="checkbox" id="selectAll_other" onchange="toggleAllPosts(this, 'other')"> <label for="selectAll_other">전체 선택</label>
+                        <label><input type="checkbox" id="selectAll_other" onchange="toggleAllPosts(this, 'other')"> 전체 선택</label>
                         <button class="btn-action btn-delete" onclick="bulkDeletePosts('other')">선택 삭제</button>
                         <select id="bulkMoveSelect_other">
                             <option value="">이동할 게시판 선택...</option>
@@ -316,9 +339,8 @@
                     <div class="section-title">📁 자료실 게시판</div>
                     <div id="refWriteArea"></div>
                     <div class="post-list" id="refList"></div>
-                    <!-- 관리자 일괄 작업바 -->
                     <div class="bulk-action-bar" id="bulkBar_ref">
-                        <input type="checkbox" id="selectAll_ref" onchange="toggleAllPosts(this, 'ref')"> <label for="selectAll_ref">전체 선택</label>
+                        <label><input type="checkbox" id="selectAll_ref" onchange="toggleAllPosts(this, 'ref')"> 전체 선택</label>
                         <button class="btn-action btn-delete" onclick="bulkDeletePosts('ref')">선택 삭제</button>
                         <select id="bulkMoveSelect_ref">
                             <option value="">이동할 게시판 선택...</option>
@@ -336,9 +358,8 @@
                     <div class="section-title">🗣️ 자유게시판</div>
                     <div id="freeWriteArea"></div>
                     <div class="post-list" id="freeList"></div>
-                    <!-- 관리자 일괄 작업바 -->
                     <div class="bulk-action-bar" id="bulkBar_free">
-                        <input type="checkbox" id="selectAll_free" onchange="toggleAllPosts(this, 'free')"> <label for="selectAll_free">전체 선택</label>
+                        <label><input type="checkbox" id="selectAll_free" onchange="toggleAllPosts(this, 'free')"> 전체 선택</label>
                         <button class="btn-action btn-delete" onclick="bulkDeletePosts('free')">선택 삭제</button>
                         <select id="bulkMoveSelect_free">
                             <option value="">이동할 게시판 선택...</option>
@@ -886,12 +907,12 @@
             });
 
             let myPostsHtml = myPosts.length === 0 ? `<p style="color:#999;">작성한 글이 없습니다.</p>` : 
-                myPosts.map(m => `<div class="post-item" onclick="viewPost('${m.type}', '${m.post.id}')"><h3>${escapeHtml(m.post.title)}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div>`).join('');
+                myPosts.map(m => `<div class="post-item" onclick="viewPost('${m.type}', '${m.post.id}')"><div class="content-area"><h3>${escapeHtml(m.post.title)}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div></div>`).join('');
 
             let scrapPostsHtml = scrapPosts.length === 0 ? `<p style="color:#999;">스크랩한 글이 없습니다.</p>` : 
                 scrapPosts.map(s => {
                     const scrapUser = users[s.post.authorId];
-                    return `<div class="post-item" onclick="viewPost('${s.type}', '${s.post.id}')"><h3>${escapeHtml(s.post.title)}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${escapeHtml(s.post.author)} | ${s.post.date} <span class="view-btn">[보기]</span></div></div>`;
+                    return `<div class="post-item" onclick="viewPost('${s.type}', '${s.post.id}')"><div class="content-area"><h3>${escapeHtml(s.post.title)}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${escapeHtml(s.post.author)} | ${s.post.date} <span class="view-btn">[보기]</span></div></div></div>`;
                 }).join('');
 
             mypageContent.innerHTML = `
@@ -1047,7 +1068,7 @@
             return html;
         }
 
-        // 게시글 렌더링 (관리자일 때 체크박스 및 일괄 작업바 표시)
+        // 게시글 렌더링 (관리자 체크박스 간격 및 라벨 처리 개선)
         function renderPosts() {
             ['semi', 'other', 'free', 'ref'].forEach(type => {
                 const listId = type === 'ref' ? 'refList' : `${type}List`;
@@ -1068,7 +1089,11 @@
                         const authorUser = users[p.authorId];
                         const regionTag = p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : '';
                         const fileIcon = (p.files && p.files.length > 0) || p.file ? ' 📎' : '';
-                        const checkboxHtml = (currentUser && currentUser.id === 'admin') ? `<input type="checkbox" class="admin-checkbox" data-type="${type}" data-id="${p.id}" onclick="event.stopPropagation()">` : '';
+                        
+                        // 체크박스를 label로 감싸서 클릭 영역을 넓히고 간격 확보
+                        const checkboxHtml = (currentUser && currentUser.id === 'admin') 
+                            ? `<label class="admin-checkbox-label" onclick="event.stopPropagation()"><input type="checkbox" class="admin-checkbox" data-type="${type}" data-id="${p.id}"></label>` 
+                            : '';
                         
                         return `<div class="post-item" onclick="viewPost('${type}', '${p.id}')">
                             ${checkboxHtml}
