@@ -115,12 +115,24 @@ function setReply(key, encodedAuthor, encodedMsg) { const txt = document.createE
 function cancelReply() { currentReply = null; const mp = document.getElementById('replyPreviewMain'); const md = document.getElementById('replyPreviewModal'); if(mp) mp.style.display = 'none'; if(md) md.style.display = 'none'; }
 function updateNewMessageAlert(id, count) { const el = document.getElementById(id); if(el && count > 0) { el.style.display = 'block'; el.querySelector('.count').innerText = count; } }
 function scrollToBottom(screenId, alertId) { const s = document.getElementById(screenId); if(s) s.scrollTop = s.scrollHeight; if(alertId) { const el = document.getElementById(alertId); if(el) { el.style.display = 'none'; el.querySelector('.count').innerText = '0'; } } if(screenId === 'chatScreen') unreadMainCount = 0; else unreadModalCount = 0; }
-function openChatModal() { const ms = document.getElementById('chatScreen'); const mds = document.getElementById('chatModalScreen'); mds.innerHTML = ms.innerHTML; mds.scrollTop = mds.scrollHeight; document.getElementById('chatModal').style.display = 'flex'; }
+
+// 크게보기 눌렀을 때 스크롤 맨 아래로 내리기 (0.1초 딜레이 주어 화면 렌더링 후 실행)
+function openChatModal() { 
+    const ms = document.getElementById('chatScreen'); 
+    const mds = document.getElementById('chatModalScreen'); 
+    mds.innerHTML = ms.innerHTML; 
+    document.getElementById('chatModal').style.display = 'flex'; 
+    setTimeout(() => {
+        mds.scrollTop = mds.scrollHeight; 
+    }, 100);
+}
+
 async function sendMessage(isModal) { const i = document.getElementById(isModal ? 'chatModalInput' : 'chatInput'); const m = i.value.trim(); if (m !== "") { if(isMaster) stopFakeChatGenerator(); let a = '익명', aid = 'guest'; if (currentUser) { a = currentUser.nickname; aid = currentUser.id; } else { a = await getAnonName(); aid = 'guest'; } let cd = { author: a, authorId: aid, message: m, timestamp: firebase.database.ServerValue.TIMESTAMP }; if(currentReply) cd.replyTo = currentReply; chatRef.push(cd); i.value = ""; cancelReply(); } }
 function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(false); }
 function handleModalKeyPress(e) { if (e.key === 'Enter') sendMessage(true); }
 
-const fakeNicknames = ['알바고수', '평택일번지', '주차왕', '궁금해요', '현직러', '친절맨', '도우미', '서울촌놈', '반장님', '기능공'];
+// 닉네임 리스트 업데이트
+const fakeNicknames = ['돈돈쓰', '배봉주', '크롱', '버티자', '춘봉', '빼꼬미', '여보세요', '성지윤', '반평택', '카우보이', '응망마틴', '고덕', '유단자', '질린다', '마린', '토마토', '포비돈', 'zoeh', '네로', '배관', '순풍', '웃자', '칸마귀', '길구', '보리', '인생은', '캐디', '르네', '겨울', '바닐라'];
 const rawScript = `평택7번게이트 근처 무료주차장있나요?
 죄송요 저는 낼 내려가는 일인입니다. 고수분들이 답해주실거에요
 무료 주차장은 없습니다
