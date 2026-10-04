@@ -153,6 +153,16 @@
         .chat-modal-content .chat-input { font-size: 16px; padding: 15px; }
         .chat-modal-content .btn-send { font-size: 16px; padding: 15px 30px; }
 
+        /* 이미지 확대용 전체화면 모달 */
+        .image-viewer-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 3000; justify-content: center; align-items: center;
+            cursor: zoom-out;
+        }
+        .image-viewer-overlay img {
+            max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px;
+        }
+
         .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 20px; }
         .admin-table { width: 100%; border-collapse: collapse; min-width: 600px; background: #fff; }
         .admin-table th, .admin-table td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 14px; white-space: nowrap; }
@@ -363,6 +373,7 @@
         현재 가입된 회원 수: <span id="userCount">1</span>명 | 총 방문자 수: <span id="visitorCount">0</span>명
     </div>
 
+    <!-- 게시글 모달 -->
     <div id="postModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('postModal')">&times;</button>
@@ -374,6 +385,7 @@
         </div>
     </div>
 
+    <!-- 소셜 로그인 모달 -->
     <div id="socialModal" class="modal-overlay">
         <div class="modal-content nickname-modal-content">
             <button class="modal-close" onclick="closeModal('socialModal')">&times;</button>
@@ -394,6 +406,7 @@
         </div>
     </div>
 
+    <!-- 채팅 모달 -->
     <div id="chatModal" class="modal-overlay">
         <div class="modal-content chat-modal-content">
             <button class="modal-close" onclick="closeModal('chatModal')">&times;</button>
@@ -404,6 +417,11 @@
                 <button class="btn-send" onclick="sendMessage(true)">전송</button>
             </div>
         </div>
+    </div>
+
+    <!-- 이미지 원본 확대 모달 -->
+    <div id="imageViewer" class="image-viewer-overlay" onclick="closeImageViewer()">
+        <img id="imageViewerContent" src="" alt="원본 이미지">
     </div>
 
     <!-- Firebase SDK -->
@@ -433,7 +451,7 @@
         let tempSocialProvider = '';
         let recommendedJobs = {};
         let editingFiles = [];
-        let tempSelectedFiles = []; // 여러 번 나누어 파일 선택할 때 누적될 임시 배열
+        let tempSelectedFiles = [];
         
         const savedUser = sessionStorage.getItem('currentUser');
         if(savedUser) currentUser = JSON.parse(savedUser);
@@ -566,7 +584,7 @@
             const type = typeMap[pageId];
             const area = document.getElementById(areaId);
 
-            tempSelectedFiles = []; // 게시판 들어갈 때 파일 임시 바구니 초기화
+            tempSelectedFiles = [];
 
             if(!currentUser) {
                 area.innerHTML = `<div class="login-required-box"><p>🔒 게시글 작성은 로그인 후 이용 가능합니다.</p><button class="btn-auth" style="width: auto; padding: 10px 20px;" onclick="showPage('login', document.querySelector('.auth-menu a'))">로그인 하러가기</button></div>`;
@@ -614,7 +632,6 @@
             }
         }
 
-        // 파일 누적 선택 함수
         function handleFileSelect(type, input) {
             const newFiles = input.files;
             
@@ -629,7 +646,6 @@
                 }
                 
                 if(isImage || isVideo) {
-                    // 이미지, 동영상은 무료 서버 용량 제한으로 최대 1MB
                     if(newFiles[i].size > 1024 * 1024) {
                         alert(`${newFiles[i].name}은(는) 1MB를 초과하여 첨부할 수 없습니다.`);
                         continue;
@@ -644,21 +660,18 @@
                 tempSelectedFiles = tempSelectedFiles.slice(0, 10);
             }
 
-            // 화면에 누적된 파일 목록 표시
             if(tempSelectedFiles.length > 0) {
                 document.getElementById(`${type}FileName`).innerText = `선택됨 (${tempSelectedFiles.length}개): ${tempSelectedFiles.map(f => f.name).join(', ')}`;
             } else {
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
             }
             
-            input.value = ''; // 같은 파일 다시 선택할 수 있도록 초기화
+            input.value = '';
         }
 
-        // 이미지 압축 함수
         function compressImage(file) {
             return new Promise((resolve) => {
                 if(!file.type.startsWith('image/')) {
-                    // 이미지가 아니면 그냥 원본 반환 (문서 파일 등)
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         resolve({ name: file.name, type: file.type, data: e.target.result });
@@ -895,7 +908,6 @@
             if(!contentInput || contentInput.value.trim() === "") { alert('[경고] 내용을 입력해주세요.'); return; }
             if(type !== 'free' && type !== 'ref' && (!regionInput || !regionInput.value)) { alert('[경고] 근무 지역을 선택해주세요.'); return; }
 
-            // 입력 필드 값 미리 캡처 (비동기 처리 중 초기화 방지)
             const titleValue = titleInput.value;
             const contentValue = contentInput.value;
             const regionValue = regionInput ? regionInput.value : '지역 없음';
@@ -909,7 +921,6 @@
                 };
                 newPostRef.set(newPost).then(() => {
                     alert('글이 성공적으로 작성되었습니다!');
-                    // 저장 성공 후에만 입력 필드 초기화
                     titleInput.value = ""; 
                     contentInput.value = "";
                     if(regionInput) regionInput.value = "";
@@ -958,15 +969,25 @@
             }
         }
 
-        // 이미지 클릭 시 원본 보기 (window.open)
+        // 이미지 확대 모달 열기/닫기
+        function openImageViewer(src) {
+            document.getElementById('imageViewerContent').src = src;
+            document.getElementById('imageViewer').style.display = 'flex';
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewer').style.display = 'none';
+            document.getElementById('imageViewerContent').src = '';
+        }
+
         function getFilesHTML(files) {
             if(!files || files.length === 0) return '';
             let html = '<div class="file-attachment-box">';
             files.forEach(f => {
                 if(f.type.startsWith('image/')) {
-                    html += `<img src="${f.data}" alt="${escapeHtml(f.name)}" onclick="window.open(this.src, '_blank')">`;
+                    html += `<img src="${f.data}" alt="${escapeHtml(f.name)}" onclick="openImageViewer(this.src)" style="cursor: zoom-in; max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">`;
                 } else if(f.type.startsWith('video/')) {
-                    html += `<video src="${f.data}" controls>지원되지 않는 동영상 형식입니다.</video>`;
+                    html += `<video src="${f.data}" controls style="max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">지원되지 않는 동영상 형식입니다.</video>`;
                 } else {
                     html += `<a href="${f.data}" download="${escapeHtml(f.name)}" class="file-download-btn">📎 ${escapeHtml(f.name)} 다운로드</a>`;
                 }
@@ -1210,7 +1231,12 @@
         }
 
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-        window.onclick = function(event) { if (event.target.id === 'postModal') closeModal('postModal'); if (event.target.id === 'socialModal') closeModal('socialModal'); if (event.target.id === 'chatModal') closeModal('chatModal'); }
+        window.onclick = function(event) {
+            if (event.target.id === 'postModal') closeModal('postModal');
+            if (event.target.id === 'socialModal') closeModal('socialModal');
+            if (event.target.id === 'chatModal') closeModal('chatModal');
+            if (event.target.id === 'imageViewer') closeImageViewer();
+        }
 
         function addRecJob() {
             const title = document.getElementById('recJobTitle').value.trim();
