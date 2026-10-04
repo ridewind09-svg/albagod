@@ -17,6 +17,38 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
 .auth-menu .logout-btn { background: #d32f2f; }
 .auth-menu .logout-btn:hover { background: #b71c1c; }
 
+/* 토글 아이콘 (모바일/기본 크기) */
+.toggle-icon {
+    font-size: 10px; 
+    color: #888; 
+    transition: transform 0.3s ease; 
+    display: inline-block; 
+    margin-left: 5px; 
+    vertical-align: middle;
+}
+/* 토글 아이콘 (PC에서만 작고 멀리) */
+@media (min-width: 769px) {
+    .toggle-icon {
+        font-size: 7px !important;
+        margin-left: 10px !important;
+    }
+}
+
+/* 하위 메뉴 스타일 */
+.nav-submenu { list-style: none; }
+.nav-sub-link { 
+    font-size: 14px; 
+    color: #b0b0c0; 
+    display: block; 
+    cursor: pointer; 
+    padding: 8px 10px; 
+    border-radius: 5px; 
+    transition: background 0.2s; 
+}
+.nav-sub-link:hover { background: #2a2a40; color: #fff; }
+.nav-sub-link.active { color: #fff; background: #2a2a40; font-weight: 800; }
+.nav-sub-link .sub-icon { color: #555; margin-right: 5px; font-weight: normal; }
+
 .main-content { flex: 1; padding: 30px; display: flex; flex-direction: column; gap: 40px; min-width: 0; background-color: #f0f2f5; }
 .page-section { display: none; flex-direction: column; gap: 40px; }
 .page-section.active { display: flex; animation: fadeIn 0.5s ease; }
@@ -80,6 +112,30 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
 .bulk-action-bar.active { display: flex; }
 .bulk-action-bar select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; flex: 1; min-width: 150px; max-width: 250px; }
 .bulk-action-bar label { font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+/* 모던한 필터 버튼 디자인 */
+.filter-btn { 
+    padding: 6px 15px; 
+    border: none; 
+    background: #ffffff; 
+    border-radius: 20px; 
+    cursor: pointer; 
+    font-size: 13px; 
+    font-weight: 700; 
+    color: #666; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    transition: all 0.25s ease; 
+} 
+.filter-btn:hover { 
+    background: #f0f0f0; 
+    transform: translateY(-1px); 
+} 
+.filter-btn.active { 
+    background: #1e1e2f; 
+    color: #fff; 
+    box-shadow: 0 4px 8px rgba(30, 30, 47, 0.3); 
+    transform: translateY(-1px); 
+}
 
 .job-posting-section { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 25px; }
 .search-area { margin-bottom: 25px; display: flex; gap: 15px; }
@@ -201,132 +257,7 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     .modal-title { font-size: 18px; }
     .modal-meta { font-size: 12px; gap: 10px; }
     
-    /* 모바일 채팅 모달: 틀 크기를 화면 절반(55vh)으로 확 줄여서 뒷배경 확실히 보이게 함 */
-    .chat-modal-content { 
-        width: 88% !important; 
-        height: 80vh !important; /* 70vh에서 80vh로 10% 확장 */
-        max-height: 80vh !important;
-        padding: 5px !important; 
-        border-radius: 12px !important; 
-        overflow: hidden !important;
-    } 
-    
-    /* 닫기 버튼 */
-    .chat-modal-content .modal-close { top: 2px; right: 5px; font-size: 18px; }
-    
-    /* 제목 공간 극한 축소 (이전에 HTML에서 style="margin-bottom:20px;" 지우신 거 확인 필수) */
-    .chat-modal-content h2 { 
-        font-size: 12px !important; 
-        margin: 2px 0 5px 0 !important; 
-        text-align: center;
-    }
-    
-    /* 채팅 스크린 영역 여백 제거하여 길게 씀 */
-    .chat-modal-content .chat-screen { 
-        padding: 8px !important;
-        margin-bottom: 0 !important;
-        flex: 1 !important;
-        min-height: 0 !important;
-    }
-    
-    /* 입력칸 간격 완전 축소 */
-    .chat-modal-content .chat-input-area { 
-        gap: 5px !important;
-        margin-top: 5px !important;
-        margin-bottom: 3px !important;
-    }
-    .chat-modal-content .chat-input { 
-        padding: 6px 8px !important; 
-        font-size: 14px !important;
-    }
-    .chat-modal-content .btn-send { 
-        padding: 6px 10px !important; 
-        font-size: 14px !important;
-    }
-    
-    .mypage-header { flex-direction: column; text-align: center; gap: 15px; }
-    .mypage-info { max-width: 100%; }
-    .footer-counter { font-size: 10px; padding: 8px 15px; }
-
-/* 토글 아이콘 스타일 */
-.toggle-icon {
-    font-size: 8px;
-    color: #888;
-    transition: transform 0.3s ease;
-    display: inline-block;
-    margin-left: 10px;
-    vertical-align: middle;
-}
-
-/* 하위 메뉴 아이콘 (└) 흐린 색 처리 */
-.nav-sub-link .sub-icon {
-    color: #555;
-    margin-right: 5px;
-    font-weight: normal;
-}
-
-.nav-sub-link {
-    font-size: 14px; 
-    color: #b0b0c0; 
-    display: block; 
-    cursor: pointer; 
-    padding: 8px 10px;
-    border-radius: 5px;
-    transition: background 0.2s;
-}
-.nav-sub-link:hover {
-    background: #2a2a40;
-    color: #fff;
-}
-.nav-sub-link.active {
-    color: #fff;
-    background: #2a2a40;
-    font-weight: 800;
-}
-
-/* 모던한 필터 버튼 디자인 (알약 형태) */
-.filter-btn {
-    padding: 6px 15px;
-    border: none;
-    background: #ffffff;
-    border-radius: 20px; /* 둥근 알약 형태 */
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 700;
-    color: #666;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: all 0.25s ease;
-}
-.filter-btn:hover {
-    background: #f0f0f0;
-    transform: translateY(-1px);
-}
-.filter-btn.active {
-    background: #1e1e2f;
-    color: #fff;
-    box-shadow: 0 4px 8px rgba(30, 30, 47, 0.3);
-    transform: translateY(-1px);
-}
-/* === 강제 적용 스타일 === */
-
-/* 1. 기본 (모바일 원래 좋았던 크기 유지) */
-.toggle-icon {
-    font-size: 10px !important;
-    margin-left: 5px !important;
-    vertical-align: middle !important;
-    display: inline-block !important;
-}
-
-/* 2. PC 전용 (화면 너비가 769px 이상일 때만 작게 & 멀리 적용) */
-@media (min-width: 769px) {
-    .toggle-icon {
-        font-size: 7px !important;
-        margin-left: 10px !important;
-    }
-}
-
-/* 3. 모바일 채팅창 상하 10% 확장 유지 */
-@media (max-width: 768px) {
+    /* 모바일 채팅 모달: 상하 80vh 확장 */
     .chat-modal-content { 
         width: 88% !important; 
         height: 80vh !important; 
@@ -335,4 +266,15 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
         border-radius: 12px !important; 
         overflow: hidden !important;
     } 
+    
+    .chat-modal-content .modal-close { top: 2px; right: 5px; font-size: 18px; }
+    .chat-modal-content h2 { font-size: 12px !important; margin: 2px 0 5px 0 !important; text-align: center; }
+    .chat-modal-content .chat-screen { padding: 8px !important; margin-bottom: 0 !important; flex: 1 !important; min-height: 0 !important; }
+    .chat-modal-content .chat-input-area { gap: 5px !important; margin-top: 5px !important; margin-bottom: 3px !important; }
+    .chat-modal-content .chat-input { padding: 6px 8px !important; font-size: 14px !important; }
+    .chat-modal-content .btn-send { padding: 6px 10px !important; font-size: 14px !important; }
+    
+    .mypage-header { flex-direction: column; text-align: center; gap: 15px; }
+    .mypage-info { max-width: 100%; }
+    .footer-counter { font-size: 10px; padding: 8px 15px; }
 }
