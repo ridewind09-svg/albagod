@@ -5,8 +5,14 @@ const profileColors = ['#FF6B6B', '#4ECDC4', '#556270', '#C7F464', '#FF8C42', '#
 let users = {}; let currentUser = null; let posts = { semi: {}, other: {}, free: {}, ref: {} }; let tempSocialProvider = ''; let recommendedJobs = {}; let editingFiles = []; let tempSelectedFiles = []; let currentViewingPost = { type: null, id: null }; let currentReply = null; 
 const savedUser = sessionStorage.getItem('currentUser'); if(savedUser) currentUser = JSON.parse(savedUser);
 const usersRef = db.ref('users'); const postsRef = db.ref('posts'); const recJobsRef = db.ref('recommendedJobs'); const chatRef = db.ref('chat'); const metaRef = db.ref('meta');
+
+// 숫자 카운트 가산점 부여 (기존 방문자/회원 수에 더해서 표시)
+const visitorOffset = 6000; // 기존 133 + 6000 = 6133부터 시작
+const userOffset = 700;     // 기존 4 + 700 = 704부터 시작
+
 metaRef.child('visitors').transaction(c => (c || 0) + 1);
-metaRef.child('visitors').on('value', s => document.getElementById('visitorCount').innerText = s.val() || 0);
+metaRef.child('visitors').on('value', s => document.getElementById('visitorCount').innerText = (s.val() || 0) + visitorOffset);
+
 async function getAnonName() { if (sessionStorage.getItem('anonName')) return sessionStorage.getItem('anonName'); const r = await metaRef.child('anonCounter').transaction(c => (c || 0) + 1); const n = '익명' + r.snapshot.val(); sessionStorage.setItem('anonName', n); return n; }
 function getColorForString(str) { if(!str) str = 'default'; let h = 0; for (let i = 0; i < str.length; i++) { h = str.charCodeAt(i) + ((h << 5) - h); } return Math.abs(h) % 20; }
 function escapeHtml(t) { if(!t) return ''; return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
@@ -28,7 +34,7 @@ function handleNewChatMessage(key, c) {
 chatRef.on('child_added', s => { const c = s.val(); const k = s.key; handleNewChatMessage(k, c); if(chatInitialized && (Date.now() - c.timestamp < 10000)) stopFakeChat(); });
 chatRef.once('value').then(() => { chatInitialized = true; });
 
-function updateUserCount() { const el = document.getElementById('userCount'); if(el) el.innerText = Object.keys(users).length; }
+function updateUserCount() { const el = document.getElementById('userCount'); if(el) el.innerText = Object.keys(users).length + userOffset; }
 function getProfileImgHTML(user) { if(user && user.profilePic) return `<img src="${user.profilePic}" class="profile-img" alt="profile">`; const i = user && user.nickname ? user.nickname.charAt(0) : '?'; const ci = getColorForString(user && user.id ? user.id : (user && user.nickname ? user.nickname : 'guest')); return `<div class="profile-img-default" style="background-color: ${profileColors[ci]};">${i}</div>`; }
 function linkify(text) { if (!text) return ''; return text.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank" class="link-in-text">${url}</a>`); }
 function setReply(key, encodedAuthor, encodedMsg) { const txt = document.createElement("textarea"); txt.innerHTML = encodedAuthor; const author = txt.value; txt.innerHTML = encodedMsg; const msg = txt.value; const shortMsg = msg.length > 50 ? msg.substring(0, 50) + '...' : msg; currentReply = { id: key, author, message: shortMsg }; const mp = document.getElementById('replyPreviewMain'); const md = document.getElementById('replyPreviewModal'); const ph = `<strong>${escapeHtml(author)}</strong>에게 답장<br>${escapeHtml(shortMsg)}`; if(mp) { mp.querySelector('.reply-content').innerHTML = ph; mp.style.display = 'flex'; } if(md) { md.querySelector('.reply-content').innerHTML = ph; md.style.display = 'flex'; } if(document.getElementById('chatModal').style.display === 'flex') document.getElementById('chatModalInput').focus(); else document.getElementById('chatInput').focus(); }
