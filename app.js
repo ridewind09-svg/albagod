@@ -7,7 +7,6 @@ let users = {}; let currentUser = null; let posts = { semi: {}, other: {}, free:
 
 const savedUser = sessionStorage.getItem('currentUser'); if(savedUser) currentUser = JSON.parse(savedUser);
 const usersRef = db.ref('users'); const postsRef = db.ref('posts'); const recJobsRef = db.ref('recommendedJobs'); const metaRef = db.ref('meta');
-const chatRef = db.ref('chat'); const chatMasterRef = db.ref('meta/chatMaster');
 
 // 숫자 카운트 가산점 부여 (기존 방문자/회원 수에 더해서 표시)
 const visitorOffset = 6000; // 6133부터 시작
