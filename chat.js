@@ -146,7 +146,7 @@ const rawScript = `가퐈 : 죄송요 저는 낼 내려가는 일인입니다. �
 냐옹:지금 힘들고 공사 막바지라 사람들 다 빠지고 공사 힘든 구간만 남아서 일하기 빡세고 힘든 구간만 남았어요
 제주도:P4로 가는데 7번게이트로 가면 금방일까요?
 커피7: 6시15분 이면 5번게이트까지 10분안 도착할까?
-갈매기:그래도 2번이 나으신텐데...걸어서 5번은 ..힘드실꺼예요
+갈매기:그래도 2번이 나으실텐데...걸어서 5번은 ..힘드실꺼예요
 냐옹:5번게이트요
 갈매기:달려가시면 가능하시겠죠?
 여보세:평택 지금 p5 공사하나요?
@@ -284,6 +284,7 @@ const rawScript = `가퐈 : 죄송요 저는 낼 내려가는 일인입니다. �
 const fakeChatLog = rawScript.split('\n').map(s => s.trim()).filter(s => s.length > 0);
 let fakeScriptIndex = 0; 
 let fakeChatInterval = null; 
+let fakeChatTimeout = null; // 랜덤 타이머용 변수 추가
 let inactivityTimeout = null; 
 let lastFakeAuthor = '익명';
 
@@ -295,15 +296,12 @@ function appendFakeMessage() {
     let author = lastFakeAuthor;
     let msg = line;
     
-    // 콜론이 있는 경우 닉네임과 메시지 분리
     if(colonIndex > -1) {
         author = line.substring(0, colonIndex).trim();
         msg = line.substring(colonIndex + 1).trim();
         lastFakeAuthor = author;
     }
-    // 콜론이 없는 경우 이전 닉네임을 그대로 유지 (lastFakeAuthor)
     
-    // 메시지가 비어있지 않을 때만 푸시
     if(msg.length > 0) {
         chatRef.push({ 
             author: author, 
@@ -316,16 +314,33 @@ function appendFakeMessage() {
     fakeScriptIndex++;
 }
 
+// 3~9초 랜덤 대기 시간 생성
+function getRandomDelay() {
+    return Math.floor(Math.random() * 7000) + 3000; // 3000ms ~ 9999ms (3~9.9초)
+}
+
+// 재귀 호출로 랜덤 간격 실행
+function scheduleNextFakeMessage() {
+    fakeChatTimeout = setTimeout(() => {
+        appendFakeMessage();
+        scheduleNextFakeMessage();
+    }, getRandomDelay());
+}
+
 function startFakeChatGenerator() { 
-    if(fakeChatInterval) return; 
-    appendFakeMessage(); 
-    fakeChatInterval = setInterval(appendFakeMessage, 12000); 
+    if(fakeChatInterval || fakeChatTimeout) return; 
+    appendFakeMessage(); // 시작할 때 즉시 1개 출력
+    scheduleNextFakeMessage(); // 랜덤 타이머 시작
 }
 
 function stopFakeChatGenerator() { 
     if(fakeChatInterval) { 
         clearInterval(fakeChatInterval); 
         fakeChatInterval = null; 
+    } 
+    if(fakeChatTimeout) { 
+        clearTimeout(fakeChatTimeout); 
+        fakeChatTimeout = null; 
     } 
     if(inactivityTimeout) clearTimeout(inactivityTimeout); 
     inactivityTimeout = setTimeout(() => startFakeChatGenerator(), 120000); 
