@@ -192,7 +192,7 @@ P4로 가는데 7번게이트로 가면 금방일까요?
 2게이트 좀더 일칙들어가시든데요 기공블들도요
 p4는마무리고요 p5들어가야죠
 일단 소주 몇잔 더 드시고 몇일 더 쉬시다 1일부터 P5고고 하세요
-지금 들어가심 젤 힘들때 들어가시는거궁P5도 시작할땐 림듭니다
+지금 들어가심 젤 힘들때 들어가시는거궁P5도 시작할때� 림듭니다
 저희 애인이 매봐 이구요 기능공입니다 이일 20년 했더라구요
 저도 이천 이나 청주sk있었근요
 용인으로 뜨고 싶다 후
@@ -311,10 +311,10 @@ me to
 const fakeScript = rawScript.split('\n').map(s => s.trim()).filter(s => s.length > 0);
 let fakeScriptIndex = 0; let fakeChatInterval = null; let inactivityTimeout = null; 
 
-// 채팅 흐름 제어 변수
-let questioner = null; // 질문자
-let responders = []; // 답변자 풀
-let currentResponderIndex = 0; // 답변자 순서
+// 1:1 대화 흐름 제어 변수
+let speakerA = null; // 질문자
+let speakerB = null; // 답변자
+let lastSpeaker = null; // 마지막으로 말한 사람
 
 function appendFakeMessage() {
     const mtp = Math.floor(Math.random() * 3) + 1; 
@@ -325,25 +325,23 @@ function appendFakeMessage() {
         let author;
 
         if(msg.includes('?')) {
-            // 물음표가 포함된 문장이면 새로운 질문자를 할당
-            questioner = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
-            author = questioner;
+            // 물음표가 있는 문장(질문)이면 새로운 대화 파트너를 설정
+            speakerA = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+            do {
+                speakerB = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+            } while (speakerB === speakerA);
             
-            // 질문자를 제외한 답변자 풀 생성 (2~3명)
-            const available = fakeNicknames.filter(n => n !== questioner);
-            available.sort(() => Math.random() - 0.5);
-            responders = available.slice(0, 2 + Math.floor(Math.random() * 2)); 
-            currentResponderIndex = 0;
+            // 질문은 무조건 A가 함
+            author = speakerA;
+            lastSpeaker = speakerA;
         } else {
-            // 물음표가 없는 답변 문장이면
-            if (responders.length === 0) {
-                // 초기 상태나 답변자가 없으면 아무나
-                author = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+            // 물음표가 없는 답변/리액션 문장은 A와 B가 번갈아 가며 말함
+            if (lastSpeaker === speakerA) {
+                author = speakerB;
             } else {
-                // 답변자들끼리 돌아가면서 말하게 함 (질문자는 절대 여기서 말하지 않음)
-                author = responders[currentResponderIndex % responders.length];
-                currentResponderIndex++;
+                author = speakerA;
             }
+            lastSpeaker = author;
         }
 
         // DB에 채팅 푸시 (마스터만 실행하므로 중복 없이 모두에게 동기화됨)
