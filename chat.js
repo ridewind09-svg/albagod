@@ -28,7 +28,33 @@ chatMasterRef.transaction((currentMaster) => {
     if (error) { console.error('Master transaction failed:', error); } 
     else if (committed && isMaster) {
         chatMasterRef.onDisconnect().remove();
-        startFakeChatGenerator();
+        // 핵심 수정: DB의 마지막 채팅을 확인하여 대본 인덱스를 이어서 시작
+        chatRef.limitToLast(1).once('value').then(snap => {
+            const lastChatData = snap.val();
+            if(lastChatData) {
+                const lastKey = Object.keys(lastChatData)[0];
+                const lastMsg = lastChatData[lastKey].message;
+                // DB에 있는 마지막 메시지가 대본의 몇 번째인지 찾음
+                const foundIndex = fakeChatLog.findIndex(line => {
+                    const colonIdx = line.indexOf(':');
+                    const msgPart = colonIdx > -1 ? line.substring(colonIdx + 1).trim() : line;
+                    return msgPart === lastMsg;
+                });
+                
+                if(foundIndex > -1) {
+                    // 찾았다면 그 다음 줄부터 이어서 시작
+                    fakeScriptIndex = foundIndex + 1;
+                    if(fakeScriptIndex >= fakeChatLog.length) fakeScriptIndex = 0;
+                } else {
+                    // 못 찾았거나 실제 유저가 친 채팅이 마지막이라면 랜덤한 지점부터 시작
+                    fakeScriptIndex = Math.floor(Math.random() * fakeChatLog.length);
+                }
+            } else {
+                // DB에 채팅이 아예 없는 첫 시작일 때만 0번부터 시작
+                fakeScriptIndex = 0;
+            }
+            startFakeChatGenerator();
+        });
     } else {
         setInterval(() => {
             chatMasterRef.once('value').then(snap => {
