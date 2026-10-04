@@ -3,8 +3,13 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const profileColors = ['#FF6B6B', '#4ECDC4', '#556270', '#C7F464', '#FF8C42', '#6A4C93', '#1982C4', '#8AC926', '#FF595E', '#FFCA3A', '#F72585', '#7209B7', '#3A0CA3', '#4361EE', '#4CC9F0', '#06D6A0', '#118AB2', '#073B4C', '#EF476F', '#06D6A0'];
 let users = {}; let currentUser = null; let posts = { semi: {}, other: {}, free: {}, ref: {} }; let tempSocialProvider = ''; let recommendedJobs = {}; let editingFiles = []; let tempSelectedFiles = []; let currentViewingPost = { type: null, id: null }; let currentReply = null; 
+
+// 고유 세션 ID 생성 (마스터 권한 획득용)
+const sessionId = Math.random().toString(36).substring(2);
+let isMaster = false;
+
 const savedUser = sessionStorage.getItem('currentUser'); if(savedUser) currentUser = JSON.parse(savedUser);
-const usersRef = db.ref('users'); const postsRef = db.ref('posts'); const recJobsRef = db.ref('recommendedJobs'); const chatRef = db.ref('chat'); const metaRef = db.ref('meta');
+const usersRef = db.ref('users'); const postsRef = db.ref('posts'); const recJobsRef = db.ref('recommendedJobs'); const chatRef = db.ref('chat'); const metaRef = db.ref('meta'); const chatMasterRef = db.ref('meta/chatMaster');
 
 // 숫자 카운트 가산점 부여 (기존 방문자/회원 수에 더해서 표시)
 const visitorOffset = 6000; // 기존 133 + 6000 = 6133부터 시작
@@ -21,8 +26,11 @@ postsRef.on('value', s => { posts = s.val() || { semi: {}, other: {}, free: {}, 
 recJobsRef.on('value', s => { recommendedJobs = s.val() || {}; renderAdminRecJobs(); renderHomeRecJobs(); });
 
 let chatInitialized = false; let unreadMainCount = 0; let unreadModalCount = 0;
+
+// 채팅 데이터 수신 시 화면 렌더링
 function handleNewChatMessage(key, c) {
-    let tempUser = users[c.authorId]; if(!tempUser) tempUser = { nickname: c.author, id: c.author };
+    let tempUser = users[c.authorId]; 
+    if(!tempUser) tempUser = { nickname: c.author, id: c.author };
     let replyQuoteHtml = '';
     if(c.replyTo) { replyQuoteHtml = `<div class="chat-reply-quote"><strong>${escapeHtml(c.replyTo.author)}:</strong><span class="reply-text">${escapeHtml(c.replyTo.message)}</span></div>`; }
     const dataAttrAuthor = escapeHtml(c.author).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -31,8 +39,47 @@ function handleNewChatMessage(key, c) {
     const mainScreen = document.getElementById('chatScreen'); const modalScreen = document.getElementById('chatModalScreen');
     [mainScreen, modalScreen].forEach(screen => { if(!screen) return; const isNearBottom = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 100; screen.insertAdjacentHTML('beforeend', html); if(!chatInitialized || isNearBottom) { screen.scrollTop = screen.scrollHeight; } else { if(screen.id === 'chatScreen') { unreadMainCount++; updateNewMessageAlert('newMsgAlertMain', unreadMainCount); } else { unreadModalCount++; updateNewMessageAlert('newMsgAlertModal', unreadModalCount); } } });
 }
-chatRef.on('child_added', s => { const c = s.val(); const k = s.key; handleNewChatMessage(k, c); if(chatInitialized && (Date.now() - c.timestamp < 10000)) stopFakeChat(); });
-chatRef.once('value').then(() => { chatInitialized = true; });
+
+// 마스터 권한 획득 시도 (가장 먼저 접속한 사람이 마스터가 됨)
+chatMasterRef.transaction((currentMaster) => {
+    if (!currentMaster) {
+        isMaster = true;
+        return sessionId;
+    }
+}, (error, committed) => {
+    if (error) { console.error('Master transaction failed:', error); } 
+    else if (committed && isMaster) {
+        // 마스터가 창을 닫을 경우 자동으로 권한 반납
+        chatMasterRef.onDisconnect().remove();
+        
+        // 마스터만 가짜 채팅 생성기 실행
+        startFakeChatGenerator();
+    } else {
+        // 이미 마스터가 존재함 (수신만 함)
+        // 마스터가 나갔는지 주기적으로 확인하여 비었으면 재시도
+        setInterval(() => {
+            chatMasterRef.once('value').then(snap => {
+                if (!snap.val()) {
+                    // 마스터가 비었으므로 페이지 새로고침하여 마스터 재선출 유도
+                    location.reload(); 
+                }
+            });
+        }, 15000); // 15초마다 확인
+    }
+});
+
+// DB에 새 채팅이 추가될 때 모두에게 수신됨
+chatRef.limitToLast(100).on('child_added', s => { 
+    const c = s.val(); 
+    const k = s.key; 
+    handleNewChatMessage(k, c); 
+    
+    // 마스터인 경우, 실제 사용자 채팅이 들어오면 가짜 채팅 멈춤
+    if(isMaster && c.authorId !== sessionId && (Date.now() - c.timestamp < 10000)) {
+        stopFakeChatGenerator();
+    }
+});
+chatRef.limitToLast(100).once('value').then(() => { chatInitialized = true; });
 
 function updateUserCount() { const el = document.getElementById('userCount'); if(el) el.innerText = Object.keys(users).length + userOffset; }
 function getProfileImgHTML(user) { if(user && user.profilePic) return `<img src="${user.profilePic}" class="profile-img" alt="profile">`; const i = user && user.nickname ? user.nickname.charAt(0) : '?'; const ci = getColorForString(user && user.id ? user.id : (user && user.nickname ? user.nickname : 'guest')); return `<div class="profile-img-default" style="background-color: ${profileColors[ci]};">${i}</div>`; }
@@ -96,7 +143,24 @@ function openChatModal() {
     document.getElementById('chatModal').style.display = 'flex'; 
 }
 
-async function sendMessage(isModal) { const i = document.getElementById(isModal ? 'chatModalInput' : 'chatInput'); const m = i.value.trim(); if (m !== "") { stopFakeChat(); let a = '익명', aid = 'guest'; if (currentUser) { a = currentUser.nickname; aid = currentUser.id; } else { a = await getAnonName(); aid = 'guest'; } let cd = { author: a, authorId: aid, message: m, timestamp: Date.now() }; if(currentReply) cd.replyTo = currentReply; chatRef.push(cd); i.value = ""; cancelReply(); } }
+async function sendMessage(isModal) { 
+    const i = document.getElementById(isModal ? 'chatModalInput' : 'chatInput'); 
+    const m = i.value.trim(); 
+    if (m !== "") { 
+        // 마스터인 경우 실제 채팅을 쳤으므로 가짜 채팅 멈춤
+        if(isMaster) stopFakeChatGenerator();
+        
+        let a = '익명', aid = 'guest'; 
+        if (currentUser) { a = currentUser.nickname; aid = currentUser.id; } 
+        else { a = await getAnonName(); aid = 'guest'; } 
+        let cd = { author: a, authorId: aid, message: m, timestamp: firebase.database.ServerValue.TIMESTAMP }; 
+        if(currentReply) cd.replyTo = currentReply; 
+        
+        chatRef.push(cd); 
+        i.value = ""; 
+        cancelReply(); 
+    } 
+}
 function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(false); }
 function handleModalKeyPress(e) { if (e.key === 'Enter') sendMessage(true); }
 
@@ -285,6 +349,7 @@ function getRandomResponder(excludeName) {
     return available[Math.floor(Math.random() * available.length)];
 }
 
+// 마스터만 실행하는 가짜 채팅 DB 푸시 로직
 function appendFakeMessage() {
     const mtp = Math.floor(Math.random() * 3) + 1; 
     for(let i=0; i<mtp; i++) {
@@ -304,19 +369,33 @@ function appendFakeMessage() {
             }
         }
 
-        const fakeKey = 'fake_' + Date.now() + '_' + i;
-        const tempUser = { nickname: author, id: 'fake_' + author };
-        const dataAttrAuthor = escapeHtml(author).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-        const dataAttrMsg = escapeHtml(msg).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-        const html = `<div class="chat-message" onclick="setReply('${fakeKey}', '${dataAttrAuthor}', '${dataAttrMsg}')">${getProfileImgHTML(tempUser)}<div class="chat-content-wrapper"><div><span class="user">${escapeHtml(author)}:</span> <span class="chat-text">${linkify(escapeHtml(msg))}</span></div></div></div>`;
-        const ms = document.getElementById('chatScreen'); const mds = document.getElementById('chatModalScreen');
-        [ms, mds].forEach(screen => { if(!screen) return; const isNearBottom = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 100; screen.insertAdjacentHTML('beforeend', html); if(isNearBottom) { screen.scrollTop = screen.scrollHeight; } else { if(screen.id === 'chatScreen') { unreadMainCount++; updateNewMessageAlert('newMsgAlertMain', unreadMainCount); } else { unreadModalCount++; updateNewMessageAlert('newMsgAlertModal', unreadModalCount); } } });
+        // DB에 가짜 채팅 푸시 (마스터만 실행하므로 중복 없이 모두에게 동기화됨)
+        chatRef.push({
+            author: author,
+            authorId: sessionId, // 마스터 본인 ID로 설정
+            message: msg,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        
         fakeScriptIndex++;
     }
 }
-function startFakeChat() { if(fakeChatInterval) return; appendFakeMessage(); fakeChatInterval = setInterval(appendFakeMessage, 12000); }
-function stopFakeChat() { if(fakeChatInterval) { clearInterval(fakeChatInterval); fakeChatInterval = null; } if(inactivityTimeout) clearTimeout(inactivityTimeout); inactivityTimeout = setTimeout(() => startFakeChat(), 120000); } 
-startFakeChat();
+
+function startFakeChatGenerator() { 
+    if(fakeChatInterval) return; 
+    appendFakeMessage(); 
+    fakeChatInterval = setInterval(appendFakeMessage, 12000); 
+}
+
+function stopFakeChatGenerator() { 
+    if(fakeChatInterval) { 
+        clearInterval(fakeChatInterval); 
+        fakeChatInterval = null; 
+    } 
+    if(inactivityTimeout) clearTimeout(inactivityTimeout); 
+    // 2분(120000ms) 뒤 마스터 기준 가짜 채팅 재개
+    inactivityTimeout = setTimeout(() => startFakeChatGenerator(), 120000); 
+} 
 
 // 모바일에서 첫 접속 시 채팅 크게 보기 자동 실행
 window.addEventListener('load', () => {
