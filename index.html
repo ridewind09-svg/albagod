@@ -153,11 +153,14 @@
         .chat-modal-content .chat-input { font-size: 16px; padding: 15px; }
         .chat-modal-content .btn-send { font-size: 16px; padding: 15px 30px; }
 
+        /* 관리자 게시글 관리 테이블 스타일 */
         .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 20px; }
         .admin-table { width: 100%; border-collapse: collapse; min-width: 600px; background: #fff; }
         .admin-table th, .admin-table td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 14px; white-space: nowrap; }
         .admin-table th { background-color: #1e1e2f; color: #fff; font-weight: 800; }
         .admin-table tbody tr:hover { background-color: #f0f2f5; }
+        .bulk-action-bar { margin-top: 20px; display: flex; gap: 15px; align-items: center; padding: 15px; background: #f0f2f5; border-radius: 8px; }
+        .bulk-action-bar select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
 
         .footer-counter { max-width: 1280px; margin: 0 auto; width: 100%; text-align: right; padding: 10px 20px; font-size: 11px; color: #999; box-sizing: border-box; background: #e8eaed; }
 
@@ -176,6 +179,7 @@
             .main-content { padding: 15px; }
             .search-area { flex-direction: column; }
             .job-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+            .bulk-action-bar { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -300,6 +304,7 @@
                 <div class="board-container" id="mypageContent"></div>
             </section>
 
+            <!-- 관리자 페이지 -->
             <section id="admin" class="page-section">
                 <div class="board-container">
                     <h2 style="margin-bottom:20px;">오늘의 추천 알바 관리</h2>
@@ -310,6 +315,7 @@
                     </div>
                     <div class="job-list" id="adminRecJobList"></div>
                 </div>
+
                 <div class="board-container">
                     <h2 style="margin-bottom:20px;">전체 회원 목록 및 정보</h2>
                     <div class="table-wrapper">
@@ -317,6 +323,37 @@
                             <thead><tr><th>아이디</th><th>닉네임</th><th>이름</th><th>연락처</th><th>가입 방식</th><th>회원 관리</th></tr></thead>
                             <tbody id="adminUserList"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- 전체 게시글 관리 영역 (체크박스 일괄 처리 추가) -->
+                <div class="board-container">
+                    <h2 style="margin-bottom:20px;">전체 게시글 관리 (일괄 삭제/이동)</h2>
+                    <div class="table-wrapper">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;"><input type="checkbox" id="selectAllPosts" onchange="toggleAllPosts(this)"></th>
+                                    <th>게시판</th>
+                                    <th>제목</th>
+                                    <th>작성자</th>
+                                    <th>작성일</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminPostList"></tbody>
+                        </table>
+                    </div>
+                    <div class="bulk-action-bar">
+                        <span style="font-weight:700;">선택한 게시글을</span>
+                        <button class="btn-action btn-delete" onclick="bulkDeletePosts()">일괄 삭제</button>
+                        <select id="bulkMoveSelect" style="flex:1; max-width:200px;">
+                            <option value="">이동할 게시판 선택...</option>
+                            <option value="semi">반도체현장</option>
+                            <option value="other">기타알바</option>
+                            <option value="ref">자료실</option>
+                            <option value="free">자유게시판</option>
+                        </select>
+                        <button class="btn-action btn-move" onclick="bulkMovePosts()">일괄 이동</button>
                     </div>
                 </div>
             </section>
@@ -363,7 +400,6 @@
         현재 가입된 회원 수: <span id="userCount">1</span>명 | 총 방문자 수: <span id="visitorCount">0</span>명
     </div>
 
-    <!-- 게시글 모달 -->
     <div id="postModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('postModal')">&times;</button>
@@ -375,7 +411,6 @@
         </div>
     </div>
 
-    <!-- 소셜 로그인 모달 -->
     <div id="socialModal" class="modal-overlay">
         <div class="modal-content nickname-modal-content">
             <button class="modal-close" onclick="closeModal('socialModal')">&times;</button>
@@ -396,7 +431,6 @@
         </div>
     </div>
 
-    <!-- 채팅 모달 -->
     <div id="chatModal" class="modal-overlay">
         <div class="modal-content chat-modal-content">
             <button class="modal-close" onclick="closeModal('chatModal')">&times;</button>
@@ -493,6 +527,7 @@
             posts = snapshot.val() || { semi: {}, other: {}, free: {}, ref: {} };
             renderPosts();
             if(document.getElementById('home').classList.contains('active')) searchJobs();
+            if(document.getElementById('admin').classList.contains('active')) loadAdminPosts();
         });
 
         recJobsRef.on('value', (snapshot) => {
@@ -546,7 +581,7 @@
             }
             document.getElementById(pageId).classList.add('active');
             if(pageId === 'mypage') loadMypage();
-            if(pageId === 'admin') { loadAdminPage(); renderAdminRecJobs(); }
+            if(pageId === 'admin') { loadAdminPage(); loadAdminPosts(); renderAdminRecJobs(); }
             if(['semiconductor', 'otherjobs', 'freeboard', 'reference'].includes(pageId)) checkWriteAuth(pageId);
         }
 
@@ -875,6 +910,83 @@
             `).join('');
         }
 
+        // 관리자: 전체 게시글 목록 로드 (체크박스 포함)
+        function loadAdminPosts() {
+            const tbody = document.getElementById('adminPostList');
+            if(!currentUser || currentUser.id !== 'admin') return;
+            
+            let html = '';
+            ['semi', 'other', 'ref', 'free'].forEach(type => {
+                const boardName = { semi: '반도체현장', other: '기타알바', ref: '자료실', free: '자유게시판' }[type];
+                const typePosts = posts[type] || {};
+                
+                Object.keys(typePosts).forEach(key => {
+                    const p = typePosts[key];
+                    html += `
+                        <tr>
+                            <td><input type="checkbox" class="post-checkbox" value="${type}_${key}"></td>
+                            <td>${boardName}</td>
+                            <td onclick="viewPost('${type}', '${key}')" style="cursor:pointer; color:#1565c0;">${escapeHtml(p.title)}</td>
+                            <td>${escapeHtml(p.author)}</td>
+                            <td>${p.date}</td>
+                        </tr>
+                    `;
+                });
+            });
+            tbody.innerHTML = html || `<tr><td colspan="5" style="text-align:center;">등록된 글이 없습니다.</td></tr>`;
+        }
+
+        // 관리자: 전체 선택/해제
+        function toggleAllPosts(checkAll) {
+            document.querySelectorAll('.post-checkbox').forEach(cb => {
+                cb.checked = checkAll.checked;
+            });
+        }
+
+        // 관리자: 선택된 게시글 일괄 삭제
+        function bulkDeletePosts() {
+            const checked = document.querySelectorAll('.post-checkbox:checked');
+            if(checked.length === 0) { alert('삭제할 게시글을 선택해주세요.'); return; }
+            
+            if(confirm(`선택한 ${checked.length}개의 게시글을 정말 삭제하시겠습니까?`)) {
+                let promises = [];
+                checked.forEach(cb => {
+                    const [type, key] = cb.value.split('_');
+                    promises.push(postsRef.child(type).child(key).remove());
+                });
+                Promise.all(promises).then(() => {
+                    alert('선택한 게시글이 모두 삭제되었습니다.');
+                    document.getElementById('selectAllPosts').checked = false;
+                }).catch(err => alert('삭제 중 오류가 발생했습니다.'));
+            }
+        }
+
+        // 관리자: 선택된 게시글 일괄 이동
+        function bulkMovePosts() {
+            const checked = document.querySelectorAll('.post-checkbox:checked');
+            const newType = document.getElementById('bulkMoveSelect').value;
+            
+            if(checked.length === 0) { alert('이동할 게시글을 선택해주세요.'); return; }
+            if(!newType) { alert('이동할 게시판을 선택해주세요.'); return; }
+            
+            if(confirm(`선택한 ${checked.length}개의 게시글을 '${newType}' 게시판으로 이동하시겠습니까?`)) {
+                let promises = [];
+                checked.forEach(cb => {
+                    const [type, key] = cb.value.split('_');
+                    if(type !== newType) {
+                        const postData = posts[type][key];
+                        promises.push(postsRef.child(newType).push(postData));
+                        promises.push(postsRef.child(type).child(key).remove());
+                    }
+                });
+                Promise.all(promises).then(() => {
+                    alert('선택한 게시글이 모두 이동되었습니다.');
+                    document.getElementById('bulkMoveSelect').value = '';
+                    document.getElementById('selectAllPosts').checked = false;
+                }).catch(err => alert('이동 중 오류가 발생했습니다.'));
+            }
+        }
+
         function deleteUser(userId) {
             if(confirm(`${userId} 님을 정말 삭제하시겠습니까?`)) {
                 usersRef.child(userId).remove();
@@ -954,7 +1066,6 @@
             }
         }
 
-        // 이미지를 안전한 가상 URL(Blob URL)로 변환하여 새 창으로 열기 (백지 방지 + 원본 크기 유지)
         function openImageViewer(base64Src) {
             try {
                 const parts = base64Src.split(',');
@@ -976,7 +1087,7 @@
                 }
             } catch (e) {
                 console.error("이미지 열기 실패", e);
-                window.open(base64Src, '_blank'); // 예외 시 기존 방식 시도
+                window.open(base64Src, '_blank');
             }
         }
 
