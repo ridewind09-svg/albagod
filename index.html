@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>알바의 신</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Square:wght@400;700;800&display=swap" rel="stylesheet">
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nanum Square', sans-serif; }
         html { background-color: #e8eaed; overflow-x: hidden; } 
@@ -14,16 +12,13 @@
 
         .app-wrapper { display: flex; min-height: 100vh; max-width: 1280px; margin: 0 auto; background-color: #f0f2f5; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
         .sidebar { width: 250px; background-color: #1e1e2f; color: #fff; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; }
-        
         .logo-container { text-align: center; margin-bottom: 30px; margin-top: 10px; padding-top: 15px; cursor: pointer; }
         .logo-img { width: 80%; max-width: 180px; height: auto; object-fit: contain; }
-
         .nav-menu { list-style: none; margin-top: 20px; }
         .nav-menu li { margin-bottom: 10px; }
         .nav-menu a { color: #b0b0c0; text-decoration: none; font-size: 16px; cursor: pointer; transition: all 0.3s; display: block; padding: 12px 15px; border-radius: 8px; font-weight: 700; }
         .nav-menu a:hover, .nav-menu a.active { color: #fff; background-color: #2a2a40; }
         .nav-menu .admin-link a { color: #ffcc00; }
-
         .auth-menu { margin-top: auto; border-top: 1px solid #3a3a50; padding-top: 20px; display: flex; gap: 10px; }
         .auth-menu a { flex: 1; text-align: center; font-size: 14px; padding: 10px; border-radius: 5px; background: #3a3a50; color: #fff; cursor: pointer; font-weight: 700; text-decoration: none; }
         .auth-menu a:hover { background: #4a4a60; }
@@ -37,10 +32,8 @@
 
         .home-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: stretch; }
         .home-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; height: 360px; overflow: hidden; }
-        
         .section-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; border-left: 4px solid #1e1e2f; padding-left: 12px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .section-title .title-btn { font-size: 12px; background: #1e1e2f; color: #fff; padding: 5px 10px; border-radius: 20px; cursor: pointer; font-weight: 700; border: none; }
-        .section-title .title-btn:hover { background: #2a2a40; }
         .clickable-title { cursor: pointer; transition: color 0.2s; }
         .clickable-title:hover { color: #1565c0; }
 
@@ -50,118 +43,39 @@
         .job-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #1e1e2f; }
         .job-info { font-size: 13px; color: #666; line-height: 1.4; }
 
-        .chat-box { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+        .chat-box { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
         .chat-screen { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; background: #f8f9fa; }
         
-        /* 채팅 메시지 부분 수정 */
-        .chat-message { 
-            margin-bottom: 12px; 
-            font-size: 14px; 
-            display: flex; 
-            align-items: flex-start; 
-            gap: 6px; 
-            word-break: break-all; 
-            padding: 5px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-left: -5px;
-        }
-        .chat-message:hover { 
-            background-color: rgba(0,0,0,0.05); 
-        }
-        .chat-message .user { 
-            font-weight: 700; 
-            color: #1e1e2f; 
-            white-space: nowrap; 
-            flex-shrink: 0; 
-        }
+        .chat-message { margin-bottom: 12px; font-size: 14px; display: flex; align-items: flex-start; gap: 6px; word-break: break-all; padding: 5px; border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-left: -5px; }
+        .chat-message:hover { background-color: rgba(0,0,0,0.05); }
+        .chat-message .user { font-weight: 700; color: #1e1e2f; white-space: nowrap; flex-shrink: 0; }
         .chat-text a, .link-in-text { color: #1565c0; text-decoration: underline; font-weight: 700; word-break: break-all; }
         
-        /* 답장 인용구 스타일 */
-        .chat-reply-quote {
-            display: flex;
-            gap: 5px;
-            background: #e9ecef;
-            padding: 5px 10px;
-            border-radius: 5px;
-            margin-bottom: 4px;
-            border-left: 3px solid #888;
-            font-size: 12px;
-            color: #555;
-            max-width: 100%;
-            overflow: hidden;
-        }
+        .chat-reply-quote { display: flex; gap: 5px; background: #e9ecef; padding: 5px 10px; border-radius: 5px; margin-bottom: 4px; border-left: 3px solid #888; font-size: 12px; color: #555; max-width: 100%; overflow: hidden; }
         .chat-reply-quote strong { color: #333; margin-right: 5px; }
-        .chat-reply-quote .reply-text {
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            flex: 1;
-        }
+        .chat-reply-quote .reply-text { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; flex: 1; }
 
-        /* 답장 입력 미리보기 */
-        .reply-preview-area {
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: #f0f2f5;
-            border-bottom: 1px solid #ddd;
-            border-radius: 8px 8px 0 0;
-            margin-bottom: 5px;
-        }
-        .reply-preview-area .reply-content {
-            border-left: 3px solid #1e1e2f;
-            padding-left: 10px;
-            font-size: 12px;
-            color: #555;
-            overflow: hidden;
-            flex: 1;
-        }
+        .reply-preview-area { display: none; align-items: center; justify-content: space-between; padding: 8px 12px; background: #f0f2f5; border-bottom: 1px solid #ddd; border-radius: 8px 8px 0 0; margin-bottom: 5px; }
+        .reply-preview-area .reply-content { border-left: 3px solid #1e1e2f; padding-left: 10px; font-size: 12px; color: #555; overflow: hidden; flex: 1; }
         .reply-preview-area .reply-content strong { color: #1e1e2f; }
-        .reply-preview-area .reply-cancel {
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: #888;
-            padding: 0 5px;
-            flex-shrink: 0;
-        }
+        .reply-preview-area .reply-cancel { background: none; border: none; font-size: 18px; cursor: pointer; color: #888; padding: 0 5px; flex-shrink: 0; }
 
         .chat-input-area { display: flex; gap: 10px; flex-shrink: 0; }
         .chat-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         .btn-send { background: #1e1e2f; color: #fff; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; }
 
-        .profile-img { 
-            width: 24px; height: 24px; border-radius: 50%; object-fit: cover; vertical-align: middle; 
-            flex-shrink: 0; margin-top: 2px; 
-        }
-        .profile-img-default { 
-            width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; 
-            font-size: 12px; color: #fff; font-weight: 700; 
-            flex-shrink: 0; margin-top: 2px; 
-        }
+        .profile-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; vertical-align: middle; flex-shrink: 0; margin-top: 2px; }
+        .profile-img-default { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+        .new-message-alert { display: none; position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); background: #1e1e2f; color: #fff; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10; transition: opacity 0.3s; }
 
         .main-board-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .post-list { display: flex; flex-direction: column; gap: 15px; }
-        
-        .post-item { 
-            padding: 15px 0; border-bottom: 1px solid #f0f0f0; transition: all 0.2s; 
-            display: flex; gap: 30px; align-items: center; 
-        }
+        .post-item { padding: 15px 0; border-bottom: 1px solid #f0f0f0; transition: all 0.2s; display: flex; gap: 30px; align-items: center; }
         .post-item:last-child { border-bottom: none; }
-        
-        .admin-checkbox-label {
-            display: flex; align-items: center; justify-content: center;
-            padding: 15px 25px; cursor: pointer; flex-shrink: 0;
-            background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;
-            transition: background 0.2s; min-width: 80px;
-        }
+        .admin-checkbox-label { display: flex; align-items: center; justify-content: center; padding: 15px 25px; cursor: pointer; flex-shrink: 0; background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; transition: background 0.2s; min-width: 80px; }
         .admin-checkbox-label:hover { background: #e3f2fd; border-color: #90caf9; }
         .admin-checkbox { width: 24px; height: 24px; cursor: pointer; margin: 0; }
-
         .content-area { flex: 1; cursor: pointer; padding: 5px 0; min-width: 0;}
         .content-area:hover h3 { text-decoration: underline; }
         .post-item h3 { font-size: 16px; margin-bottom: 8px; color: #1e1e2f; font-weight: 700; word-break: break-word; }
@@ -188,20 +102,17 @@
         .write-form { margin-bottom: 30px; border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px; background: #f9f9f9; }
         .write-form select, .write-form input[type="text"], .write-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; font-family: 'Nanum Square', sans-serif; }
         .write-form textarea { resize: vertical; min-height: 100px; margin-bottom: 20px; }
-        
         .file-upload-wrapper { margin-bottom: 20px; }
         .file-upload-label { display: block; padding: 15px; background: #e3f2fd; color: #1565c0; border: 2px dashed #1565c0; border-radius: 8px; text-align: center; cursor: pointer; font-weight: 700; transition: background 0.2s; }
         .file-upload-label:hover { background: #bbdefb; }
         .file-upload-label input { display: none; }
         .file-name-display { margin-top: 10px; font-size: 13px; color: #555; font-weight: 700; text-align: center; }
-
         .btn-write { background: #1e1e2f; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 700; margin-left: auto; display: block; }
 
         .file-attachment-box { margin-top: 15px; padding: 15px; background: #f0f2f5; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; }
         .file-attachment-box img { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; cursor: zoom-in; }
         .file-attachment-box video { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; }
         .file-download-btn { display: inline-block; padding: 10px 15px; background: #e3f2fd; color: #1565c0; text-decoration: none; border-radius: 5px; font-weight: 700; font-size: 14px; width: fit-content; }
-
         .edit-file-item { margin-bottom: 10px; padding: 10px; background: #f0f2f5; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
         .edit-file-item span { font-weight: 700; font-size: 14px; color: #333; }
 
@@ -209,7 +120,6 @@
         .auth-form input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
         .btn-auth { width: 100%; padding: 15px; background: #1e1e2f; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
         .btn-auth:hover { background: #2a2a40; }
-
         .social-login { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
         .social-btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .social-btn.google { background: #fff; color: #000; border: 1px solid #ccc; }
@@ -229,7 +139,6 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #fff; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; position: relative; max-height: 80vh; overflow-y: auto; animation: fadeIn 0.3s ease; }
         .modal-close { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #333; font-weight: 800; }
-        
         .modal-title { font-size: 22px; font-weight: 800; margin-bottom: 15px; border-bottom: 2px solid #1e1e2f; padding-bottom: 10px; }
         .modal-meta { font-size: 14px; color: #999; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         .modal-body { font-size: 16px; line-height: 1.6; color: #333; white-space: pre-wrap; margin-bottom: 20px; word-break: break-all; }
@@ -262,10 +171,11 @@
         .phone-verify-area input { flex: 1; margin: 0; }
         .phone-verify-area button { padding: 0 15px; background: #1e1e2f; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; white-space: nowrap; }
 
-        .chat-modal-content { max-width: 800px; height: 80vh; display: flex; flex-direction: column; padding: 40px; }
+        .chat-modal-content { max-width: 800px; height: 80vh; display: flex; flex-direction: column; padding: 40px; position: relative; }
         .chat-modal-content .chat-screen { flex: 1; font-size: 16px; padding: 20px; margin-bottom: 20px; }
         .chat-modal-content .chat-input { font-size: 16px; padding: 15px; }
         .chat-modal-content .btn-send { font-size: 16px; padding: 15px 30px; }
+        .chat-modal-content .new-message-alert { bottom: 100px; }
 
         .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 20px; }
         .admin-table { width: 100%; border-collapse: collapse; min-width: 600px; background: #fff; }
@@ -306,7 +216,6 @@
     </style>
 </head>
 <body>
-
     <div class="app-wrapper">
         <aside class="sidebar">
             <div class="logo-container" onclick="showPage('home', document.querySelector('.nav-link'))">
@@ -340,20 +249,17 @@
                             <button class="title-btn" onclick="openChatModal()">크게 보기</button>
                         </div>
                         <div class="chat-screen" id="chatScreen"></div>
-                        
-                        <!-- 답장 미리보기 (메인) -->
+                        <div class="new-message-alert" id="newMsgAlertMain" onclick="scrollToBottom('chatScreen', 'newMsgAlertMain')">새 메시지 <span class="count">0</span> ↓</div>
                         <div class="reply-preview-area" id="replyPreviewMain">
                             <div class="reply-content"></div>
                             <button class="reply-cancel" onclick="cancelReply()">&times;</button>
                         </div>
-
                         <div class="chat-input-area">
                             <input type="text" id="chatInput" class="chat-input" placeholder="메시지 입력 (URL 자동 링크)" onkeypress="handleKeyPress(event)">
                             <button class="btn-send" onclick="sendMessage(false)">전송</button>
                         </div>
                     </div>
                 </div>
-
                 <div class="main-board-container">
                     <div class="home-card" style="height: auto; flex: 1;">
                         <div class="section-title clickable-title" onclick="goToBoard('semiconductor')">🔧 반도체현장 최신글</div>
@@ -364,1498 +270,323 @@
                         <div class="post-list" id="mainOtherList"></div>
                     </div>
                 </div>
-
                 <div class="job-posting-section">
                     <div class="section-title">📢 알바 공고 통합 검색</div>
                     <div class="search-area">
                         <select id="searchRegion" class="search-select" onchange="searchJobs()">
                             <option value="">전체 지역</option>
-                            <option value="서울">서울</option>
-                            <option value="경기">경기</option>
-                            <option value="인천">인천</option>
-                            <option value="부산">부산</option>
-                            <option value="대구">대구</option>
-                            <option value="광주">광주</option>
-                            <option value="대전">대전</option>
-                            <option value="울산">울산</option>
-                            <option value="세종">세종</option>
-                            <option value="강원">강원</option>
-                            <option value="충북">충북</option>
-                            <option value="충남">충남</option>
-                            <option value="전북">전북</option>
-                            <option value="전남">전남</option>
-                            <option value="경북">경북</option>
-                            <option value="경남">경남</option>
-                            <option value="제주">제주</option>
-                            <option value="온라인">온라인</option>
+                            <option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option><option value="부산">부산</option><option value="대구">대구</option><option value="광주">광주</option><option value="대전">대전</option><option value="울산">울산</option><option value="세종">세종</option><option value="강원">강원</option><option value="충북">충북</option><option value="충남">충남</option><option value="전북">전북</option><option value="전남">전남</option><option value="경북">경북</option><option value="경남">경남</option><option value="제주">제주</option><option value="온라인">온라인</option>
                         </select>
                         <input type="text" id="jobSearchInput" class="search-input" placeholder="🔍 근무지, 공고제목, 급여 등 검색어를 입력하세요" onkeyup="searchJobs()">
                     </div>
-                    <div id="searchResults" class="post-list">
-                        <p style="color:#999;">검색어를 입력하면 전체 게시판에서 공고를 찾아드립니다.</p>
-                    </div>
+                    <div id="searchResults" class="post-list"><p style="color:#999;">검색어를 입력하면 전체 게시판에서 공고를 찾아드립니다.</p></div>
                 </div>
             </section>
 
-            <section id="semiconductor" class="page-section">
-                <div class="board-container">
-                    <div class="section-title">🔧 반도체현장 게시판</div>
-                    <div id="semiWriteArea"></div>
-                    <div class="post-list" id="semiList"></div>
-                    <div class="bulk-action-bar" id="bulkBar_semi">
-                        <label><input type="checkbox" id="selectAll_semi" onchange="toggleAllPosts(this, 'semi')"> 전체 선택</label>
-                        <button class="btn-action btn-delete" onclick="bulkDeletePosts('semi')">선택 삭제</button>
-                        <select id="bulkMoveSelect_semi">
-                            <option value="">이동할 게시판 선택...</option>
-                            <option value="other">기타알바</option>
-                            <option value="ref">자료실</option>
-                            <option value="free">자유게시판</option>
-                        </select>
-                        <button class="btn-action btn-move" onclick="bulkMovePosts('semi')">선택 이동</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="otherjobs" class="page-section">
-                <div class="board-container">
-                    <div class="section-title">💼 기타알바 게시판</div>
-                    <div id="otherWriteArea"></div>
-                    <div class="post-list" id="otherList"></div>
-                    <div class="bulk-action-bar" id="bulkBar_other">
-                        <label><input type="checkbox" id="selectAll_other" onchange="toggleAllPosts(this, 'other')"> 전체 선택</label>
-                        <button class="btn-action btn-delete" onclick="bulkDeletePosts('other')">선택 삭제</button>
-                        <select id="bulkMoveSelect_other">
-                            <option value="">이동할 게시판 선택...</option>
-                            <option value="semi">반도체현장</option>
-                            <option value="ref">자료실</option>
-                            <option value="free">자유게시판</option>
-                        </select>
-                        <button class="btn-action btn-move" onclick="bulkMovePosts('other')">선택 이동</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="reference" class="page-section">
-                <div class="board-container">
-                    <div class="section-title">📁 자료실 게시판</div>
-                    <div id="refWriteArea"></div>
-                    <div class="post-list" id="refList"></div>
-                    <div class="bulk-action-bar" id="bulkBar_ref">
-                        <label><input type="checkbox" id="selectAll_ref" onchange="toggleAllPosts(this, 'ref')"> 전체 선택</label>
-                        <button class="btn-action btn-delete" onclick="bulkDeletePosts('ref')">선택 삭제</button>
-                        <select id="bulkMoveSelect_ref">
-                            <option value="">이동할 게시판 선택...</option>
-                            <option value="semi">반도체현장</option>
-                            <option value="other">기타알바</option>
-                            <option value="free">자유게시판</option>
-                        </select>
-                        <button class="btn-action btn-move" onclick="bulkMovePosts('ref')">선택 이동</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="freeboard" class="page-section">
-                <div class="board-container">
-                    <div class="section-title">🗣️ 자유게시판</div>
-                    <div id="freeWriteArea"></div>
-                    <div class="post-list" id="freeList"></div>
-                    <div class="bulk-action-bar" id="bulkBar_free">
-                        <label><input type="checkbox" id="selectAll_free" onchange="toggleAllPosts(this, 'free')"> 전체 선택</label>
-                        <button class="btn-action btn-delete" onclick="bulkDeletePosts('free')">선택 삭제</button>
-                        <select id="bulkMoveSelect_free">
-                            <option value="">이동할 게시판 선택...</option>
-                            <option value="semi">반도체현장</option>
-                            <option value="other">기타알바</option>
-                            <option value="ref">자료실</option>
-                        </select>
-                        <button class="btn-action btn-move" onclick="bulkMovePosts('free')">선택 이동</button>
-                    </div>
-                </div>
-            </section>
-
-            <section id="mypage" class="page-section">
-                <div class="board-container" id="mypageContent"></div>
-            </section>
-
-            <section id="admin" class="page-section">
-                <div class="board-container">
-                    <h2 style="margin-bottom:20px;">오늘의 추천 알바 관리</h2>
-                    <div class="write-form" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; background:#f0f2f5;">
-                        <input type="text" id="recJobTitle" placeholder="알바 제목 (예: 카페 바리스타)" style="margin-bottom:0;">
-                        <textarea id="recJobInfo" placeholder="알바 상세 내용 입력 (줄바꿈 가능)" style="margin-bottom:0; height:80px; padding:12px; border:1px solid #ccc; border-radius:5px; font-family:'Nanum Square'; resize:vertical;"></textarea>
-                        <button class="btn-write" style="margin:0; align-self:flex-end; display:inline-block;" onclick="addRecJob()">등록</button>
-                    </div>
-                    <div class="job-list" id="adminRecJobList"></div>
-                </div>
-                <div class="board-container">
-                    <h2 style="margin-bottom:20px;">전체 회원 목록 및 정보</h2>
-                    <div class="table-wrapper">
-                        <table class="admin-table">
-                            <thead><tr><th>아이디</th><th>닉네임</th><th>이름</th><th>연락처</th><th>가입 방식</th><th>회원 관리</th></tr></thead>
-                            <tbody id="adminUserList"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="login" class="page-section">
-                <div class="board-container">
-                    <div class="section-title">🔓 로그인</div>
-                    <div class="auth-form">
-                        <input type="text" id="loginId" placeholder="아이디">
-                        <input type="password" id="loginPw" placeholder="비밀번호">
-                        <button class="btn-auth" onclick="handleLogin()">로그인</button>
-                        <div class="social-login">
-                            <button class="social-btn google" onclick="openSocialModal('Google')">G 구글로 로그인</button>
-                            <button class="social-btn naver" onclick="openSocialModal('Naver')">N 네이버로 로그인</button>
-                            <button class="social-btn kakao" onclick="openSocialModal('Kakao')">K 카카오톡으로 로그인</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="signup" class="page-section">
-                <div class="board-container">
-                    <div class="section-title">📝 회원가입</div>
-                    <div class="auth-form">
-                        <input type="text" id="signupId" placeholder="아이디">
-                        <input type="password" id="signupPw" placeholder="비밀번호">
-                        <input type="password" id="signupPwCheck" placeholder="비밀번호 확인">
-                        <input type="text" id="signupNickname" placeholder="닉네임 (게시판에 표시될 이름)">
-                        <input type="text" id="signupName" placeholder="이름">
-                        <input type="text" id="signupPhone" placeholder="휴대폰 번호">
-                        <button class="btn-auth" onclick="handleSignup()">가입하기</button>
-                        <div class="social-login">
-                            <button class="social-btn google" onclick="openSocialModal('Google')">G 구글로 시작하기</button>
-                            <button class="social-btn naver" onclick="openSocialModal('Naver')">N 네이버로 시작하기</button>
-                            <button class="social-btn kakao" onclick="openSocialModal('Kakao')">K 카카오톡으로 시작하기</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <!-- 다른 게시판 섹션들 (반도체, 기타알바, 자료실, 자유게시판, 마이페이지, 관리자, 로그인, 회원가입)은 생략하지 않고 그대로 유지됩니다. -->
+            <!-- 가독성을 위해 접었지만, 실제 코드에서는 아래에 모두 포함되어 있습니다. -->
+             <section id="semiconductor" class="page-section"><div class="board-container"><div class="section-title">🔧 반도체현장 게시판</div><div id="semiWriteArea"></div><div class="post-list" id="semiList"></div><div class="bulk-action-bar" id="bulkBar_semi"><label><input type="checkbox" id="selectAll_semi" onchange="toggleAllPosts(this, 'semi')"> 전체 선택</label><button class="btn-action btn-delete" onclick="bulkDeletePosts('semi')">선택 삭제</button><select id="bulkMoveSelect_semi"><option value="">이동할 게시판 선택...</option><option value="other">기타알바</option><option value="ref">자료실</option><option value="free">자유게시판</option></select><button class="btn-action btn-move" onclick="bulkMovePosts('semi')">선택 이동</button></div></div></section>
+            <section id="otherjobs" class="page-section"><div class="board-container"><div class="section-title">💼 기타알바 게시판</div><div id="otherWriteArea"></div><div class="post-list" id="otherList"></div><div class="bulk-action-bar" id="bulkBar_other"><label><input type="checkbox" id="selectAll_other" onchange="toggleAllPosts(this, 'other')"> 전체 선택</label><button class="btn-action btn-delete" onclick="bulkDeletePosts('other')">선택 삭제</button><select id="bulkMoveSelect_other"><option value="">이동할 게시판 선택...</option><option value="semi">반도체현장</option><option value="ref">자료실</option><option value="free">자유게시판</option></select><button class="btn-action btn-move" onclick="bulkMovePosts('other')">선택 이동</button></div></div></section>
+            <section id="reference" class="page-section"><div class="board-container"><div class="section-title">📁 자료실 게시판</div><div id="refWriteArea"></div><div class="post-list" id="refList"></div><div class="bulk-action-bar" id="bulkBar_ref"><label><input type="checkbox" id="selectAll_ref" onchange="toggleAllPosts(this, 'ref')"> 전체 선택</label><button class="btn-action btn-delete" onclick="bulkDeletePosts('ref')">선택 삭제</button><select id="bulkMoveSelect_ref"><option value="">이동할 게시판 선택...</option><option value="semi">반도체현장</option><option value="other">기타알바</option><option value="free">자유게시판</option></select><button class="btn-action btn-move" onclick="bulkMovePosts('ref')">선택 이동</button></div></div></section>
+            <section id="freeboard" class="page-section"><div class="board-container"><div class="section-title">🗣️ 자유게시판</div><div id="freeWriteArea"></div><div class="post-list" id="freeList"></div><div class="bulk-action-bar" id="bulkBar_free"><label><input type="checkbox" id="selectAll_free" onchange="toggleAllPosts(this, 'free')"> 전체 선택</label><button class="btn-action btn-delete" onclick="bulkDeletePosts('free')">선택 삭제</button><select id="bulkMoveSelect_free"><option value="">이동할 게시판 선택...</option><option value="semi">반도체현장</option><option value="other">기타알바</option><option value="ref">자료실</option></select><button class="btn-action btn-move" onclick="bulkMovePosts('free')">선택 이동</button></div></div></section>
+            <section id="mypage" class="page-section"><div class="board-container" id="mypageContent"></div></section>
+            <section id="admin" class="page-section"><div class="board-container"><h2 style="margin-bottom:20px;">오늘의 추천 알바 관리</h2><div class="write-form" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; background:#f0f2f5;"><input type="text" id="recJobTitle" placeholder="알바 제목 (예: 카페 바리스타)" style="margin-bottom:0;"><textarea id="recJobInfo" placeholder="알바 상세 내용 입력 (줄바꿈 가능)" style="margin-bottom:0; height:80px; padding:12px; border:1px solid #ccc; border-radius:5px; font-family:'Nanum Square'; resize:vertical;"></textarea><button class="btn-write" style="margin:0; align-self:flex-end; display:inline-block;" onclick="addRecJob()">등록</button></div><div class="job-list" id="adminRecJobList"></div></div><div class="board-container"><h2 style="margin-bottom:20px;">전체 회원 목록 및 정보</h2><div class="table-wrapper"><table class="admin-table"><thead><tr><th>아이디</th><th>닉네임</th><th>이름</th><th>연락처</th><th>가입 방식</th><th>회원 관리</th></tr></thead><tbody id="adminUserList"></tbody></table></div></div></section>
+            <section id="login" class="page-section"><div class="board-container"><div class="section-title">🔓 로그인</div><div class="auth-form"><input type="text" id="loginId" placeholder="아이디"><input type="password" id="loginPw" placeholder="비밀번호"><button class="btn-auth" onclick="handleLogin()">로그인</button><div class="social-login"><button class="social-btn google" onclick="openSocialModal('Google')">G 구글로 로그인</button><button class="social-btn naver" onclick="openSocialModal('Naver')">N 네이버로 로그인</button><button class="social-btn kakao" onclick="openSocialModal('Kakao')">K 카카오톡으로 로그인</button></div></div></div></section>
+            <section id="signup" class="page-section"><div class="board-container"><div class="section-title">📝 회원가입</div><div class="auth-form"><input type="text" id="signupId" placeholder="아이디"><input type="password" id="signupPw" placeholder="비밀번호"><input type="password" id="signupPwCheck" placeholder="비밀번호 확인"><input type="text" id="signupNickname" placeholder="닉네임 (게시판에 표시될 이름)"><input type="text" id="signupName" placeholder="이름"><input type="text" id="signupPhone" placeholder="휴대폰 번호"><button class="btn-auth" onclick="handleSignup()">가입하기</button><div class="social-login"><button class="social-btn google" onclick="openSocialModal('Google')">G 구글로 시작하기</button><button class="social-btn naver" onclick="openSocialModal('Naver')">N 네이버로 시작하기</button><button class="social-btn kakao" onclick="openSocialModal('Kakao')">K 카카오톡으로 시작하기</button></div></div></div></section>
         </main>
     </div>
 
-    <div class="footer-counter">
-        현재 가입된 회원 수: <span id="userCount">1</span>명 | 총 방문자 수: <span id="visitorCount">0</span>명
-    </div>
+    <div class="footer-counter">현재 가입된 회원 수: <span id="userCount">1</span>명 | 총 방문자 수: <span id="visitorCount">0</span>명</div>
 
-    <div id="postModal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('postModal')">&times;</button>
-            <div class="modal-title" id="modalTitle"></div>
-            <div class="modal-meta" id="modalMeta"></div>
-            <div class="modal-body" id="modalContent"></div>
-            <div class="modal-actions" id="modalActions"></div>
-            <div class="modal-move-area" id="modalMoveArea" style="display:none;"></div>
-            
-            <div class="comment-section">
-                <h3>💬 댓글 (<span id="commentCount">0</span>)</h3>
-                <div class="comment-list" id="commentList"></div>
-                <div class="comment-form">
-                    <input type="text" id="commentInput" class="comment-input" placeholder="댓글을 입력하세요" onkeypress="handleCommentKeyPress(event)">
-                    <button class="comment-submit" onclick="addComment()">등록</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="postModal" class="modal-overlay"><div class="modal-content"><button class="modal-close" onclick="closeModal('postModal')">&times;</button><div class="modal-title" id="modalTitle"></div><div class="modal-meta" id="modalMeta"></div><div class="modal-body" id="modalContent"></div><div class="modal-actions" id="modalActions"></div><div class="modal-move-area" id="modalMoveArea" style="display:none;"></div><div class="comment-section"><h3>💬 댓글 (<span id="commentCount">0</span>)</h3><div class="comment-list" id="commentList"></div><div class="comment-form"><input type="text" id="commentInput" class="comment-input" placeholder="댓글을 입력하세요" onkeypress="handleCommentKeyPress(event)"><button class="comment-submit" onclick="addComment()">등록</button></div></div></div></div>
+    <div id="socialModal" class="modal-overlay"><div class="modal-content nickname-modal-content"><button class="modal-close" onclick="closeModal('socialModal')">&times;</button><h2>회원정보 및 전화번호 인증</h2><p style="color:#666; margin-top:10px; font-size:14px;"><span id="socialProviderName"></span> 로그인을 위한 추가 정보를 입력해주세요.</p><input type="text" id="socialNicknameInput" placeholder="사용할 닉네임"><input type="text" id="socialNameInput" placeholder="이름"><div class="phone-verify-area"><input type="text" id="socialPhoneInput" placeholder="휴대폰 번호 ('-' 없이 입력)"><button onclick="sendVerificationCode()">인증요청</button></div><input type="text" id="socialVerifyCodeInput" placeholder="인증번호 4자리 입력"><button class="btn-auth" onclick="confirmSocialLogin()">가입 및 로그인</button></div></div>
+    <div id="chatModal" class="modal-overlay"><div class="modal-content chat-modal-content"><button class="modal-close" onclick="closeModal('chatModal')">&times;</button><h2 style="margin-bottom:20px;">💬 실시간 채팅 (전체화면)</h2><div class="chat-screen" id="chatModalScreen"></div><div class="new-message-alert" id="newMsgAlertModal" onclick="scrollToBottom('chatModalScreen', 'newMsgAlertModal')">새 메시지 <span class="count">0</span> ↓</div><div class="reply-preview-area" id="replyPreviewModal"><div class="reply-content"></div><button class="reply-cancel" onclick="cancelReply()">&times;</button></div><div class="chat-input-area"><input type="text" id="chatModalInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleModalKeyPress(event)"><button class="btn-send" onclick="sendMessage(true)">전송</button></div></div></div>
 
-    <div id="socialModal" class="modal-overlay">
-        <div class="modal-content nickname-modal-content">
-            <button class="modal-close" onclick="closeModal('socialModal')">&times;</button>
-            <h2>회원정보 및 전화번호 인증</h2>
-            <p style="color:#666; margin-top:10px; font-size:14px;"><span id="socialProviderName"></span> 로그인을 위한 추가 정보를 입력해주세요.</p>
-            
-            <input type="text" id="socialNicknameInput" placeholder="사용할 닉네임">
-            <input type="text" id="socialNameInput" placeholder="이름">
-            
-            <div class="phone-verify-area">
-                <input type="text" id="socialPhoneInput" placeholder="휴대폰 번호 ('-' 없이 입력)">
-                <button onclick="sendVerificationCode()">인증요청</button>
-            </div>
-            
-            <input type="text" id="socialVerifyCodeInput" placeholder="인증번호 4자리 입력">
-            
-            <button class="btn-auth" onclick="confirmSocialLogin()">가입 및 로그인</button>
-        </div>
-    </div>
-
-    <div id="chatModal" class="modal-overlay">
-        <div class="modal-content chat-modal-content">
-            <button class="modal-close" onclick="closeModal('chatModal')">&times;</button>
-            <h2 style="margin-bottom:20px;">💬 실시간 채팅 (전체화면)</h2>
-            <div class="chat-screen" id="chatModalScreen"></div>
-            
-            <!-- 답장 미리보기 (모달) -->
-            <div class="reply-preview-area" id="replyPreviewModal">
-                <div class="reply-content"></div>
-                <button class="reply-cancel" onclick="cancelReply()">&times;</button>
-            </div>
-
-            <div class="chat-input-area">
-                <input type="text" id="chatModalInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleModalKeyPress(event)">
-                <button class="btn-send" onclick="sendMessage(true)">전송</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCLm9sr7hw5L4Vwl1ZoF1iQGPUQcsn8uFI",
-            authDomain: "albagod-5cbb4.firebaseapp.com",
-            databaseURL: "https://albagod-5cbb4-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "albagod-5cbb4",
-            storageBucket: "albagod-5cbb4.firebasestorage.app",
-            messagingSenderId: "1035968499607",
-            appId: "1:1035968499607:web:1f699c1264021e4f40bed2",
-            measurementId: "G-2P1ZPG28NT"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyCLm9sr7hw5L4Vwl1ZoF1iQGPUQcsn8uFI", authDomain: "albagod-5cbb4.firebaseapp.com", databaseURL: "https://albagod-5cbb4-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "albagod-5cbb4", storageBucket: "albagod-5cbb4.firebasestorage.app", messagingSenderId: "1035968499607", appId: "1:1035968499607:web:1f699c1264021e4f40bed2", measurementId: "G-2P1ZPG28NT" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
         const profileColors = ['#FF6B6B', '#4ECDC4', '#556270', '#C7F464', '#FF8C42', '#6A4C93', '#1982C4', '#8AC926', '#FF595E', '#FFCA3A', '#F72585', '#7209B7', '#3A0CA3', '#4361EE', '#4CC9F0', '#06D6A0', '#118AB2', '#073B4C', '#EF476F', '#06D6A0'];
-
-        let users = {};
-        let currentUser = null;
-        let posts = { semi: {}, other: {}, free: {}, ref: {} };
-        let tempSocialProvider = '';
-        let recommendedJobs = {};
-        let editingFiles = [];
-        let tempSelectedFiles = [];
-        let currentViewingPost = { type: null, id: null };
-        let currentReply = null; // 답장 대상 메시지
+        let users = {}; let currentUser = null; let posts = { semi: {}, other: {}, free: {}, ref: {} }; let tempSocialProvider = ''; let recommendedJobs = {}; let editingFiles = []; let tempSelectedFiles = []; let currentViewingPost = { type: null, id: null }; let currentReply = null; 
+        const savedUser = sessionStorage.getItem('currentUser'); if(savedUser) currentUser = JSON.parse(savedUser);
+        const usersRef = db.ref('users'); const postsRef = db.ref('posts'); const recJobsRef = db.ref('recommendedJobs'); const chatRef = db.ref('chat'); const metaRef = db.ref('meta');
+        metaRef.child('visitors').transaction(c => (c || 0) + 1);
+        metaRef.child('visitors').on('value', s => document.getElementById('visitorCount').innerText = s.val() || 0);
+        async function getAnonName() { if (sessionStorage.getItem('anonName')) return sessionStorage.getItem('anonName'); const r = await metaRef.child('anonCounter').transaction(c => (c || 0) + 1); const n = '익명' + r.snapshot.val(); sessionStorage.setItem('anonName', n); return n; }
+        function getColorForString(str) { if(!str) str = 'default'; let h = 0; for (let i = 0; i < str.length; i++) { h = str.charCodeAt(i) + ((h << 5) - h); } return Math.abs(h) % 20; }
+        function escapeHtml(t) { if(!t) return ''; return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+        usersRef.on('value', s => { users = s.val() || {}; if(!users['admin']) usersRef.child('admin').set({ id: 'admin', pw: 'admin1234', nickname: '관리자', name: '운영자', phone: '010-0000-0000', provider: '관리자', scraps: {}, profilePic: null }); updateUserCount(); updateAuthMenu(); if(document.getElementById('admin').classList.contains('active')) loadAdminPage(); if(document.getElementById('mypage').classList.contains('active')) loadMypage(); });
+        postsRef.on('value', s => { posts = s.val() || { semi: {}, other: {}, free: {}, ref: {} }; renderPosts(); if(document.getElementById('home').classList.contains('active')) searchJobs(); if(currentViewingPost.type && currentViewingPost.id) renderComments(currentViewingPost.type, currentViewingPost.id); });
+        recJobsRef.on('value', s => { recommendedJobs = s.val() || {}; renderAdminRecJobs(); renderHomeRecJobs(); });
         
-        const savedUser = sessionStorage.getItem('currentUser');
-        if(savedUser) currentUser = JSON.parse(savedUser);
-
-        const usersRef = db.ref('users');
-        const postsRef = db.ref('posts');
-        const recJobsRef = db.ref('recommendedJobs');
-        const chatRef = db.ref('chat');
-        const metaRef = db.ref('meta');
-
-        metaRef.child('visitors').transaction(function(current) {
-            return (current || 0) + 1;
-        });
-        metaRef.child('visitors').on('value', (snapshot) => {
-            document.getElementById('visitorCount').innerText = snapshot.val() || 0;
-        });
-
-        async function getAnonName() {
-            if (sessionStorage.getItem('anonName')) return sessionStorage.getItem('anonName');
-            const result = await metaRef.child('anonCounter').transaction(function(current) {
-                return (current || 0) + 1;
-            });
-            const name = '익명' + result.snapshot.val();
-            sessionStorage.setItem('anonName', name);
-            return name;
+        let chatInitialized = false; let unreadMainCount = 0; let unreadModalCount = 0;
+        function handleNewChatMessage(key, c) {
+            let tempUser = users[c.authorId]; if(!tempUser) tempUser = { nickname: c.author, id: c.author };
+            let replyQuoteHtml = '';
+            if(c.replyTo) { replyQuoteHtml = `<div class="chat-reply-quote"><strong>${escapeHtml(c.replyTo.author)}:</strong><span class="reply-text">${escapeHtml(c.replyTo.message)}</span></div>`; }
+            const dataAttrAuthor = escapeHtml(c.author).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            const dataAttrMsg = escapeHtml(c.message).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            const html = `<div class="chat-message" onclick="setReply('${key}', '${dataAttrAuthor}', '${dataAttrMsg}')">${getProfileImgHTML(tempUser)}<div class="chat-content-wrapper">${replyQuoteHtml}<div><span class="user">${escapeHtml(c.author)}:</span> <span class="chat-text">${linkify(escapeHtml(c.message))}</span></div></div></div>`;
+            const mainScreen = document.getElementById('chatScreen'); const modalScreen = document.getElementById('chatModalScreen');
+            [mainScreen, modalScreen].forEach(screen => { if(!screen) return; const isNearBottom = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 100; screen.insertAdjacentHTML('beforeend', html); if(!chatInitialized || isNearBottom) { screen.scrollTop = screen.scrollHeight; } else { if(screen.id === 'chatScreen') { unreadMainCount++; updateNewMessageAlert('newMsgAlertMain', unreadMainCount); } else { unreadModalCount++; updateNewMessageAlert('newMsgAlertModal', unreadModalCount); } } });
         }
-
-        function getColorForString(str) {
-            if(!str) str = 'default';
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            return Math.abs(hash) % 20;
-        }
-
-        function escapeHtml(text) {
-            if(!text) return '';
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-
-        usersRef.on('value', (snapshot) => {
-            users = snapshot.val() || {};
-            if(!users['admin']) {
-                usersRef.child('admin').set({ id: 'admin', pw: 'admin1234', nickname: '관리자', name: '운영자', phone: '010-0000-0000', provider: '관리자', scraps: {}, profilePic: null });
-            }
-            updateUserCount();
-            updateAuthMenu();
-            if(document.getElementById('admin').classList.contains('active')) loadAdminPage();
-            if(document.getElementById('mypage').classList.contains('active')) loadMypage();
-        });
-
-        postsRef.on('value', (snapshot) => {
-            posts = snapshot.val() || { semi: {}, other: {}, free: {}, ref: {} };
-            renderPosts();
-            if(document.getElementById('home').classList.contains('active')) searchJobs();
-            if(currentViewingPost.type && currentViewingPost.id) {
-                renderComments(currentViewingPost.type, currentViewingPost.id);
-            }
-        });
-
-        recJobsRef.on('value', (snapshot) => {
-            recommendedJobs = snapshot.val() || {};
-            renderAdminRecJobs();
-            renderHomeRecJobs();
-        });
-
-        // 채팅 렌더링 시 답장 인용구 처리 포함
-        chatRef.on('value', (snapshot) => {
-            const chatData = snapshot.val() || {};
-            const chatArray = Object.entries(chatData).map(([key, val]) => ({ key, ...val })).sort((a,b) => a.timestamp - b.timestamp);
-            const chatHtml = chatArray.map(c => {
-                let tempUser = users[c.authorId];
-                if(!tempUser) {
-                    tempUser = { nickname: c.author, id: c.author }; 
-                }
-
-                let replyQuoteHtml = '';
-                if(c.replyTo) {
-                    replyQuoteHtml = `<div class="chat-reply-quote">
-                        <strong>${escapeHtml(c.replyTo.author)}:</strong>
-                        <span class="reply-text">${escapeHtml(c.replyTo.message)}</span>
-                    </div>`;
-                }
-
-                // HTML attribute에 넣기 위해 엔티티화 (onclick에서 역으로 디코딩하여 안전하게 처리)
-                const dataAttrAuthor = escapeHtml(c.author).replace(/"/g, '&quot;');
-                const dataAttrMsg = escapeHtml(c.message).replace(/"/g, '&quot;');
-
-                return `<div class="chat-message" onclick="setReply('${c.key}', '${dataAttrAuthor}', '${dataAttrMsg}')">
-                    ${getProfileImgHTML(tempUser)} 
-                    <div class="chat-content-wrapper">
-                        ${replyQuoteHtml}
-                        <div><span class="user">${escapeHtml(c.author)}:</span> <span class="chat-text">${linkify(escapeHtml(c.message))}</span></div>
-                    </div>
-                </div>`;
-            }).join('');
-            document.getElementById('chatScreen').innerHTML = chatHtml;
-            document.getElementById('chatModalScreen').innerHTML = chatHtml;
-            document.getElementById('chatScreen').scrollTop = document.getElementById('chatScreen').scrollHeight;
-            document.getElementById('chatModalScreen').scrollTop = document.getElementById('chatModalScreen').scrollHeight;
-        });
-
-        chatRef.limitToLast(1).on('child_added', (snapshot) => {
-            const data = snapshot.val();
-            if(data && (Date.now() - data.timestamp < 10000)) {
-                stopFakeChat();
-            }
-        });
-
-        function updateUserCount() {
-            const el = document.getElementById('userCount');
-            if(el) el.innerText = Object.keys(users).length;
-        }
-
-        function getProfileImgHTML(user) {
-            if(user && user.profilePic) return `<img src="${user.profilePic}" class="profile-img" alt="profile">`;
-            const initial = user && user.nickname ? user.nickname.charAt(0) : '?';
-            const colorIndex = getColorForString(user && user.id ? user.id : (user && user.nickname ? user.nickname : 'guest'));
-            const bgColor = profileColors[colorIndex];
-            return `<div class="profile-img-default" style="background-color: ${bgColor};">${initial}</div>`;
-        }
-
-        function linkify(text) {
-            if (!text) return '';
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            return text.replace(urlRegex, function(url) {
-                return `<a href="${url}" target="_blank" class="link-in-text">${url}</a>`;
-            });
-        }
-
-        // 답장 설정 함수
-        function setReply(key, encodedAuthor, encodedMsg) {
-            // HTML Entity 디코딩
-            const txt = document.createElement("textarea");
-            txt.innerHTML = encodedAuthor;
-            const author = txt.value;
-            txt.innerHTML = encodedMsg;
-            const msg = txt.value;
-
-            const shortMsg = msg.length > 50 ? msg.substring(0, 50) + '...' : msg;
-            
-            currentReply = { id: key, author, message: shortMsg };
-            
-            const mainPreview = document.getElementById('replyPreviewMain');
-            const modalPreview = document.getElementById('replyPreviewModal');
-            const previewHtml = `<strong>${escapeHtml(author)}</strong>에게 답장<br>${escapeHtml(shortMsg)}`;
-            
-            if(mainPreview) {
-                mainPreview.querySelector('.reply-content').innerHTML = previewHtml;
-                mainPreview.style.display = 'flex';
-            }
-            if(modalPreview) {
-                modalPreview.querySelector('.reply-content').innerHTML = previewHtml;
-                modalPreview.style.display = 'flex';
-            }
-
-            if(document.getElementById('chatModal').style.display === 'flex') {
-                document.getElementById('chatModalInput').focus();
-            } else {
-                document.getElementById('chatInput').focus();
-            }
-        }
-
-        // 답장 취소 함수
-        function cancelReply() {
-            currentReply = null;
-            const mainPreview = document.getElementById('replyPreviewMain');
-            const modalPreview = document.getElementById('replyPreviewModal');
-            if(mainPreview) mainPreview.style.display = 'none';
-            if(modalPreview) modalPreview.style.display = 'none';
-        }
-
-        function showPage(pageId, element) {
-            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-            if(element) {
-                document.querySelectorAll('.nav-link, .auth-menu a, .admin-link a').forEach(l => l.classList.remove('active'));
-                element.classList.add('active');
-            }
-            document.getElementById(pageId).classList.add('active');
-            if(pageId === 'mypage') loadMypage();
-            if(pageId === 'admin') { loadAdminPage(); renderAdminRecJobs(); }
-            if(['semiconductor', 'otherjobs', 'freeboard', 'reference'].includes(pageId)) checkWriteAuth(pageId);
-            window.scrollTo(0, 0);
-        }
-
-        function goToBoard(boardId) {
-            const navLinks = document.querySelectorAll('.nav-link');
-            let targetLink = null;
-            navLinks.forEach(link => {
-                if(link.getAttribute('onclick') && link.getAttribute('onclick').includes(boardId)) {
-                    targetLink = link;
-                }
-            });
-            showPage(boardId, targetLink);
-        }
-
-        function checkWriteAuth(pageId) {
-            const areaIdMap = { semiconductor: 'semiWriteArea', otherjobs: 'otherWriteArea', freeboard: 'freeWriteArea', reference: 'refWriteArea' };
-            const typeMap = { semiconductor: 'semi', otherjobs: 'other', freeboard: 'free', reference: 'ref' };
-            
-            const areaId = areaIdMap[pageId];
-            const type = typeMap[pageId];
-            const area = document.getElementById(areaId);
-
-            tempSelectedFiles = [];
-
-            if(!currentUser) {
-                area.innerHTML = `<div class="login-required-box"><p>🔒 게시글 작성은 로그인 후 이용 가능합니다.</p><button class="btn-auth" style="width: auto; padding: 10px 20px;" onclick="showPage('login', document.querySelector('.auth-menu a'))">로그인 하러가기</button></div>`;
-            } else {
-                const isJobBoard = (type === 'semi' || type === 'other');
-                area.innerHTML = `
-                    <div class="write-form">
-                        <h3 style="margin-bottom:15px;">글쓰기</h3>
-                        ${isJobBoard ? `
-                        <select id="${type}Region">
-                            <option value="">근무 지역 선택 (필수)</option>
-                            <option value="서울">서울</option>
-                            <option value="경기">경기</option>
-                            <option value="인천">인천</option>
-                            <option value="부산">부산</option>
-                            <option value="대구">대구</option>
-                            <option value="광주">광주</option>
-                            <option value="대전">대전</option>
-                            <option value="울산">울산</option>
-                            <option value="세종">세종</option>
-                            <option value="강원">강원</option>
-                            <option value="충북">충북</option>
-                            <option value="충남">충남</option>
-                            <option value="전북">전북</option>
-                            <option value="전남">전남</option>
-                            <option value="경북">경북</option>
-                            <option value="경남">경남</option>
-                            <option value="제주">제주</option>
-                            <option value="온라인">온라인</option>
-                        </select>` : ''}
-                        <input type="text" id="${type}Title" placeholder="제목을 입력하세요">
-                        <textarea id="${type}Content" placeholder="내용을 입력하세요 (https://... 주소는 자동 링크됩니다)"></textarea>
-                        
-                        <div class="file-upload-wrapper">
-                            <label class="file-upload-label" for="${type}File">
-                                📎 파일 첨부하기 (이미지/문서 10개, 동영상 1개 / 여러 번 나누어 올려도 누적됩니다)
-                            </label>
-                            <input type="file" id="${type}File" multiple onchange="handleFileSelect('${type}', this)">
-                            <div class="file-name-display" id="${type}FileName">선택된 파일 없음</div>
-                        </div>
-
-                        <button class="btn-write" onclick="writePost('${type}')">작성 완료</button>
-                    </div>
-                `;
-            }
-        }
-
-        function handleFileSelect(type, input) {
-            const newFiles = input.files;
-            
-            for(let i=0; i<newFiles.length; i++) {
-                let isVideo = newFiles[i].type.startsWith('video/');
-                let isImage = newFiles[i].type.startsWith('image/');
-                let currentVideoCount = tempSelectedFiles.filter(f => f.type.startsWith('video/')).length;
-                
-                if(isVideo && currentVideoCount >= 1) {
-                    alert('동영상은 1개만 업로드할 수 있습니다.');
-                    continue;
-                }
-                
-                if(isImage || isVideo) {
-                    if(newFiles[i].size > 3 * 1024 * 1024) {
-                        alert(`${newFiles[i].name}은(는) 3MB를 초과하여 첨부할 수 없습니다.`);
-                        continue;
-                    }
-                }
-                
-                tempSelectedFiles.push(newFiles[i]);
-            }
-
-            if(tempSelectedFiles.length > 10) {
-                alert('파일은 최대 10개까지 첨부할 수 있습니다.');
-                tempSelectedFiles = tempSelectedFiles.slice(0, 10);
-            }
-
-            if(tempSelectedFiles.length > 0) {
-                document.getElementById(`${type}FileName`).innerText = `선택됨 (${tempSelectedFiles.length}개): ${tempSelectedFiles.map(f => f.name).join(', ')}`;
-            } else {
-                document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
-            }
-            
-            input.value = '';
-        }
-
-        function compressImage(file) {
-            return new Promise((resolve) => {
-                if(!file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        resolve({ name: file.name, type: file.type, data: e.target.result });
-                    };
-                    reader.readAsDataURL(file);
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        let width = img.width;
-                        let height = img.height;
-                        const maxSize = 1920; 
-                        if (width > height && width > maxSize) {
-                            height = Math.round(height * maxSize / width);
-                            width = maxSize;
-                        } else if (height > width && height > maxSize) {
-                            width = Math.round(width * maxSize / height);
-                            height = maxSize;
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                        resolve({ name: file.name, type: 'image/jpeg', data: dataUrl });
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function handleSignup() {
-            const id = document.getElementById('signupId').value.trim();
-            const pw = document.getElementById('signupPw').value.trim();
-            const pwCheck = document.getElementById('signupPwCheck').value.trim();
-            const nickname = document.getElementById('signupNickname').value.trim();
-            const name = document.getElementById('signupName').value.trim();
-            const phone = document.getElementById('signupPhone').value.trim();
-
-            if(!id || !pw || !nickname || !name || !phone) { alert('모든 항목을 입력해주세요.'); return; }
-            if(pw !== pwCheck) { alert('비밀번호가 일치하지 않습니다.'); return; }
-            if(users[id]) { alert('이미 존재하는 아이디입니다.'); return; }
-
-            usersRef.child(id).set({ id, pw, nickname, name, phone, provider: '일반', scraps: {}, profilePic: null });
-            alert('회원가입이 완료되었습니다. 로그인해주세요.');
-            showPage('login', document.querySelector('.auth-menu a'));
-        }
-
-        function handleLogin() {
-            const id = document.getElementById('loginId').value.trim();
-            const pw = document.getElementById('loginPw').value.trim();
-
-            if(!id) { alert('[로그인 실패] 아이디를 입력하지 않으셨습니다.'); return; }
-            if(!pw) { alert('[로그인 실패] 비밀번호를 입력하지 않으셨습니다.'); return; }
-
-            const userById = users[id];
-            if(!userById) { alert('[로그인 실패] 존재하지 않는 아이디입니다.'); return; }
-            if(userById.pw !== pw) { alert('[로그인 실패] 비밀번호가 틀렸습니다.'); return; }
-            
-            currentUser = userById;
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-            if(!currentUser.scraps) currentUser.scraps = {};
-            
-            alert(`[로그인 성공] ${userById.nickname}님 환영합니다!`);
-            updateAuthMenu();
-            showPage('home', document.querySelector('.nav-menu a'));
-        }
-
-        function openSocialModal(provider) {
-            tempSocialProvider = provider;
-            document.getElementById('socialProviderName').innerText = provider;
-            document.getElementById('socialNicknameInput').value = '';
-            document.getElementById('socialNameInput').value = '';
-            document.getElementById('socialPhoneInput').value = '';
-            document.getElementById('socialVerifyCodeInput').value = '';
-            document.getElementById('socialModal').style.display = 'flex';
-        }
-
-        function sendVerificationCode() {
-            const phone = document.getElementById('socialPhoneInput').value.trim();
-            if(!phone) { alert('휴대폰 번호를 먼저 입력해주세요.'); return; }
-            if(phone.length < 10) { alert('올바른 휴대폰 번호를 입력해주세요.'); return; }
-            alert(`[가상 문자 발송] ${phone} 번호로 인증번호 [ 1234 ]가 발송되었습니다.`);
-        }
-
-        function confirmSocialLogin() {
-            const nickname = document.getElementById('socialNicknameInput').value.trim();
-            const name = document.getElementById('socialNameInput').value.trim();
-            const phone = document.getElementById('socialPhoneInput').value.trim();
-            const code = document.getElementById('socialVerifyCodeInput').value.trim();
-
-            if(!nickname || !name || !phone || !code) { alert('모든 항목을 입력해주세요.'); return; }
-            if(code !== '1234') { alert('[인증 실패] 인증번호가 틀렸습니다. (테스트용 1234)'); return; }
-
-            const tempId = `${tempSocialProvider}_user_${Math.floor(Math.random() * 10000)}`;
-            currentUser = {
-                id: tempId, name, nickname, phone,
-                provider: tempSocialProvider, scraps: {}, profilePic: null
-            };
-            
-            usersRef.child(tempId).set(currentUser);
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            closeModal('socialModal');
-            alert(`[인증 완료] ${tempSocialProvider} 로그인 성공!`);
-            updateAuthMenu();
-            showPage('home', document.querySelector('.nav-menu a'));
-        }
-
-        function handleLogout() {
-            currentUser = null;
-            sessionStorage.removeItem('currentUser');
-            alert('로그아웃 되었습니다.');
-            updateAuthMenu();
-            showPage('home', document.querySelector('.nav-link'));
-        }
-
-        function updateAuthMenu() {
-            const authMenu = document.getElementById('authMenu');
-            const adminLink = document.getElementById('adminMenuLink');
-            if(currentUser) {
-                authMenu.innerHTML = `<a style="background:#4a4a60; cursor:default;">${escapeHtml(currentUser.nickname)}님</a><a class="logout-btn" onclick="handleLogout()">로그아웃</a>`;
-                adminLink.style.display = currentUser.id === 'admin' ? 'block' : 'none';
-            } else {
-                authMenu.innerHTML = `<a onclick="showPage('login', this)">로그인</a><a onclick="showPage('signup', this)">회원가입</a>`;
-                adminLink.style.display = 'none';
-            }
-        }
-
-        function handleProfilePicUpload(event) {
-            const file = event.target.files[0];
-            if(file) {
-                if(file.size > 3 * 1024 * 1024) { alert('프로필 사진은 3MB 이하만 가능합니다.'); return; }
-                compressImage(file).then((compressed) => {
-                    currentUser.profilePic = compressed.data;
-                    usersRef.child(currentUser.id).update({ profilePic: currentUser.profilePic });
-                    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    loadMypage();
-                    alert('프로필 사진이 변경되었습니다.');
-                });
-            }
-        }
-
-        function loadMypage() {
-            const mypageContent = document.getElementById('mypageContent');
-            if(!currentUser) { mypageContent.innerHTML = `<p style="text-align:center; color:#666;">로그인이 필요한 페이지입니다.</p>`; return; }
-
-            let myPosts = [];
-            ['semi', 'other', 'free', 'ref'].forEach(type => {
-                const typePosts = posts[type] || {};
-                Object.keys(typePosts).forEach(key => {
-                    const p = typePosts[key];
-                    p.id = key;
-                    if(currentUser.id === p.authorId) myPosts.push({ type, post: p });
-                });
-            });
-
-            let scrapPosts = [];
-            const userScraps = currentUser.scraps || {};
-            ['semi', 'other', 'free', 'ref'].forEach(type => {
-                const typePosts = posts[type] || {};
-                Object.keys(typePosts).forEach(key => {
-                    const p = typePosts[key];
-                    p.id = key;
-                    if(userScraps[key]) scrapPosts.push({ type, post: p });
-                });
-            });
-
-            let myPostsHtml = myPosts.length === 0 ? `<p style="color:#999;">작성한 글이 없습니다.</p>` : 
-                myPosts.map(m => `<div class="post-item"><div class="content-area" onclick="viewPost('${m.type}', '${m.post.id}')"><h3>${escapeHtml(m.post.title)}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div></div>`).join('');
-
-            let scrapPostsHtml = scrapPosts.length === 0 ? `<p style="color:#999;">스크랩한 글이 없습니다.</p>` : 
-                scrapPosts.map(s => {
-                    const scrapUser = users[s.post.authorId];
-                    return `<div class="post-item"><div class="content-area" onclick="viewPost('${s.type}', '${s.post.id}')"><h3>${escapeHtml(s.post.title)}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${escapeHtml(s.post.author)} | ${s.post.date} <span class="view-btn">[보기]</span></div></div></div>`;
-                }).join('');
-
-            mypageContent.innerHTML = `
-                <div class="section-title">🧑‍💻 마이페이지</div>
-                <div class="mypage-header">
-                    <div class="mypage-profile-pic" id="mypageProfilePic">${currentUser.profilePic ? `<img src="${currentUser.profilePic}" style="width:100%; height:100%; object-fit:cover;">` : escapeHtml(currentUser.nickname.charAt(0))}</div>
-                    <div>
-                        <h2 style="margin-bottom:10px;">${escapeHtml(currentUser.nickname)}님의 마이페이지</h2>
-                        <input type="file" accept="image/*" onchange="handleProfilePicUpload(event)" style="display:none;" id="profilePicInput">
-                        <button class="btn-auth" style="width:auto; padding:8px 15px; font-size:14px;" onclick="document.getElementById('profilePicInput').click()">프로필 사진 변경</button>
-                    </div>
-                </div>
-                <div class="mypage-info">
-                    <div class="info-row"><div class="info-label">아이디</div><div class="info-value">${escapeHtml(currentUser.id)}</div></div>
-                    <div class="info-row"><div class="info-label">닉네임</div><div class="info-value">${escapeHtml(currentUser.nickname)}</div></div>
-                    <div class="info-row"><div class="info-label">이름</div><div class="info-value">${escapeHtml(currentUser.name)}</div></div>
-                    <div class="info-row"><div class="info-label">연락처</div><div class="info-value">${escapeHtml(currentUser.phone)}</div></div>
-                    <div class="info-row"><div class="info-label">가입 방식</div><div class="info-value">${escapeHtml(currentUser.provider)}</div></div>
-                </div>
-                <div class="mypage-section"><h3>📝 내가 쓴 게시글</h3><div class="post-list">${myPostsHtml}</div></div>
-                <div class="mypage-section"><h3>⭐ 나의 스크랩 목록</h3><div class="post-list">${scrapPostsHtml}</div></div>
-            `;
-        }
-
-        function loadAdminPage() {
-            const tbody = document.getElementById('adminUserList');
-            if(!currentUser || currentUser.id !== 'admin') return;
-            tbody.innerHTML = Object.values(users).map(u => `
-                <tr>
-                    <td>${escapeHtml(u.id)}</td><td>${escapeHtml(u.nickname)}</td><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.phone)}</td><td>${escapeHtml(u.provider)}</td>
-                    <td>${u.id === 'admin' ? '<span style="color:#999;">삭제 불가</span>' : `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')">삭제</button>`}</td>
-                </tr>
-            `).join('');
-        }
-
-        function deleteUser(userId) {
-            if(confirm(`${userId} 님을 정말 삭제하시겠습니까?`)) {
-                usersRef.child(userId).remove();
-                alert('회원이 삭제되었습니다.');
-            }
-        }
-
-        updateAuthMenu();
-
-        function writePost(type) {
-            const titleInput = document.getElementById(`${type}Title`);
-            const contentInput = document.getElementById(`${type}Content`);
-            const regionInput = document.getElementById(`${type}Region`);
-            
-            if(!titleInput || titleInput.value.trim() === "") { alert('[경고] 제목을 입력해주세요.'); return; }
-            if(!contentInput || contentInput.value.trim() === "") { alert('[경고] 내용을 입력해주세요.'); return; }
-            if(type !== 'free' && type !== 'ref' && (!regionInput || !regionInput.value)) { alert('[경고] 근무 지역을 선택해주세요.'); return; }
-
-            const titleValue = titleInput.value;
-            const contentValue = contentInput.value;
-            const regionValue = regionInput ? regionInput.value : '지역 없음';
-
-            const savePostToDB = (filesDataArray) => {
-                const newPostRef = postsRef.child(type).push();
-                const newPost = { 
-                    title: titleValue, content: contentValue, 
-                    author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(),
-                    region: regionValue, files: filesDataArray, comments: {}
-                };
-                newPostRef.set(newPost).then(() => {
-                    alert('글이 성공적으로 작성되었습니다!');
-                    titleInput.value = ""; 
-                    contentInput.value = "";
-                    if(regionInput) regionInput.value = "";
-                    tempSelectedFiles = [];
-                    if(document.getElementById(`${type}FileName`)) document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
-                }).catch((error) => {
-                    console.error("저장 실패", error);
-                    if(filesDataArray && filesDataArray.length > 0) {
-                        newPost.files = []; 
-                        newPostRef.set(newPost).then(() => {
-                            alert('글은 작성되었으나, 파일 용량 제한으로 인해 첨부파일은 제외되었습니다.');
-                            titleInput.value = ""; 
-                            contentInput.value = "";
-                            if(regionInput) regionInput.value = "";
-                            tempSelectedFiles = [];
-                            if(document.getElementById(`${type}FileName`)) document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
-                        }).catch(() => {
-                            alert('글 작성에 실패했습니다. Firebase 데이터베이스 규칙이 true로 되어있는지 확인해주세요.');
-                        });
-                    } else {
-                        alert('글 작성 실패! Firebase 데이터베이스가 잠겨있을 수 있습니다. (규칙 탭 확인 필요)');
-                    }
-                });
-            };
-
-            if (tempSelectedFiles.length > 0) {
-                let videoCount = 0;
-                for(let i=0; i<tempSelectedFiles.length; i++) {
-                    if(tempSelectedFiles[i].type.startsWith('video/')) videoCount++;
-                }
-                if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
-                if(tempSelectedFiles.length > 10) { alert('파일은 최대 10개까지 업로드 가능합니다.'); return; }
-
-                const promises = [];
-                for(let i=0; i<tempSelectedFiles.length; i++) {
-                    if(tempSelectedFiles[i].type.startsWith('video/')) {
-                        if(tempSelectedFiles[i].size > 3 * 1024 * 1024) { alert('동영상 파일이 너무 큽니다. 3MB 이하만 가능합니다.'); return; }
-                    }
-                    promises.push(compressImage(tempSelectedFiles[i]));
-                }
-                Promise.all(promises).then((results) => {
-                    savePostToDB(results);
-                });
-            } else {
-                savePostToDB([]);
-            }
-        }
-
-        function openImageViewer(base64Src) {
-            try {
-                const parts = base64Src.split(',');
-                const mime = parts[0].match(/:(.*?);/)[1];
-                const byteString = atob(parts[1]);
-                let u8 = new Uint8Array(byteString.length);
-                for (let i = 0; i < byteString.length; i++) {
-                    u8[i] = byteString.charCodeAt(i);
-                }
-                const blob = new Blob([u8], { type: mime });
-                const url = URL.createObjectURL(blob);
-                
-                const newWindow = window.open('', '_blank');
-                if (newWindow) {
-                    newWindow.location.href = url;
-                    setTimeout(() => URL.revokeObjectURL(url), 10000);
-                } else {
-                    alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
-                }
-            } catch (e) {
-                console.error("이미지 열기 실패", e);
-                window.open(base64Src, '_blank');
-            }
-        }
-
-        function getFilesHTML(files) {
-            if(!files || files.length === 0) return '';
-            let html = '<div class="file-attachment-box">';
-            files.forEach(f => {
-                if(f.type.startsWith('image/')) {
-                    html += `<img src="${f.data}" alt="${escapeHtml(f.name)}" onclick="openImageViewer(this.src)" style="cursor: zoom-in; max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">`;
-                } else if(f.type.startsWith('video/')) {
-                    html += `<video src="${f.data}" controls style="max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">지원되지 않는 동영상 형식입니다.</video>`;
-                } else {
-                    html += `<a href="${f.data}" download="${escapeHtml(f.name)}" class="file-download-btn">📎 ${escapeHtml(f.name)} 다운로드</a>`;
-                }
-            });
-            html += '</div>';
-            return html;
-        }
-
-        function renderPosts() {
-            ['semi', 'other', 'free', 'ref'].forEach(type => {
-                const listId = type === 'ref' ? 'refList' : `${type}List`;
-                const list = document.getElementById(listId);
-                if(!list) return;
-                
-                const bulkBar = document.getElementById(`bulkBar_${type}`);
-                if(bulkBar) {
-                    bulkBar.classList.toggle('active', currentUser && currentUser.id === 'admin');
-                }
-
-                const typePosts = posts[type] || {};
-                const postArray = Object.keys(typePosts).map(key => ({ id: key, ...typePosts[key] })).reverse();
-                if (postArray.length === 0) {
-                    list.innerHTML = `<p style="color:#999;">등록된 글이 없습니다.</p>`;
-                } else {
-                    list.innerHTML = postArray.map(p => {
-                        const authorUser = users[p.authorId];
-                        const regionTag = p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : '';
-                        const fileIcon = (p.files && p.files.length > 0) || p.file ? ' 📎' : '';
-                        const commentCount = p.comments ? Object.keys(p.comments).length : 0;
-                        const commentIcon = commentCount > 0 ? ` 💬${commentCount}` : '';
-                        
-                        const checkboxHtml = (currentUser && currentUser.id === 'admin') 
-                            ? `<label class="admin-checkbox-label"><input type="checkbox" class="admin-checkbox" data-type="${type}" data-id="${p.id}"></label>` 
-                            : '';
-                        
-                        return `<div class="post-item">
-                            ${checkboxHtml}
-                            <div class="content-area" onclick="viewPost('${type}', '${p.id}')">
-                                <h3>${regionTag} ${escapeHtml(p.title)}${fileIcon}${commentIcon}</h3>
-                                <p>${linkify(escapeHtml(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content))}</p>
-                                <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(p.author)} | ${p.date} <span class="view-btn">[클릭하여 보기]</span></div>
-                            </div>
-                        </div>`;
-                    }).join('');
-                }
-            });
-            renderMainList('mainSemiList', 'semi');
-            renderMainList('mainOtherList', 'other');
-        }
-
-        function renderMainList(elementId, type) {
-            const list = document.getElementById(elementId);
-            const typePosts = posts[type] || {};
-            const latestPosts = Object.keys(typePosts).map(key => ({ id: key, ...typePosts[key] })).reverse().slice(0, 3);
-            if (latestPosts.length === 0) list.innerHTML = `<p style="color:#999;">아직 등록된 글이 없습니다.</p>`;
-            else list.innerHTML = latestPosts.map(p => {
-                const authorUser = users[p.authorId];
-                return `<div class="post-item">
-                    <div class="content-area" onclick="viewPost('${type}', '${p.id}')">
-                        <h3>${p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''} ${escapeHtml(p.title)}</h3>
-                        <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(p.author)} | ${p.date}</div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        function toggleAllPosts(checkAll, type) {
-            document.querySelectorAll(`.admin-checkbox[data-type="${type}"]`).forEach(cb => {
-                cb.checked = checkAll.checked;
-            });
-        }
-
-        function bulkDeletePosts(type) {
-            const checked = document.querySelectorAll(`.admin-checkbox[data-type="${type}"]:checked`);
-            if(checked.length === 0) { alert('삭제할 게시글을 선택해주세요.'); return; }
-            
-            if(confirm(`선택한 ${checked.length}개의 게시글을 정말 삭제하시겠습니까?`)) {
-                let promises = [];
-                checked.forEach(cb => {
-                    const id = cb.getAttribute('data-id');
-                    promises.push(postsRef.child(type).child(id).remove());
-                });
-                Promise.all(promises).then(() => {
-                    alert('선택한 게시글이 모두 삭제되었습니다.');
-                    document.getElementById(`selectAll_${type}`).checked = false;
-                }).catch(err => alert('삭제 중 오류가 발생했습니다.'));
-            }
-        }
-
-        function bulkMovePosts(type) {
-            const checked = document.querySelectorAll(`.admin-checkbox[data-type="${type}"]:checked`);
-            const newType = document.getElementById(`bulkMoveSelect_${type}`).value;
-            
-            if(checked.length === 0) { alert('이동할 게시글을 선택해주세요.'); return; }
-            if(!newType) { alert('이동할 게시판을 선택해주세요.'); return; }
-            
-            if(confirm(`선택한 ${checked.length}개의 게시글을 '${newType}' 게시판으로 이동하시겠습니까?`)) {
-                let promises = [];
-                checked.forEach(cb => {
-                    const id = cb.getAttribute('data-id');
-                    if(type !== newType) {
-                        const postData = posts[type][id];
-                        promises.push(postsRef.child(newType).push(postData));
-                        promises.push(postsRef.child(type).child(id).remove());
-                    }
-                });
-                Promise.all(promises).then(() => {
-                    alert('선택한 게시글이 모두 이동되었습니다.');
-                    document.getElementById(`bulkMoveSelect_${type}`).value = '';
-                    document.getElementById(`selectAll_${type}`).checked = false;
-                }).catch(err => alert('이동 중 오류가 발생했습니다.'));
-            }
-        }
-
-        function viewRecJob(jobId) {
-            const job = recommendedJobs[jobId];
-            if(!job) return;
-
-            if(job.originType && job.originId && posts[job.originType] && posts[job.originType][job.originId]) {
-                viewPost(job.originType, job.originId);
-            } else {
-                document.getElementById('modalTitle').innerText = job.title;
-                document.getElementById('modalMeta').innerHTML = job.region ? `<span class="tag">${escapeHtml(job.region)}</span>` : '';
-                document.getElementById('modalContent').innerHTML = linkify(escapeHtml(job.info).replace(/\n/g, '<br>'));
-                document.getElementById('modalActions').innerHTML = `<button class="btn-action" style="background:#ccc; color:#333;" onclick="closeModal('postModal')">닫기</button>`;
-                document.getElementById('modalMoveArea').style.display = 'none';
-                document.getElementById('postModal').style.display = 'flex';
-            }
-        }
-
-        function viewPost(type, postId) {
-            if(!posts[type] || !posts[type][postId]) {
-                alert('원본 게시글이 삭제되었거나 존재하지 않습니다.');
-                return;
-            }
-            const post = posts[type][postId];
-            const authorUser = users[post.authorId] || {};
-            document.getElementById('modalTitle').innerText = post.title;
-            document.getElementById('modalMeta').innerHTML = `
-                ${getProfileImgHTML(authorUser)} <span>작성자: <strong>${escapeHtml(post.author)}</strong></span>
-                <span>작성일: ${post.date}</span>
-                ${post.region && post.region !== '지역 없음' ? `<span class="tag">${escapeHtml(post.region)}</span>` : ''}
-            `;
-            
-            const filesToRender = post.files || (post.file ? [post.file] : []);
-            document.getElementById('modalContent').innerHTML = linkify(escapeHtml(post.content).replace(/\n/g, '<br>')) + getFilesHTML(filesToRender);
-
-            const actionsDiv = document.getElementById('modalActions');
-            const moveArea = document.getElementById('modalMoveArea');
-            actionsDiv.innerHTML = '';
-            moveArea.innerHTML = '';
-            moveArea.style.display = 'none';
-
-            if(currentUser) {
-                let html = '';
-                if(currentUser.id === post.authorId || currentUser.id === 'admin') {
-                    html += `<button class="btn-action btn-edit" onclick="editPost('${type}', '${postId}')">수정하기</button>`;
-                    html += `<button class="btn-action btn-delete" onclick="deletePost('${type}', '${postId}')">삭제하기</button>`;
-                }
-                if(currentUser.id !== post.authorId) {
-                    const isScrapped = currentUser.scraps && currentUser.scraps[postId];
-                    html += `<button class="btn-action btn-scrap" onclick="toggleScrap('${type}', '${postId}')">${isScrapped ? '스크랩 취소' : '스크랩하기'}</button>`;
-                }
-                actionsDiv.innerHTML = html;
-
-                if(currentUser.id === 'admin') {
-                    actionsDiv.innerHTML += `<button class="btn-action btn-rec" onclick="addPostToRec('${type}', '${postId}')">추천 알바 등록</button>`;
-                    moveArea.style.display = 'block';
-                    moveArea.innerHTML = `
-                        <label style="font-weight:700; margin-right:10px;">게시판 이동 (관리자):</label>
-                        <select id="moveSelect">
-                            <option value="">게시판 선택</option>
-                            <option value="semi">반도체현장</option>
-                            <option value="other">기타알바</option>
-                            <option value="ref">자료실</option>
-                            <option value="free">자유게시판</option>
-                        </select>
-                        <button class="btn-action btn-move" onclick="movePost('${type}', '${postId}')">이동하기</button>
-                    `;
-                }
-            }
-            
-            currentViewingPost = { type, id: postId };
-            renderComments(type, postId);
-            
-            document.getElementById('postModal').style.display = 'flex';
-        }
-
-        function renderComments(type, postId) {
-            const post = posts[type][postId];
-            const comments = post.comments || {};
-            const commentArray = Object.keys(comments).map(key => ({ id: key, ...comments[key] })).sort((a,b) => a.timestamp - b.timestamp);
-            
-            document.getElementById('commentCount').innerText = commentArray.length;
-            
-            const list = document.getElementById('commentList');
-            if(commentArray.length === 0) {
-                list.innerHTML = `<p style="color:#999; font-size:14px;">아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>`;
-            } else {
-                list.innerHTML = commentArray.map(c => {
-                    const authorUser = users[c.authorId] || { nickname: c.author, id: c.authorId };
-                    const isAuthor = (currentUser && (currentUser.id === c.authorId || currentUser.id === 'admin'));
-                    const deleteBtn = isAuthor ? `<button class="comment-delete-btn" onclick="deleteComment('${type}', '${postId}', '${c.id}')">삭제</button>` : '';
-                    
-                    return `<div class="comment-item">
-                        <div class="comment-meta">
-                            <div class="comment-author">${getProfileImgHTML(authorUser)} ${escapeHtml(c.author)}</div>
-                            <div>
-                                <span class="comment-date">${new Date(c.timestamp).toLocaleString()}</span>
-                                ${deleteBtn}
-                            </div>
-                        </div>
-                        <div class="comment-content">${linkify(escapeHtml(c.content))}</div>
-                    </div>`;
-                }).join('');
-            }
-        }
-
-        async function addComment() {
-            if(!currentViewingPost.type || !currentViewingPost.id) return;
-            
-            const input = document.getElementById('commentInput');
-            const content = input.value.trim();
-            if(!content) { alert('댓글 내용을 입력해주세요.'); return; }
-            
-            let author = '익명';
-            let authorId = 'guest';
-            
-            if(currentUser) {
-                author = currentUser.nickname;
-                authorId = currentUser.id;
-            } else {
-                author = await getAnonName();
-            }
-            
-            const commentRef = postsRef.child(currentViewingPost.type).child(currentViewingPost.id).child('comments').push();
-            commentRef.set({
-                author: author,
-                authorId: authorId,
-                content: content,
-                timestamp: Date.now()
-            }).then(() => {
-                input.value = '';
-            }).catch(err => {
-                alert('댓글 등록에 실패했습니다.');
-            });
-        }
-
-        function deleteComment(type, postId, commentId) {
-            if(!confirm('댓글을 삭제하시겠습니까?')) return;
-            
-            postsRef.child(type).child(postId).child('comments').child(commentId).remove()
-                .then(() => {
-                    alert('댓글이 삭제되었습니다.');
-                })
-                .catch(err => {
-                    alert('댓글 삭제에 실패했습니다.');
-                });
-        }
-
-        function handleCommentKeyPress(event) {
-            if (event.key === 'Enter') addComment();
-        }
-
-        function toggleScrap(type, postId) {
-            const scrapRef = usersRef.child(currentUser.id).child('scraps').child(postId);
-            if(currentUser.scraps && currentUser.scraps[postId]) {
-                scrapRef.remove();
-                alert('스크랩이 취소되었습니다.');
-            } else {
-                scrapRef.set(true);
-                alert('스크랩되었습니다. 마이페이지에서 확인하세요!');
-            }
-        }
-
-        function addPostToRec(type, postId) {
-            const post = posts[type][postId];
-            recJobsRef.push({ 
-                title: post.title, 
-                info: post.content, 
-                region: post.region || '미지정',
-                originType: type,
-                originId: postId
-            });
-            alert('오늘의 추천 알바에 등록되었습니다!');
-            closeModal('postModal');
-        }
-
-        function movePost(type, postId) {
-            const newType = document.getElementById('moveSelect').value;
-            if(!newType) { alert('이동할 게시판을 선택하세요.'); return; }
-            if(newType === type) { alert('같은 게시판입니다.'); return; }
-            const post = posts[type][postId];
-            postsRef.child(newType).push(post);
-            postsRef.child(type).child(postId).remove();
-            alert('게시판이 이동되었습니다.');
-            closeModal('postModal');
-        }
-
-        function editPost(type, postId) {
-            const post = posts[type][postId];
-            editingFiles = post.files || (post.file ? [post.file] : []);
-
-            document.getElementById('modalTitle').innerHTML = `<input type="text" id="editTitle" value="${escapeHtml(post.title)}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">`;
-            document.getElementById('modalContent').innerHTML = `
-                <textarea id="editContent" style="width:100%; height:150px; padding:10px; border:1px solid #ccc; border-radius:5px;">${escapeHtml(post.content)}</textarea>
-                ${renderEditFileArea()}
-            `;
-            document.getElementById('modalActions').innerHTML = `<button class="btn-action btn-edit" onclick="savePost('${type}', '${postId}')">저장하기</button><button class="btn-action" style="background:#ccc; color:#333;" onclick="viewPost('${type}', '${postId}')">취소</button>`;
-            document.getElementById('modalMoveArea').style.display = 'none';
-        }
-
-        function renderEditFileArea() {
-            let html = '<div id="editFileArea">';
-            if(editingFiles && editingFiles.length > 0) {
-                editingFiles.forEach((f, idx) => {
-                    html += `<div class="edit-file-item">
-                                <span>첨부된 파일: ${escapeHtml(f.name)}</span>
-                                <button class="btn-action btn-delete" style="margin:0; padding:5px 10px;" onclick="removeEditingFile(${idx})">삭제</button>
-                             </div>`;
-                });
-            }
-            html += `<div class="file-upload-wrapper">
-                        <label class="file-upload-label" for="editFile">📎 새 파일 첨부 (교체/추가)</label>
-                        <input type="file" id="editFile" multiple style="display:none;" onchange="document.getElementById('editFileName').innerText = this.files.length > 0 ? this.files.length + '개 파일 선택됨' : (editingFiles.length > 0 ? '기존 파일 유지 중' : '선택된 파일 없음');">
-                        <div class="file-name-display" id="editFileName">${editingFiles.length > 0 ? '기존 파일 유지 중' : '선택된 파일 없음'}</div>
-                     </div>`;
-            html += '</div>';
-            return html;
-        }
-
-        function removeEditingFile(idx) {
-            editingFiles.splice(idx, 1);
-            document.getElementById('modalContent').innerHTML = document.getElementById('modalContent').innerHTML.split('<div id="editFileArea">')[0] + renderEditFileArea();
-        }
-
-        function savePost(type, postId) {
-            const newTitle = document.getElementById('editTitle').value.trim();
-            const newContent = document.getElementById('editContent').value.trim();
-            if(!newTitle || !newContent) { alert('제목과 내용을 모두 입력해주세요.'); return; }
-
-            const newFileInput = document.getElementById('editFile');
-            const newFiles = newFileInput.files;
-            const postRef = postsRef.child(type).child(postId);
-
-            let videoCount = 0;
-            for(let i=0; i<editingFiles.length; i++) {
-                if(editingFiles[i].type.startsWith('video/')) videoCount++;
-            }
-
-            if(newFiles.length > 0) {
-                for(let i=0; i<newFiles.length; i++) {
-                    if(newFiles[i].type.startsWith('video/')) videoCount++;
-                }
-                if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
-                if((editingFiles.length + newFiles.length) > 10) { alert('파일은 최대 10개까지 업로드 가능합니다.'); return; }
-
-                const promises = [];
-                for(let i=0; i<newFiles.length; i++) {
-                    promises.push(compressImage(newFiles[i]));
-                }
-                Promise.all(promises).then((results) => {
-                    const allFiles = editingFiles.concat(results);
-                    postRef.update({ title: newTitle, content: newContent, files: allFiles, file: null, date: `${new Date().toLocaleString()} (수정됨)` })
-                    .then(() => {
-                        alert('글이 수정되었습니다.');
-                    }).catch(() => {
-                        postRef.update({ title: newTitle, content: newContent, files: [], file: null, date: `${new Date().toLocaleString()} (수정됨)` })
-                        .then(() => alert('글은 수정되었으나, 파일 용량 제한으로 첨부파일은 제외되었습니다.'))
-                        .catch(() => alert('수정 실패. DB 규칙을 확인하세요.'));
-                    });
-                });
-            } else {
-                if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
-                postRef.update({ title: newTitle, content: newContent, files: editingFiles, file: null, date: `${new Date().toLocaleString()} (수정됨)` })
-                .then(() => {
-                    alert('글이 수정되었습니다.');
-                }).catch(() => alert('수정 실패. DB 규칙을 확인하세요.'));
-            }
-            closeModal('postModal');
-        }
-
-        function deletePost(type, postId) {
-            if(confirm('정말 삭제하시겠습니까?')) {
-                postsRef.child(type).child(postId).remove();
-                alert('삭제되었습니다.');
-                closeModal('postModal');
-            }
-        }
-
-        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-        window.onclick = function(event) {
-            if (event.target.id === 'postModal') closeModal('postModal');
-            if (event.target.id === 'socialModal') closeModal('socialModal');
-            if (event.target.id === 'chatModal') closeModal('chatModal');
-        }
-
-        function addRecJob() {
-            const title = document.getElementById('recJobTitle').value.trim();
-            const info = document.getElementById('recJobInfo').value.trim();
-            if(!title || !info) { alert('제목과 정보를 모두 입력해주세요.'); return; }
-            recJobsRef.push({ title, info, region: '미지정' });
-            document.getElementById('recJobTitle').value = '';
-            document.getElementById('recJobInfo').value = '';
-        }
-
-        function deleteRecJob(jobId) {
-            recJobsRef.child(jobId).remove();
-            alert('추천 알바가 삭제되었습니다.');
-        }
-
-        function renderAdminRecJobs() {
-            const list = document.getElementById('adminRecJobList');
-            const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] }));
-            if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
-            else list.innerHTML = jobs.map(j => {
-                const previewInfo = j.info.length > 30 ? j.info.substring(0, 30) + '...' : j.info;
-                return `<div class="job-card"><div class="job-title">${escapeHtml(j.title)}</div><div class="job-info">${escapeHtml(previewInfo)}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${j.id}')">삭제</button></div>`;
-            }).join('');
-        }
-
-        function renderHomeRecJobs() {
-            const list = document.getElementById('homeJobList');
-            const jobs = Object.keys(recommendedJobs).map(key => ({ id: key, ...recommendedJobs[key] })).reverse().slice(0, 4);
-            if(jobs.length === 0) list.innerHTML = `<p style="color:#999;">등록된 추천 알바가 없습니다.</p>`;
-            else list.innerHTML = jobs.map(j => {
-                const previewInfo = j.info.length > 50 ? j.info.substring(0, 50) + '...' : j.info;
-                return `<div class="job-card" onclick="viewRecJob('${j.id}')">
-                    <div class="job-title">${j.region ? `<span class="tag">${escapeHtml(j.region)}</span>` : ''} ${escapeHtml(j.title)}</div>
-                    <div class="job-info">${escapeHtml(previewInfo)}</div>
-                </div>`;
-            }).join('');
-        }
-
-        function searchJobs() {
-            const input = document.getElementById('jobSearchInput');
-            const regionSelect = document.getElementById('searchRegion');
-            const filter = input.value.toUpperCase();
-            const region = regionSelect.value;
-            
-            const results = [];
-            ['semi', 'other'].forEach(type => {
-                const typePosts = posts[type] || {};
-                Object.keys(typePosts).forEach(key => {
-                    const p = typePosts[key];
-                    p.id = key;
-                    const matchText = (p.title + p.content + p.author).toUpperCase().indexOf(filter) > -1;
-                    const matchRegion = !region || p.region === region;
-                    if(matchText && matchRegion) results.push({ type, post: p });
-                });
-            });
-
-            const searchDiv = document.getElementById('searchResults');
-            if(filter === "" && region === "") {
-                searchDiv.innerHTML = `<p style="color:#999;">검색어를 입력하면 전체 게시판에서 공고를 찾아드립니다.</p>`;
-                return;
-            }
-            if (results.length === 0) {
-                searchDiv.innerHTML = `<p style="color:#999;">검색 결과가 없습니다.</p>`;
-            } else {
-                searchDiv.innerHTML = results.map(r => {
-                    const authorUser = users[r.post.authorId];
-                    return `<div class="post-item">
-                        <div class="content-area" onclick="viewPost('${r.type}', '${r.post.id}')">
-                            <h3>${r.post.region ? `<span class="tag">${escapeHtml(r.post.region)}</span>` : ''} ${escapeHtml(r.post.title)}</h3>
-                            <p>${linkify(escapeHtml(r.post.content.length > 50 ? r.post.content.substring(0, 50) + '...' : r.post.content))}</p>
-                            <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(r.post.author)} | ${r.post.date}</div>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-        }
-
-        function openChatModal() {
-            const mainScreen = document.getElementById('chatScreen');
-            const modalScreen = document.getElementById('chatModalScreen');
-            modalScreen.innerHTML = mainScreen.innerHTML;
-            modalScreen.scrollTop = modalScreen.scrollHeight;
-            document.getElementById('chatModal').style.display = 'flex';
-            document.getElementById('chatModalInput').focus();
-        }
-
-        async function sendMessage(isModal = false) {
-            const inputId = isModal ? 'chatModalInput' : 'chatInput';
-            const input = document.getElementById(inputId);
-            const message = input.value.trim();
-            if (message !== "") {
-                stopFakeChat();
-
-                let author = '익명';
-                let authorId = 'guest';
-
-                if (currentUser) {
-                    author = currentUser.nickname;
-                    authorId = currentUser.id;
-                } else {
-                    author = await getAnonName();
-                    authorId = 'guest';
-                }
-                
-                let chatData = { author, authorId, message, timestamp: Date.now() };
-                
-                // 답장 대상이 있다면 데이터에 포함
-                if(currentReply) {
-                    chatData.replyTo = currentReply;
-                }
-                
-                chatRef.push(chatData);
-                input.value = "";
-                cancelReply(); // 전송 후 답장 상태 초기화
-            }
-        }
-        function handleKeyPress(event) { if (event.key === 'Enter') sendMessage(false); }
-        function handleModalKeyPress(event) { if (event.key === 'Enter') sendMessage(true); }
-
-
-        // =========================================================
-        // 가짜 채팅 (스크린세이버) 시스템
-        // =========================================================
-        const fakeNicknames = ['알바고수', '평택일번지', '주차왕', '궁금해요', '현직러', '친절맨', '도우미'];
-        const fakeScript = [
-            "평택7번게이트 근처 무료주차장있나요?",
-            "죄송요 저는 낼 내려가는 일인입니다. 고수분들이 답해주실거에요",
-            "무료 주차장은 없습니다",
-            "7번 게이트 입문 하시는 거라면 그린존 일하시는거 같은데 개서식당이나 정성 식당 식권 식사하시며 주차하시고 식당 버스 이용하시는게 빠를듯요",
-            "개성식당 정성식당",
-            "숙소는 고덕여염리이라서요",
-            "그러면 차량 이용은 힘드시고 자전거나 오토바이뿐 입니다",
-            "걷기에는 좀 힘들고요",
-            "네",
-            "회사 어디에 입사 하셨나요?",
-            "광건요",
-            "광건이라면 칸막이 공사죠? 탭동인가요?",
-            "5동은 식사하고 주차가능 하는곳 아실까요?",
-            "p4요 복합동요",
-            "5번 게이트 도 그린동 탭동 복합동이라 주차 불가입니다",
-            "5번 게이트 입문하시면 빨라요 복합동 2번게이트도 괞찬고요",
-            "걸어서10분안으로주차 가능한곳은요",
-            "없음니다",
-            "물산이아니고 E&J이라서요",
-            "정성한식 뷔페 찍고 빌라쪽 쭉 올라가시면 아침 빠른시간 군데군데 주차 자리 있어요 그리고 걸어서 오면 10분 거리입니다 5번게이트",
-            "2번개이트에서 걸어서 10분 거리에 유료주차장은 있어요. 월주차 33만원 입니다.",
-            "네 E&a 5번게이트 복합동 맞습니다",
-            "주차편하게 하실거면 월 주차 해야되욤",
-            "2 7 5게이트사용 가능한데",
-            "2번게이트 사용 이 애매해서요 물산 이 오픈안하면.못들어가서요",
-            "5게이트나 7번게이트 이용하시면 호이스트 이용하실껀데 출퇴근 시간은 대기줄 길어요"
-        ];
-        let fakeScriptIndex = 0;
-        let fakeChatInterval = null;
-        let inactivityTimeout = null;
+        chatRef.on('child_added', s => { const c = s.val(); const k = s.key; handleNewChatMessage(k, c); if(chatInitialized && (Date.now() - c.timestamp < 10000)) stopFakeChat(); });
+        chatRef.once('value').then(() => { chatInitialized = true; });
+
+        function updateUserCount() { const el = document.getElementById('userCount'); if(el) el.innerText = Object.keys(users).length; }
+        function getProfileImgHTML(user) { if(user && user.profilePic) return `<img src="${user.profilePic}" class="profile-img" alt="profile">`; const i = user && user.nickname ? user.nickname.charAt(0) : '?'; const ci = getColorForString(user && user.id ? user.id : (user && user.nickname ? user.nickname : 'guest')); return `<div class="profile-img-default" style="background-color: ${profileColors[ci]};">${i}</div>`; }
+        function linkify(text) { if (!text) return ''; return text.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank" class="link-in-text">${url}</a>`); }
+        function setReply(key, encodedAuthor, encodedMsg) { const txt = document.createElement("textarea"); txt.innerHTML = encodedAuthor; const author = txt.value; txt.innerHTML = encodedMsg; const msg = txt.value; const shortMsg = msg.length > 50 ? msg.substring(0, 50) + '...' : msg; currentReply = { id: key, author, message: shortMsg }; const mp = document.getElementById('replyPreviewMain'); const md = document.getElementById('replyPreviewModal'); const ph = `<strong>${escapeHtml(author)}</strong>에게 답장<br>${escapeHtml(shortMsg)}`; if(mp) { mp.querySelector('.reply-content').innerHTML = ph; mp.style.display = 'flex'; } if(md) { md.querySelector('.reply-content').innerHTML = ph; md.style.display = 'flex'; } if(document.getElementById('chatModal').style.display === 'flex') document.getElementById('chatModalInput').focus(); else document.getElementById('chatInput').focus(); }
+        function cancelReply() { currentReply = null; const mp = document.getElementById('replyPreviewMain'); const md = document.getElementById('replyPreviewModal'); if(mp) mp.style.display = 'none'; if(md) md.style.display = 'none'; }
+        function updateNewMessageAlert(id, count) { const el = document.getElementById(id); if(el && count > 0) { el.style.display = 'block'; el.querySelector('.count').innerText = count; } }
+        function scrollToBottom(screenId, alertId) { const s = document.getElementById(screenId); if(s) s.scrollTop = s.scrollHeight; if(alertId) { const el = document.getElementById(alertId); if(el) { el.style.display = 'none'; el.querySelector('.count').innerText = '0'; } } if(screenId === 'chatScreen') unreadMainCount = 0; else unreadModalCount = 0; }
+        function showPage(p, e) { document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active')); if(e) { document.querySelectorAll('.nav-link, .auth-menu a, .admin-link a').forEach(l => l.classList.remove('active')); e.classList.add('active'); } document.getElementById(p).classList.add('active'); if(p === 'mypage') loadMypage(); if(p === 'admin') { loadAdminPage(); renderAdminRecJobs(); } if(['semiconductor', 'otherjobs', 'freeboard', 'reference'].includes(p)) checkWriteAuth(p); window.scrollTo(0, 0); }
+        function goToBoard(b) { const nl = document.querySelectorAll('.nav-link'); let t = null; nl.forEach(l => { if(l.getAttribute('onclick') && l.getAttribute('onclick').includes(b)) t = l; }); showPage(b, t); }
+        function checkWriteAuth(p) { const am = { semiconductor: 'semiWriteArea', otherjobs: 'otherWriteArea', freeboard: 'freeWriteArea', reference: 'refWriteArea' }; const tm = { semiconductor: 'semi', otherjobs: 'other', freeboard: 'free', reference: 'ref' }; const a = document.getElementById(am[p]); const t = tm[p]; tempSelectedFiles = []; if(!currentUser) { a.innerHTML = `<div class="login-required-box"><p>🔒 게시글 작성은 로그인 후 이용 가능합니다.</p><button class="btn-auth" style="width: auto; padding: 10px 20px;" onclick="showPage('login', document.querySelector('.auth-menu a'))">로그인 하러가기</button></div>`; } else { const ij = (t === 'semi' || t === 'other'); a.innerHTML = `<div class="write-form"><h3 style="margin-bottom:15px;">글쓰기</h3>${ij ? `<select id="${t}Region"><option value="">근무 지역 (필수)</option><option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option><option value="온라인">온라인</option></select>` : ''}<input type="text" id="${t}Title" placeholder="제목"><textarea id="${t}Content" placeholder="내용 (https://... 자동 링크)"></textarea><div class="file-upload-wrapper"><label class="file-upload-label" for="${t}File">📎 파일 첨부 (이미지/문서 10개, 동영상 1개)</label><input type="file" id="${t}File" multiple onchange="handleFileSelect('${t}', this)"><div class="file-name-display" id="${t}FileName">선택된 파일 없음</div></div><button class="btn-write" onclick="writePost('${t}')">작성 완료</button></div>`; } }
+        function handleFileSelect(t, i) { const nf = i.files; for(let j=0; j<nf.length; j++) { let iv = nf[j].type.startsWith('video/'), ii = nf[j].type.startsWith('image/'); let cvc = tempSelectedFiles.filter(f => f.type.startsWith('video/')).length; if(iv && cvc >= 1) { alert('동영상은 1개만 가능.'); continue; } if((ii || iv) && nf[j].size > 3*1024*1024) { alert(`${nf[j].name} 3MB 초과.`); continue; } tempSelectedFiles.push(nf[j]); } if(tempSelectedFiles.length > 10) { alert('최대 10개.'); tempSelectedFiles = tempSelectedFiles.slice(0, 10); } document.getElementById(`${t}FileName`).innerText = tempSelectedFiles.length > 0 ? `선택됨 (${tempSelectedFiles.length}개)` : '선택된 파일 없음'; i.value = ''; }
+        function compressImage(f) { return new Promise(r => { if(!f.type.startsWith('image/')) { const rd = new FileReader(); rd.onload = e => r({ name: f.name, type: f.type, data: e.target.result }); rd.readAsDataURL(f); return; } const rd = new FileReader(); rd.onload = e => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); const cx = c.getContext('2d'); let w = im.width, h = im.height, m = 1920; if(w > h && w > m) { h = Math.round(h*m/w); w = m; } else if(h > w && h > m) { w = Math.round(w*m/h); h = m; } c.width = w; c.height = h; cx.drawImage(im, 0, 0, w, h); r({ name: f.name, type: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.8) }); }; im.src = e.target.result; }; rd.readAsDataURL(f); }); }
+        function handleSignup() { const i = document.getElementById('signupId').value.trim(), p = document.getElementById('signupPw').value.trim(), pc = document.getElementById('signupPwCheck').value.trim(), n = document.getElementById('signupNickname').value.trim(), nm = document.getElementById('signupName').value.trim(), ph = document.getElementById('signupPhone').value.trim(); if(!i||!p||!n||!nm||!ph) { alert('모두 입력.'); return; } if(p !== pc) { alert('비밀번호 불일치.'); return; } if(users[i]) { alert('존재하는 아이디.'); return; } usersRef.child(i).set({ id: i, pw: p, nickname: n, name: nm, phone: ph, provider: '일반', scraps: {}, profilePic: null }); alert('가입 완료.'); showPage('login', document.querySelector('.auth-menu a')); }
+        function handleLogin() { const i = document.getElementById('loginId').value.trim(), p = document.getElementById('loginPw').value.trim(); if(!i) { alert('아이디 없음.'); return; } if(!p) { alert('비밀번호 없음.'); return; } const u = users[i]; if(!u) { alert('없는 아이디.'); return; } if(u.pw !== p) { alert('비밀번호 틀림.'); return; } currentUser = u; sessionStorage.setItem('currentUser', JSON.stringify(u)); if(!u.scraps) u.scraps = {}; alert(`로그인 성공 ${u.nickname}`); updateAuthMenu(); showPage('home', document.querySelector('.nav-menu a')); }
+        function openSocialModal(p) { tempSocialProvider = p; document.getElementById('socialProviderName').innerText = p; document.getElementById('socialNicknameInput').value = ''; document.getElementById('socialNameInput').value = ''; document.getElementById('socialPhoneInput').value = ''; document.getElementById('socialVerifyCodeInput').value = ''; document.getElementById('socialModal').style.display = 'flex'; }
+        function sendVerificationCode() { const p = document.getElementById('socialPhoneInput').value.trim(); if(!p) { alert('번호 입력.'); return; } if(p.length < 10) { alert('올바른 번호 입력.'); return; } alert(`[가상 문자] ${p} 로 [1234] 발송.`); }
+        function confirmSocialLogin() { const n = document.getElementById('socialNicknameInput').value.trim(), nm = document.getElementById('socialNameInput').value.trim(), p = document.getElementById('socialPhoneInput').value.trim(), c = document.getElementById('socialVerifyCodeInput').value.trim(); if(!n||!nm||!p||!c) { alert('모두 입력.'); return; } if(c !== '1234') { alert('인증 실패. 1234'); return; } const ti = `${tempSocialProvider}_${Math.floor(Math.random()*10000)}`; currentUser = { id: ti, name: nm, nickname: n, phone: p, provider: tempSocialProvider, scraps: {}, profilePic: null }; usersRef.child(ti).set(currentUser); sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); closeModal('socialModal'); alert(`${tempSocialProvider} 로그인 성공`); updateAuthMenu(); showPage('home', document.querySelector('.nav-menu a')); }
+        function handleLogout() { currentUser = null; sessionStorage.removeItem('currentUser'); alert('로그아웃.'); updateAuthMenu(); showPage('home', document.querySelector('.nav-link')); }
+        function updateAuthMenu() { const a = document.getElementById('authMenu'); const al = document.getElementById('adminMenuLink'); if(currentUser) { a.innerHTML = `<a style="background:#4a4a60; cursor:default;">${escapeHtml(currentUser.nickname)}님</a><a class="logout-btn" onclick="handleLogout()">로그아웃</a>`; al.style.display = currentUser.id === 'admin' ? 'block' : 'none'; } else { a.innerHTML = `<a onclick="showPage('login', this)">로그인</a><a onclick="showPage('signup', this)">회원가입</a>`; al.style.display = 'none'; } }
+        function handleProfilePicUpload(e) { const f = e.target.files[0]; if(f) { if(f.size > 3*1024*1024) { alert('3MB 이하만.'); return; } compressImage(f).then(c => { currentUser.profilePic = c.data; usersRef.child(currentUser.id).update({ profilePic: c.data }); sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); loadMypage(); alert('변경 완료.'); }); } }
+        function loadMypage() { const m = document.getElementById('mypageContent'); if(!currentUser) { m.innerHTML = `<p style="text-align:center; color:#666;">로그인 필요.</p>`; return; } let mp = []; ['semi', 'other', 'free', 'ref'].forEach(t => { const tp = posts[t] || {}; Object.keys(tp).forEach(k => { const p = tp[k]; p.id = k; if(currentUser.id === p.authorId) mp.push({ type: t, post: p }); }); }); let sp = []; const us = currentUser.scraps || {}; ['semi', 'other', 'free', 'ref'].forEach(t => { const tp = posts[t] || {}; Object.keys(tp).forEach(k => { const p = tp[k]; p.id = k; if(us[k]) sp.push({ type: t, post: p }); }); }); let mph = mp.length === 0 ? `<p style="color:#999;">없음.</p>` : mp.map(m => `<div class="post-item"><div class="content-area" onclick="viewPost('${m.type}', '${m.post.id}')"><h3>${escapeHtml(m.post.title)}</h3><div class="meta">${getProfileImgHTML(currentUser)} ${m.post.date} <span class="view-btn">[보기]</span></div></div></div>`).join(''); let sph = sp.length === 0 ? `<p style="color:#999;">없음.</p>` : sp.map(s => { const su = users[s.post.authorId]; return `<div class="post-item"><div class="content-area" onclick="viewPost('${s.type}', '${s.post.id}')"><h3>${escapeHtml(s.post.title)}</h3><div class="meta">${getProfileImgHTML(su)} ${escapeHtml(s.post.author)} | ${s.post.date} <span class="view-btn">[보기]</span></div></div></div>`; }).join(''); m.innerHTML = `<div class="section-title">🧑‍💻 마이페이지</div><div class="mypage-header"><div class="mypage-profile-pic" id="mypageProfilePic">${currentUser.profilePic ? `<img src="${currentUser.profilePic}" style="width:100%; height:100%; object-fit:cover;">` : escapeHtml(currentUser.nickname.charAt(0))}</div><div><h2 style="margin-bottom:10px;">${escapeHtml(currentUser.nickname)}님</h2><input type="file" accept="image/*" onchange="handleProfilePicUpload(event)" style="display:none;" id="profilePicInput"><button class="btn-auth" style="width:auto; padding:8px 15px; font-size:14px;" onclick="document.getElementById('profilePicInput').click()">프로필 변경</button></div></div><div class="mypage-info"><div class="info-row"><div class="info-label">아이디</div><div class="info-value">${escapeHtml(currentUser.id)}</div></div><div class="info-row"><div class="info-label">닉네임</div><div class="info-value">${escapeHtml(currentUser.nickname)}</div></div><div class="info-row"><div class="info-label">이름</div><div class="info-value">${escapeHtml(currentUser.name)}</div></div><div class="info-row"><div class="info-label">연락처</div><div class="info-value">${escapeHtml(currentUser.phone)}</div></div><div class="info-row"><div class="info-label">가입 방식</div><div class="info-value">${escapeHtml(currentUser.provider)}</div></div></div><div class="mypage-section"><h3>📝 내가 쓴 글</h3><div class="post-list">${mph}</div></div><div class="mypage-section"><h3>⭐ 스크랩</h3><div class="post-list">${sph}</div></div>`; }
+        function loadAdminPage() { const tb = document.getElementById('adminUserList'); if(!currentUser || currentUser.id !== 'admin') return; tb.innerHTML = Object.values(users).map(u => `<tr><td>${escapeHtml(u.id)}</td><td>${escapeHtml(u.nickname)}</td><td>${escapeHtml(u.name)}</td><td>${escapeHtml(u.phone)}</td><td>${escapeHtml(u.provider)}</td><td>${u.id === 'admin' ? '<span style="color:#999;">불가</span>' : `<button class="btn-action btn-delete" onclick="deleteUser('${u.id}')">삭제</button>`}</td></tr>`).join(''); }
+        function deleteUser(i) { if(confirm(`${i} 삭제?`)) { usersRef.child(i).remove(); alert('삭제됨.'); } } updateAuthMenu();
+        function writePost(t) { const ti = document.getElementById(`${t}Title`), ci = document.getElementById(`${t}Content`), ri = document.getElementById(`${t}Region`); if(!ti || !ti.value.trim()) { alert('제목 입력.'); return; } if(!ci || !ci.value.trim()) { alert('내용 입력.'); return; } if(t !== 'free' && t !== 'ref' && (!ri || !ri.value)) { alert('지역 선택.'); return; } const tv = ti.value, cv = ci.value, rv = ri ? ri.value : '지역 없음'; const sp = (fda) => { const npr = postsRef.child(t).push(); const np = { title: tv, content: cv, author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(), region: rv, files: fda, comments: {} }; npr.set(np).then(() => { alert('작성 성공!'); ti.value = ""; ci.value = ""; if(ri) ri.value = ""; tempSelectedFiles = []; if(document.getElementById(`${t}FileName`)) document.getElementById(`${t}FileName`).innerText = '선택된 파일 없음'; }).catch(e => { console.error("실패", e); if(fda && fda.length > 0) { np.files = []; npr.set(np).then(() => { alert('글 작성됨 (파일 제외).'); ti.value=""; ci.value=""; if(ri) ri.value=""; tempSelectedFiles=[]; }).catch(() => alert('작성 실패.')); } else { alert('작성 실패.'); } }); }; if (tempSelectedFiles.length > 0) { let vc = 0; for(let i=0; i<tempSelectedFiles.length; i++) if(tempSelectedFiles[i].type.startsWith('video/')) vc++; if(vc > 1) { alert('동영상 1개만.'); return; } if(tempSelectedFiles.length > 10) { alert('파일 10개만.'); return; } const ps = []; for(let i=0; i<tempSelectedFiles.length; i++) { if(tempSelectedFiles[i].type.startsWith('video/') && tempSelectedFiles[i].size > 3*1024*1024) { alert('동영상 3MB 이하.'); return; } ps.push(compressImage(tempSelectedFiles[i])); } Promise.all(ps).then(r => sp(r)); } else { sp([]); } }
+        function openImageViewer(b64) { try { const p = b64.split(','); const m = p[0].match(/:(.*?);/)[1]; const bs = atob(p[1]); let u8 = new Uint8Array(bs.length); for (let i = 0; i < bs.length; i++) u8[i] = bs.charCodeAt(i); const b = new Blob([u8], { type: m }); const u = URL.createObjectURL(b); const w = window.open('', '_blank'); if (w) { w.location.href = u; setTimeout(() => URL.revokeObjectURL(u), 10000); } else { alert('팝업 차단.'); } } catch (e) { console.error("실패", e); window.open(b64, '_blank'); } }
+        function getFilesHTML(f) { if(!f || f.length === 0) return ''; let h = '<div class="file-attachment-box">'; f.forEach(x => { if(x.type.startsWith('image/')) h += `<img src="${x.data}" alt="${escapeHtml(x.name)}" onclick="openImageViewer(this.src)" style="cursor: zoom-in; max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">`; else if(x.type.startsWith('video/')) h += `<video src="${x.data}" controls style="max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">지원 안됨.</video>`; else h += `<a href="${x.data}" download="${escapeHtml(x.name)}" class="file-download-btn">📎 ${escapeHtml(x.name)} 다운로드</a>`; }); h += '</div>'; return h; }
+        function renderPosts() { ['semi', 'other', 'free', 'ref'].forEach(t => { const l = document.getElementById(t === 'ref' ? 'refList' : `${t}List`); if(!l) return; const bb = document.getElementById(`bulkBar_${t}`); if(bb) bb.classList.toggle('active', currentUser && currentUser.id === 'admin'); const tp = posts[t] || {}; const pa = Object.keys(tp).map(k => ({ id: k, ...tp[k] })).reverse(); if (pa.length === 0) l.innerHTML = `<p style="color:#999;">글 없음.</p>`; else l.innerHTML = pa.map(p => { const au = users[p.authorId]; const rt = p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''; const fi = (p.files && p.files.length > 0) || p.file ? ' 📎' : ''; const cc = p.comments ? Object.keys(p.comments).length : 0; const ci = cc > 0 ? ` 💬${cc}` : ''; const ch = (currentUser && currentUser.id === 'admin') ? `<label class="admin-checkbox-label"><input type="checkbox" class="admin-checkbox" data-type="${t}" data-id="${p.id}"></label>` : ''; return `<div class="post-item">${ch}<div class="content-area" onclick="viewPost('${t}', '${p.id}')"><h3>${rt} ${escapeHtml(p.title)}${fi}${ci}</h3><p>${linkify(escapeHtml(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content))}</p><div class="meta">${getProfileImgHTML(au)} ${escapeHtml(p.author)} | ${p.date} <span class="view-btn">[보기]</span></div></div></div>`; }).join(''); }); renderMainList('mainSemiList', 'semi'); renderMainList('mainOtherList', 'other'); }
+        function renderMainList(e, t) { const l = document.getElementById(e); const tp = posts[t] || {}; const lp = Object.keys(tp).map(k => ({ id: k, ...tp[k] })).reverse().slice(0, 3); if (lp.length === 0) l.innerHTML = `<p style="color:#999;">글 없음.</p>`; else l.innerHTML = lp.map(p => { const au = users[p.authorId]; return `<div class="post-item"><div class="content-area" onclick="viewPost('${t}', '${p.id}')"><h3>${p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''} ${escapeHtml(p.title)}</h3><div class="meta">${getProfileImgHTML(au)} ${escapeHtml(p.author)} | ${p.date}</div></div></div>`; }).join(''); }
+        function toggleAllPosts(c, t) { document.querySelectorAll(`.admin-checkbox[data-type="${t}"]`).forEach(cb => cb.checked = c.checked); }
+        function bulkDeletePosts(t) { const c = document.querySelectorAll(`.admin-checkbox[data-type="${t}"]:checked`); if(c.length === 0) { alert('선택.'); return; } if(confirm(`${c.length}개 삭제?`)) { Promise.all(Array.from(c).map(cb => postsRef.child(t).child(cb.getAttribute('data-id')).remove())).then(() => { alert('삭제됨.'); document.getElementById(`selectAll_${t}`).checked = false; }).catch(() => alert('오류.')); } }
+        function bulkMovePosts(t) { const c = document.querySelectorAll(`.admin-checkbox[data-type="${t}"]:checked`); const nt = document.getElementById(`bulkMoveSelect_${t}`).value; if(c.length === 0) { alert('선택.'); return; } if(!nt) { alert('게시판 선택.'); return; } if(confirm(`${c.length}개 이동?`)) { Promise.all(Array.from(c).flatMap(cb => { const id = cb.getAttribute('data-id'); if(t !== nt) { const pd = posts[t][id]; return [postsRef.child(nt).push(pd), postsRef.child(t).child(id).remove()]; } return []; })).then(() => { alert('이동됨.'); document.getElementById(`bulkMoveSelect_${t}`).value = ''; document.getElementById(`selectAll_${t}`).checked = false; }).catch(() => alert('오류.')); } }
+        function viewRecJob(j) { const jb = recommendedJobs[j]; if(!jb) return; if(jb.originType && jb.originId && posts[jb.originType] && posts[jb.originType][jb.originId]) viewPost(jb.originType, jb.originId); else { document.getElementById('modalTitle').innerText = jb.title; document.getElementById('modalMeta').innerHTML = jb.region ? `<span class="tag">${escapeHtml(jb.region)}</span>` : ''; document.getElementById('modalContent').innerHTML = linkify(escapeHtml(jb.info).replace(/\n/g, '<br>')); document.getElementById('modalActions').innerHTML = `<button class="btn-action" style="background:#ccc; color:#333;" onclick="closeModal('postModal')">닫기</button>`; document.getElementById('modalMoveArea').style.display = 'none'; document.getElementById('postModal').style.display = 'flex'; } }
+        function viewPost(t, id) { if(!posts[t] || !posts[t][id]) { alert('삭제됨.'); return; } const p = posts[t][id]; const au = users[p.authorId] || {}; document.getElementById('modalTitle').innerText = p.title; document.getElementById('modalMeta').innerHTML = `${getProfileImgHTML(au)} <span>작성자: <strong>${escapeHtml(p.author)}</strong></span><span>작성일: ${p.date}</span>${p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''}`; const f = p.files || (p.file ? [p.file] : []); document.getElementById('modalContent').innerHTML = linkify(escapeHtml(p.content).replace(/\n/g, '<br>')) + getFilesHTML(f); const a = document.getElementById('modalActions'); const m = document.getElementById('modalMoveArea'); a.innerHTML = ''; m.innerHTML = ''; m.style.display = 'none'; if(currentUser) { let h = ''; if(currentUser.id === p.authorId || currentUser.id === 'admin') { h += `<button class="btn-action btn-edit" onclick="editPost('${t}', '${id}')">수정</button><button class="btn-action btn-delete" onclick="deletePost('${t}', '${id}')">삭제</button>`; } if(currentUser.id !== p.authorId) { const is = currentUser.scraps && currentUser.scraps[id]; h += `<button class="btn-action btn-scrap" onclick="toggleScrap('${t}', '${id}')">${is ? '스크랩 취소' : '스크랩'}</button>`; } a.innerHTML = h; if(currentUser.id === 'admin') { a.innerHTML += `<button class="btn-action btn-rec" onclick="addPostToRec('${t}', '${id}')">추천 등록</button>`; m.style.display = 'block'; m.innerHTML = `<label style="font-weight:700; margin-right:10px;">게시판 이동:</label><select id="moveSelect"><option value="">선택</option><option value="semi">반도체</option><option value="other">기타</option><option value="ref">자료실</option><option value="free">자유</option></select><button class="btn-action btn-move" onclick="movePost('${t}', '${id}')">이동</button>`; } } currentViewingPost = { type: t, id: id }; renderComments(t, id); document.getElementById('postModal').style.display = 'flex'; }
+        function renderComments(t, id) { const p = posts[t][id]; const cs = p.comments || {}; const ca = Object.keys(cs).map(k => ({ id: k, ...cs[k] })).sort((a,b) => a.timestamp - b.timestamp); document.getElementById('commentCount').innerText = ca.length; const l = document.getElementById('commentList'); if(ca.length === 0) l.innerHTML = `<p style="color:#999; font-size:14px;">댓글 없음.</p>`; else l.innerHTML = ca.map(c => { const au = users[c.authorId] || { nickname: c.author, id: c.authorId }; const is = (currentUser && (currentUser.id === c.authorId || currentUser.id === 'admin')); const db = is ? `<button class="comment-delete-btn" onclick="deleteComment('${t}', '${id}', '${c.id}')">삭제</button>` : ''; return `<div class="comment-item"><div class="comment-meta"><div class="comment-author">${getProfileImgHTML(au)} ${escapeHtml(c.author)}</div><div><span class="comment-date">${new Date(c.timestamp).toLocaleString()}</span>${db}</div></div><div class="comment-content">${linkify(escapeHtml(c.content))}</div></div>`; }).join(''); }
+        async function addComment() { if(!currentViewingPost.type || !currentViewingPost.id) return; const i = document.getElementById('commentInput'); const c = i.value.trim(); if(!c) { alert('내용 입력.'); return; } let a = '익명', aid = 'guest'; if(currentUser) { a = currentUser.nickname; aid = currentUser.id; } else { a = await getAnonName(); } postsRef.child(currentViewingPost.type).child(currentViewingPost.id).child('comments').push({ author: a, authorId: aid, content: c, timestamp: Date.now() }).then(() => i.value = '').catch(() => alert('실패.')); }
+        function deleteComment(t, id, cid) { if(!confirm('삭제?')) return; postsRef.child(t).child(id).child('comments').child(cid).remove().then(() => alert('삭제됨.')).catch(() => alert('실패.')); }
+        function handleCommentKeyPress(e) { if (e.key === 'Enter') addComment(); }
+        function toggleScrap(t, id) { const sr = usersRef.child(currentUser.id).child('scraps').child(id); if(currentUser.scraps && currentUser.scraps[id]) { sr.remove(); alert('스크랩 취소.'); } else { sr.set(true); alert('스크랩 됨.'); } }
+        function addPostToRec(t, id) { const p = posts[t][id]; recJobsRef.push({ title: p.title, info: p.content, region: p.region || '미지정', originType: t, originId: id }); alert('추천 등록 완료.'); closeModal('postModal'); }
+        function movePost(t, id) { const nt = document.getElementById('moveSelect').value; if(!nt) { alert('게시판 선택.'); return; } if(nt === t) { alert('같은 게시판.'); return; } const p = posts[t][id]; postsRef.child(nt).push(p); postsRef.child(t).child(id).remove(); alert('이동됨.'); closeModal('postModal'); }
+        function editPost(t, id) { const p = posts[t][id]; editingFiles = p.files || (p.file ? [p.file] : []); document.getElementById('modalTitle').innerHTML = `<input type="text" id="editTitle" value="${escapeHtml(p.title)}" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">`; document.getElementById('modalContent').innerHTML = `<textarea id="editContent" style="width:100%; height:150px; padding:10px; border:1px solid #ccc; border-radius:5px;">${escapeHtml(p.content)}</textarea>${renderEditFileArea()}`; document.getElementById('modalActions').innerHTML = `<button class="btn-action btn-edit" onclick="savePost('${t}', '${id}')">저장</button><button class="btn-action" style="background:#ccc; color:#333;" onclick="viewPost('${t}', '${id}')">취소</button>`; document.getElementById('modalMoveArea').style.display = 'none'; }
+        function renderEditFileArea() { let h = '<div id="editFileArea">'; if(editingFiles && editingFiles.length > 0) editingFiles.forEach((f, i) => h += `<div class="edit-file-item"><span>${escapeHtml(f.name)}</span><button class="btn-action btn-delete" style="margin:0; padding:5px 10px;" onclick="removeEditingFile(${i})">삭제</button></div>`); h += `<div class="file-upload-wrapper"><label class="file-upload-label" for="editFile">📎 새 파일</label><input type="file" id="editFile" multiple style="display:none;" onchange="document.getElementById('editFileName').innerText = this.files.length > 0 ? this.files.length + '개 선택' : (editingFiles.length > 0 ? '기존 유지' : '없음');"><div class="file-name-display" id="editFileName">${editingFiles.length > 0 ? '기존 유지' : '없음'}</div></div></div>`; return h; }
+        function removeEditingFile(i) { editingFiles.splice(i, 1); document.getElementById('modalContent').innerHTML = document.getElementById('modalContent').innerHTML.split('<div id="editFileArea">')[0] + renderEditFileArea(); }
+        function savePost(t, id) { const nt = document.getElementById('editTitle').value.trim(), nc = document.getElementById('editContent').value.trim(); if(!nt || !nc) { alert('제목/내용 입력.'); return; } const nf = document.getElementById('editFile').files; const pr = postsRef.child(t).child(id); let vc = 0; for(let i=0; i<editingFiles.length; i++) if(editingFiles[i].type.startsWith('video/')) vc++; if(nf.length > 0) { for(let i=0; i<nf.length; i++) if(nf[i].type.startsWith('video/')) vc++; if(vc > 1) { alert('동영상 1개만.'); return; } if((editingFiles.length + nf.length) > 10) { alert('파일 10개만.'); return; } const ps = []; for(let i=0; i<nf.length; i++) ps.push(compressImage(nf[i])); Promise.all(ps).then(r => { const af = editingFiles.concat(r); pr.update({ title: nt, content: nc, files: af, file: null, date: `${new Date().toLocaleString()} (수정)` }).then(() => alert('수정됨.')).catch(() => pr.update({ title: nt, content: nc, files: [], file: null, date: `${new Date().toLocaleString()} (수정)` }).then(() => alert('수정됨 (파일 제외).')).catch(() => alert('실패.'))); }); } else { if(vc > 1) { alert('동영상 1개만.'); return; } pr.update({ title: nt, content: nc, files: editingFiles, file: null, date: `${new Date().toLocaleString()} (수정)` }).then(() => alert('수정됨.')).catch(() => alert('실패.')); } closeModal('postModal'); }
+        function deletePost(t, id) { if(confirm('삭제?')) { postsRef.child(t).child(id).remove(); alert('삭제됨.'); closeModal('postModal'); } }
+        function closeModal(m) { document.getElementById(m).style.display = 'none'; }
+        window.onclick = e => { if (e.target.id === 'postModal') closeModal('postModal'); if (e.target.id === 'socialModal') closeModal('socialModal'); if (e.target.id === 'chatModal') closeModal('chatModal'); }
+        function addRecJob() { const t = document.getElementById('recJobTitle').value.trim(), i = document.getElementById('recJobInfo').value.trim(); if(!t || !i) { alert('입력.'); return; } recJobsRef.push({ title: t, info: i, region: '미지정' }); document.getElementById('recJobTitle').value = ''; document.getElementById('recJobInfo').value = ''; }
+        function deleteRecJob(i) { recJobsRef.child(i).remove(); alert('삭제됨.'); }
+        function renderAdminRecJobs() { const l = document.getElementById('adminRecJobList'); const j = Object.keys(recommendedJobs).map(k => ({ id: k, ...recommendedJobs[k] })); if(j.length === 0) l.innerHTML = `<p style="color:#999;">없음.</p>`; else l.innerHTML = j.map(x => `<div class="job-card"><div class="job-title">${escapeHtml(x.title)}</div><div class="job-info">${escapeHtml(x.info.length > 30 ? x.info.substring(0, 30) + '...' : x.info)}</div><button class="btn-action btn-delete" style="margin-top:10px;" onclick="deleteRecJob('${x.id}')">삭제</button></div>`).join(''); }
+        function renderHomeRecJobs() { const l = document.getElementById('homeJobList'); const j = Object.keys(recommendedJobs).map(k => ({ id: k, ...recommendedJobs[k] })).reverse().slice(0, 4); if(j.length === 0) l.innerHTML = `<p style="color:#999;">없음.</p>`; else l.innerHTML = j.map(x => `<div class="job-card" onclick="viewRecJob('${x.id}')"><div class="job-title">${x.region ? `<span class="tag">${escapeHtml(x.region)}</span>` : ''} ${escapeHtml(x.title)}</div><div class="job-info">${escapeHtml(x.info.length > 50 ? x.info.substring(0, 50) + '...' : x.info)}</div></div>`).join(''); }
+        function searchJobs() { const i = document.getElementById('jobSearchInput').value.toUpperCase(), r = document.getElementById('searchRegion').value; const res = []; ['semi', 'other'].forEach(t => { const tp = posts[t] || {}; Object.keys(tp).forEach(k => { const p = tp[k]; p.id = k; if((p.title + p.content + p.author).toUpperCase().indexOf(i) > -1 && (!r || p.region === r)) res.push({ type: t, post: p }); }); }); const d = document.getElementById('searchResults'); if(i === "" && r === "") { d.innerHTML = `<p style="color:#999;">검색어 입력.</p>`; return; } if (res.length === 0) d.innerHTML = `<p style="color:#999;">결과 없음.</p>`; else d.innerHTML = res.map(x => `<div class="post-item"><div class="content-area" onclick="viewPost('${x.type}', '${x.post.id}')"><h3>${x.post.region ? `<span class="tag">${escapeHtml(x.post.region)}</span>` : ''} ${escapeHtml(x.post.title)}</h3><p>${linkify(escapeHtml(x.post.content.length > 50 ? x.post.content.substring(0, 50) + '...' : x.post.content))}</p><div class="meta">${getProfileImgHTML(users[x.post.authorId])} ${escapeHtml(x.post.author)} | ${x.post.date}</div></div></div>`).join(''); }
+        function openChatModal() { const ms = document.getElementById('chatScreen'); const mds = document.getElementById('chatModalScreen'); mds.innerHTML = ms.innerHTML; mds.scrollTop = mds.scrollHeight; document.getElementById('chatModal').style.display = 'flex'; document.getElementById('chatModalInput').focus(); }
+        async function sendMessage(isModal) { const i = document.getElementById(isModal ? 'chatModalInput' : 'chatInput'); const m = i.value.trim(); if (m !== "") { stopFakeChat(); let a = '익명', aid = 'guest'; if (currentUser) { a = currentUser.nickname; aid = currentUser.id; } else { a = await getAnonName(); aid = 'guest'; } let cd = { author: a, authorId: aid, message: m, timestamp: Date.now() }; if(currentReply) cd.replyTo = currentReply; chatRef.push(cd); i.value = ""; cancelReply(); } }
+        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(false); }
+        function handleModalKeyPress(e) { if (e.key === 'Enter') sendMessage(true); }
+
+        const fakeNicknames = ['알바고수', '평택일번지', '주차왕', '궁금해요', '현직러', '친절맨', '도우미', '서울촌놈', '반장님', '기능공'];
+        const rawScript = `평택7번게이트 근처 무료주차장있나요?
+죄송요 저는 낼 내려가는 일인입니다. 고수분들이 답해주실거에요
+무료 주차장은 없습니다
+7번 게이트 입문 하시는 거라면 그린존 일하시는거 같은데 개서식당이나 정성 식당 식권 식사하시며 주차하시고 식당 버스 이용하시는게 빠를듯요
+개성식당 정성식당
+숙소는 고덕여염리이라서요
+그러면 차량 이용은 힘드시고 자전거나 오토바이뿐 입니다
+걷기에는 좀 힘들고요
+네
+회사 어디에 입사 하셨나요?
+광건요
+광건이라면 칸막이 공사죠? 탭동인가요?
+5동은 식사하고 주차가능 하는곳 아실까요?
+p4요 복합동요
+5번 게이트 도 그린동 탭동 복합동이라 주차 불가입니다
+5번 게이트 입문하시면 빨라요 복합동 2번게이트도 괞찬고요
+걸어서10분안으로주차 가능한곳은요
+없음니다
+물산이아니고 E&J이라서요
+정성한식 뷔페 찍고 빌라쪽 쭉 올라가시면 아침 빠른시간 군데군데 주차 자리 있어요 그리고 걸어서 오면 10분 거리입니다 5번게이트
+2번개이트에서 걸어서 10분 거리에 유료주차장은 있어요. 월주차 33만원 입니다.
+네 E&a 5번게이트 복합동 맞습니다
+주차편하게 하실거면 월 주차 해야되욤
+2 7 5게이트사용 가능한데 
+2번게이트 사용 이 애매해서요 물산 이 오픈안하면.못들어가서요
+5게이트나 7번게이트 이용하시면 호이스트 이용하실껀데 출퇴근 시간은 대기줄 길어요
+혹시 소개로 들어가시나요,
+아니요
+화기 가세요
+아웃소싱 아니고. 아는분이라서요
+아~~
+화기로 가세요 안담이예요?
+둘다아니에요
+반장님
+그럼?
+시공
+전기쪽 이신듯 트레이
+지금 공기 1달 남았어요 가지마세요
+아~시공 아~ 이제인식요 남자분이시구나
+지금 힘들고 공사 막바지라 사람들 다 빠지고 공사 힘든 구간만 남아서 일하기 빡세고 힘든 구간만 남았어요
+P4로 가는데 7번게이트로 가면 금방일까요?
+6시15분 이면 5번게이트까지 10분안 도착할까?
+그래도 2번이 나으실텐데...걸어서 5번은 ..힘드실꺼예요
+5번게이트요
+달려가시면 가능하시겠죠?
+평택 지금 p5 공사하나요?
+네
+안되요 넘어요
+감사용
+함밥집셔틀타면요
+자잔거 다 썩은거 3만원 주고 하나 사서 타고 다니세요 정성식당 근처 차 대놓고
+제가 아시는 블이 삼성에 몇분계시는데 소장님도 계시구 
+직발쪽도 계시는데 저 안들어갔어요 이뜻은알아 들으셔야 하실것요
+어찌되었던 2게이트기준 6시 30분전에 들어가시는게 편함니다
+네
+지금 상황이 별루 인거죠?
+2게이트 좀더 일칙들어가시든데요 기공블들도요
+p4는마무리고요 p5들어가야죠
+일단 소주 몇잔 더 드시고 몇일 더 쉬시다 1일부터 P5고고 하세요
+지금 들어가심 젤 힘들때 들어가시는거궁P5도 시작할땐 림듭니다
+저희 애인이 매봐 이구요 기능공입니다 이일 20년 했더라구요
+저도 이천 이나 청주sk있었근요
+용인으로 뜨고 싶다 후
+저도 청주 m15 x 멤버
+전 용인 오라하는거 안가구 있슴요
+거긴 추퇴근 지옥
+P5 복합동 안감 입니다.  
+입사 동기 10명인데 2주만에 7명이 그만두고
+1명은 병가 내고….주말에 복귀하니 숙소가 썰렁합니다. 용인Sk 넘어가고 싶네요.
+아 더 지옥이에요?
+용인 출퇴근지욕 2차선ㅜㅜ
+저는 p4 안감임다 ㅋㅋ 안감 별로네여 후
+네 평택 2배라고 생각하심되요 저 한달하고 지처서 평택서 청주 1시간30분 출퇴근 ㅣ년 보다 더힘듬요
+여염에서 5번 게이트 맨날 걸어서 출퇴근하는데 이것도 빡셈유 후
+아뇨 전 편하게 했어요 경기도 굉주 가 집이였는데 회사에서 숙소 얻어 줬어요
+저도 소개 였구 직발 이었는데
+P4 안감은 젊은 사람 위주인듯. 블랙조끼 유니폼은 P5 파란색 보다 나은듯
+일할땐 내직장 상사가 누구였는지 그게 큰 것같고 그경험했습니다
+빙고
+내일을 위해 로그아웃 ....
+저도 조출이라서 먼저 잡니다.
+잘쉬시고 지금은 고덕 잘 모르겠네요 저사는데 앞집 아저씨
+넘힘들어하시드라구요
+오토바이 주차도 빡쎄보이던데 그냥 아무대나 대도 괜찮은건지요
+스쿠터 타고 출퇴근예정인데 아는 정보가 하나도 없네요 ㅜ
+머리털 나고 평택 처음와보는 서울촌놈입니다 ㅋ
+잠가놓으세요 글구 오토바이 긁거나 쉽게 차로 설명 드리면 빽밀러 각아 놓고 그냥가시는분 많으셍
+엔진만 뽀려가지 않으면 괜찮습니다 ㅎㅎ 주차는 그냥 자리빈곳 아무대나 해도 되나요
+그렇게 일해본분이 계셔서 말씀 드리는거궁 음~다니 오토바이는
+차 처럼 그 앞근방에 세워놓고 출퇴근가능요 그럼다른분들 보다 조금 늦게 나오셔도되궁 출퇴근 편하시게 되는거지용
+차도있는데 스쿠터로 다닐려고요 보니까 차는 답이안나올것 같더라구요 ㅋㅋ
+남들 5시에 나갈걸 스쿠터는집에서 6시에 나가도 된신다는 장점요
+그렇군요 현장근처 답사갔는데 바이크가 엄청많더라구요 그래서 이거 이거 바이크도 댈곳이없겠는데 싶었네요
+백날 얘기 듣느니 함 해보세요
+얘기도 못들었습니다 ㅋ
+예를 들면 살치 아님소고기 새우살도 먹어 봐야 알듯이 직접 경험 하시고 아무리 일이힘들어도
+같이 일하시는분들 께서 많이챙겨주심그걸 로 만족하셔야할듯요
+넵 현답이십니다 뭐 직접 부딪혀봐야 실수도하고 알아내기도 하는거겠죠 그냥 대충이나마 도움얻을수 있을까 싶어 질문드렸습니다 감사합니다
+그러니까요 점점 개인주의가 심해져서 이젠 어디가서 도움도 못청하는 시대가 된거같아 씁쓸하네요
+일 해보실거면 맘 잡고 일해보세요
+안녕하세요 아무것도 모르는상태에서와서 8일째하는데요 발바닥아픈거빼곤 할만합니다
+서울에서 맘잡고 일해보려고 한달전부터 가재동에 집구하고 현장답사도 가보고 엄청 노력중입니다 이제 집정리가 좀 끝났네요 좋은말씀 감사드리고 꿀잠주무세요
+8일 정도면 좀더 몇일있다 ㆍㄹ집 잡힘니다
+어떤 공정 하시는지요
+저는 안전화도 적응하려고 일안할때도 신고 다니고있습니다 ㅋㅋ
+개인적으로 구매했네요 안전화
+개인 안전화 인가요
+네네 k2 lt122인가? 이거 가볍고 좋네요 6인치
+한 10일 지나면 안아플낌니더
+안전화 안에 하나 더 깔구신으셍ㆍ느
+서울 어디서 오셨어요?
+수장입니다 금토 비때문에 개인안전화신다가 여기서준거신고 그랬네요
+능동에서 왔어요
+하루쉬니 다리아픈거도 풀린거같고 내일도 화이팅입니다
+아~~무튼 반갑습니다 같은 서울사람
+오~ 반가워요 ㅎㅎ
+다들 남성분이시죠?
+전 서교동
+전 여잔데요 ㅎ
+아~~
+서교동이면 연희동 그 근처라인 맞죠?
+어맛 마자요
+동교동옆.연남동옆
+어릴때 홍대랑 신촌 많이갔습니다 ㅋㅋ
+홍대.합정.신촌
+어쩜 봤을수도 ㅎ
+갑자기 소고기 토킹을 하시니
+배고프다 아입니꼬 ㅋㅋㅋㅋㅋㅋ
+일단 일해보세요 자신에게 믽는일이라 새
+생각이들면 하는거니까요
+여기오니 서울에는 절대없는 여유? 같은게 있네요 바이크로 돌아다니다가 길을 잘못들었는데 양옆이 논 조금더가니 소키우는곳이 ㅋㅋ
+우리도 수학여행은 ㅋ쓰울로 갔었거등예!!!ㅋㅋㅋㅋㅋㅋ63빌딩에 ㅋㅋㅋㅋ
+제가 말씀드리것은 메보 뜻은 아시는거죠
+우린 경주요
+ㅠㅠ
+태어난곳은 이태원1동 이에요 홍대랑 모두 가까워서 자주 갔었습니다 물론 젊었을적 ㅋㅋ
+여기 옛날 이태원같은 곳있어요 깜놀 했어요
+다이소찾다가
+지금 이태원말고
+거기가 어딘가요? 추억 돋고싶은데
+무슨 공군 비행장인가
+일하스는데가 메인 배관 이지.그뜻인데요
+다이소 앞이던데
+한번 찾아봐야겠네요 ㅎㅎ
+엥?
+아님 방수도 있구요
+이태원 내가 살던시절엔 진짜 정글이었는데 지금은 정말 좋아진 케이스
+오~ 여러분 
+지평막걸리에 토닉워터 레몬즙 타서 드셔보셨나요
+지금은 LA느낌나쥬 ㅎ
+경리단길
+남성분 이시네요
+참 좋아요
+이게 야채튀김안주에 기가 막히네요
+그거보단 외지인들이 더많아서 ㅎㅎ
+거기 가보세요
+이전 이태원같아요
+경리단길이 이태원1동 이에요 내고향
+오호
+여러분들도 행복 편안한 밤되세요~
+감솨요
+저 팽성에서 3년 살다 이사 나왔읍니다
+낼 일하시렴 주무셔야 겠네요. 저는 다시 내려가서 도돌이 해야해요ㅠㅠ
+미군 가족들 ㅠ 대박 주말마다 파티하심ㅇᆢㄷ
+저 집구할때 그쪽도 알아봤는데 현장하고는 거리가 멀더라구요
+팽성은 횡성?
+팽성읍
+아 지송
+경기도
+여기 평택에 팽성 이라고 있지않나요?
+영어 좀 하셨나?
+네네 저두 byee
+네 ~ 나머진 바디랭귀지
+me to
+주무세요~~Goodnight`;
+        const fakeScript = rawScript.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+        let fakeScriptIndex = 0; let fakeChatInterval = null; let inactivityTimeout = null;
 
         function appendFakeMessage() {
-            const messagesToPush = Math.floor(Math.random() * 3) + 1; // 1~3개 랜덤 출력
-            
-            for(let i=0; i<messagesToPush; i++) {
-                if(fakeScriptIndex >= fakeScript.length) fakeScriptIndex = 0; // 끝나면 다시 처음부터
-                
-                const msg = fakeScript[fakeScriptIndex];
-                const author = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
-                
+            const mtp = Math.floor(Math.random() * 3) + 1; 
+            for(let i=0; i<mtp; i++) {
+                if(fakeScriptIndex >= fakeScript.length) fakeScriptIndex = 0; 
+                const msg = fakeScript[fakeScriptIndex]; const author = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)]; const fakeKey = 'fake_' + Date.now() + '_' + i;
                 const tempUser = { nickname: author, id: 'fake_' + author };
-                
-                // 가짜 채팅이므로 답장 인용구는 생략하고 단순 텍스트로만 렌더링
-                const html = `<div class="chat-message" onclick="setReply('fake_${Date.now()}', '${escapeHtml(author).replace(/"/g, '&quot;')}', '${escapeHtml(msg).replace(/"/g, '&quot;')}')">
-                    ${getProfileImgHTML(tempUser)} 
-                    <div class="chat-content-wrapper">
-                        <div><span class="user">${escapeHtml(author)}:</span> <span class="chat-text">${linkify(escapeHtml(msg))}</span></div>
-                    </div>
-                </div>`;
-                
-                const chatScreen = document.getElementById('chatScreen');
-                const modalScreen = document.getElementById('chatModalScreen');
-                
-                if(chatScreen) {
-                    chatScreen.insertAdjacentHTML('beforeend', html);
-                    chatScreen.scrollTop = chatScreen.scrollHeight;
-                }
-                if(modalScreen) {
-                    modalScreen.insertAdjacentHTML('beforeend', html);
-                    modalScreen.scrollTop = modalScreen.scrollHeight;
-                }
-                
+                const dataAttrAuthor = escapeHtml(author).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+                const dataAttrMsg = escapeHtml(msg).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+                const html = `<div class="chat-message" onclick="setReply('${fakeKey}', '${dataAttrAuthor}', '${dataAttrMsg}')">${getProfileImgHTML(tempUser)}<div class="chat-content-wrapper"><div><span class="user">${escapeHtml(author)}:</span> <span class="chat-text">${linkify(escapeHtml(msg))}</span></div></div></div>`;
+                const ms = document.getElementById('chatScreen'); const mds = document.getElementById('chatModalScreen');
+                [ms, mds].forEach(screen => { if(!screen) return; const isNearBottom = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 100; screen.insertAdjacentHTML('beforeend', html); if(isNearBottom) { screen.scrollTop = screen.scrollHeight; } else { if(screen.id === 'chatScreen') { unreadMainCount++; updateNewMessageAlert('newMsgAlertMain', unreadMainCount); } else { unreadModalCount++; updateNewMessageAlert('newMsgAlertModal', unreadModalCount); } } });
                 fakeScriptIndex++;
             }
         }
-
-        function startFakeChat() {
-            if(fakeChatInterval) return;
-            appendFakeMessage();
-            fakeChatInterval = setInterval(appendFakeMessage, 12000);
-        }
-
-        function stopFakeChat() {
-            if(fakeChatInterval) {
-                clearInterval(fakeChatInterval);
-                fakeChatInterval = null;
-            }
-            if(inactivityTimeout) clearTimeout(inactivityTimeout);
-            inactivityTimeout = setTimeout(() => {
-                startFakeChat();
-            }, 3600000); 
-        }
-
+        function startFakeChat() { if(fakeChatInterval) return; appendFakeMessage(); fakeChatInterval = setInterval(appendFakeMessage, 12000); }
+        function stopFakeChat() { if(fakeChatInterval) { clearInterval(fakeChatInterval); fakeChatInterval = null; } if(inactivityTimeout) clearTimeout(inactivityTimeout); inactivityTimeout = setTimeout(() => startFakeChat(), 3600000); }
         startFakeChat();
     </script>
 </body>
