@@ -248,10 +248,61 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     .mypage-info { max-width: 100%; }
     .footer-counter { font-size: 10px; padding: 8px 15px; }
 
-    /* 하위 필터 버튼 스타일 */
-.filter-btn { padding: 5px 12px; border: 1px solid #ccc; background: #fff; border-radius: 15px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.2s; }
-.filter-btn:hover { background: #f0f0f0; }
-.filter-btn.active { background: #1e1e2f; color: #fff; border-color: #1e1e2f; }
-.nav-submenu { list-style: none; }
-.nav-sub-link.active { font-weight: 800; color: #fff !important; background: #2a2a40; border-radius: 5px; padding-left: 5px; }
+/* 토글 아이콘 스타일 */
+.toggle-icon {
+    font-size: 10px;
+    color: #888;
+    transition: transform 0.3s ease;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+/* 하위 메뉴 아이콘 (└) 흐린 색 처리 */
+.nav-sub-link .sub-icon {
+    color: #555;
+    margin-right: 5px;
+    font-weight: normal;
+}
+
+.nav-sub-link {
+    font-size: 14px; 
+    color: #b0b0c0; 
+    display: block; 
+    cursor: pointer; 
+    padding: 8px 10px;
+    border-radius: 5px;
+    transition: background 0.2s;
+}
+.nav-sub-link:hover {
+    background: #2a2a40;
+    color: #fff;
+}
+.nav-sub-link.active {
+    color: #fff;
+    background: #2a2a40;
+    font-weight: 800;
+}
+
+/* 모던한 필터 버튼 디자인 (알약 형태) */
+.filter-btn {
+    padding: 6px 15px;
+    border: none;
+    background: #ffffff;
+    border-radius: 20px; /* 둥근 알약 형태 */
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: #666;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.25s ease;
+}
+.filter-btn:hover {
+    background: #f0f0f0;
+    transform: translateY(-1px);
+}
+.filter-btn.active {
+    background: #1e1e2f;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(30, 30, 47, 0.3);
+    transform: translateY(-1px);
 }
