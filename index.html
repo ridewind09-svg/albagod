@@ -52,15 +52,37 @@
 
         .chat-box { flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-screen { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; background: #f8f9fa; }
-        .chat-message { margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
-        .chat-message .user { font-weight: 700; color: #1e1e2f; }
+        
+        /* 채팅 메시지 부분 수정: 아이콘 찌부 방지 및 닉네임 세로 출력 방지 */
+        .chat-message { 
+            margin-bottom: 12px; 
+            font-size: 14px; 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 6px; 
+            word-break: break-all; 
+        }
+        .chat-message .user { 
+            font-weight: 700; 
+            color: #1e1e2f; 
+            white-space: nowrap; 
+            flex-shrink: 0; 
+        }
         .chat-text a, .link-in-text { color: #1565c0; text-decoration: underline; font-weight: 700; word-break: break-all; }
         .chat-input-area { display: flex; gap: 10px; flex-shrink: 0; }
         .chat-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         .btn-send { background: #1e1e2f; color: #fff; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; }
 
-        .profile-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; vertical-align: middle; }
-        .profile-img-default { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 700; }
+        /* 프로필 이미지 및 아이콘 찌부 방지 수정 */
+        .profile-img { 
+            width: 24px; height: 24px; border-radius: 50%; object-fit: cover; vertical-align: middle; 
+            flex-shrink: 0; margin-top: 2px; 
+        }
+        .profile-img-default { 
+            width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; 
+            font-size: 12px; color: #fff; font-weight: 700; 
+            flex-shrink: 0; margin-top: 2px; 
+        }
 
         .main-board-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .post-list { display: flex; flex-direction: column; gap: 15px; }
@@ -168,7 +190,7 @@
         .comment-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .comment-author { font-weight: 700; font-size: 14px; color: #1e1e2f; display: flex; align-items: center; gap: 5px; }
         .comment-date { font-size: 12px; color: #999; }
-        .comment-content { font-size: 14px; color: #444; line-height: 1.5; }
+        .comment-content { font-size: 14px; color: #444; line-height: 1.5; word-break: break-all; }
         .comment-delete-btn { font-size: 12px; color: #d32f2f; cursor: pointer; background: none; border: none; padding: 0; }
         .comment-form { display: flex; gap: 10px; }
         .comment-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
