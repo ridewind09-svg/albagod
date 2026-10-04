@@ -5,7 +5,7 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
 .app-wrapper { display: flex; min-height: 100vh; max-width: 1280px; margin: 0 auto; background-color: #f0f2f5; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
 .sidebar { width: 250px; background-color: #1e1e2f; color: #fff; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; }
 .logo-container { text-align: center; margin-bottom: 30px; margin-top: 10px; padding-top: 15px; cursor: pointer; }
-.logo-img { width: 80%; max-width: 180px; height: auto; object-fit: contain; }
+.logo-img { width: 90%; max-width: 200px; height: auto; object-fit: contain; }
 .nav-menu { list-style: none; margin-top: 20px; }
 .nav-menu li { margin-bottom: 10px; }
 .nav-menu a { color: #b0b0c0; text-decoration: none; font-size: 16px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; padding: 12px 15px; border-radius: 8px; font-weight: 700; }
@@ -236,7 +236,7 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
     .app-wrapper { flex-direction: column; max-width: 100%; }
     .sidebar { width: 100%; min-height: auto; flex-direction: column; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
     .logo-container { margin: 0 0 10px 0; padding: 0; text-align: center; }
-    .logo-img { width: 120px; }
+    .logo-img { width: 132px; }
     .nav-menu { display: flex; gap: 8px; margin: 0 0 10px 0; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 5px; }
     .nav-menu li { margin-bottom: 0; flex-shrink: 0; }
     .nav-menu a { padding: 8px 12px; font-size: 13px; white-space: nowrap; }
