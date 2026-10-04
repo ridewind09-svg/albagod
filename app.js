@@ -131,7 +131,7 @@ async function sendMessage(isModal) { const i = document.getElementById(isModal 
 function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(false); }
 function handleModalKeyPress(e) { if (e.key === 'Enter') sendMessage(true); }
 
-// 닉네임 리스트 업데이트
+// 닉네임 리스트
 const fakeNicknames = ['돈돈쓰', '배봉주', '크롱', '버티자', '춘봉', '빼꼬미', '여보세요', '성지윤', '반평택', '카우보이', '응망마틴', '고덕', '유단자', '질린다', '마린', '토마토', '포비돈', 'zoeh', '네로', '배관', '순풍', '웃자', '칸마귀', '길구', '보리', '인생은', '캐디', '르네', '겨울', '바닐라'];
 const rawScript = `평택7번게이트 근처 무료주차장있나요?
 죄송요 저는 낼 내려가는 일인입니다. 고수분들이 답해주실거에요
@@ -309,25 +309,40 @@ P4 안감은 젊은 사람 위주인듯. 블랙조끼 유니폼은 P5 파란색 
 me to
 주무세요~~Goodnight`;
 const fakeScript = rawScript.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-let fakeScriptIndex = 0; let fakeChatInterval = null; let inactivityTimeout = null; let currentSpeaker = null;
-
-function getRandomResponder(excludeName) {
-    const available = fakeNicknames.filter(n => n !== excludeName);
-    return available[Math.floor(Math.random() * available.length)];
-}
+let fakeScriptIndex = 0; let fakeChatInterval = null; let inactivityTimeout = null; 
+let currentSpeaker = null;
+let responders = [];
+let msgAfterQuestionCount = 0;
 
 function appendFakeMessage() {
     const mtp = Math.floor(Math.random() * 3) + 1; 
     for(let i=0; i<mtp; i++) {
         if(fakeScriptIndex >= fakeScript.length) fakeScriptIndex = 0; 
-        const msg = fakeScript[fakeScriptIndex]; let author;
+        
+        const msg = fakeScript[fakeScriptIndex];
+        let author;
+
         if(msg.includes('?')) {
             currentSpeaker = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+            const available = fakeNicknames.filter(n => n !== currentSpeaker);
+            available.sort(() => Math.random() - 0.5);
+            responders = available.slice(0, 2 + Math.floor(Math.random() * 2));
+            
             author = currentSpeaker;
+            msgAfterQuestionCount = 0;
         } else {
-            if(Math.random() < 0.8) author = getRandomResponder(currentSpeaker);
-            else author = currentSpeaker;
+            if(currentSpeaker === null) {
+                author = fakeNicknames[Math.floor(Math.random() * fakeNicknames.length)];
+            } else {
+                msgAfterQuestionCount++;
+                if(msgAfterQuestionCount <= 2 && Math.random() < 0.5) {
+                    author = currentSpeaker;
+                } else {
+                    author = responders[Math.floor(Math.random() * responders.length)];
+                }
+            }
         }
+
         chatRef.push({ author: author, authorId: sessionId, message: msg, timestamp: firebase.database.ServerValue.TIMESTAMP });
         fakeScriptIndex++;
     }
