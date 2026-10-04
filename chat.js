@@ -28,13 +28,11 @@ chatMasterRef.transaction((currentMaster) => {
     if (error) { console.error('Master transaction failed:', error); } 
     else if (committed && isMaster) {
         chatMasterRef.onDisconnect().remove();
-        // 핵심 수정: DB의 마지막 채팅을 확인하여 대본 인덱스를 이어서 시작
         chatRef.limitToLast(1).once('value').then(snap => {
             const lastChatData = snap.val();
             if(lastChatData) {
                 const lastKey = Object.keys(lastChatData)[0];
                 const lastMsg = lastChatData[lastKey].message;
-                // DB에 있는 마지막 메시지가 대본의 몇 번째인지 찾음
                 const foundIndex = fakeChatLog.findIndex(line => {
                     const colonIdx = line.indexOf(':');
                     const msgPart = colonIdx > -1 ? line.substring(colonIdx + 1).trim() : line;
@@ -42,15 +40,12 @@ chatMasterRef.transaction((currentMaster) => {
                 });
                 
                 if(foundIndex > -1) {
-                    // 찾았다면 그 다음 줄부터 이어서 시작
                     fakeScriptIndex = foundIndex + 1;
                     if(fakeScriptIndex >= fakeChatLog.length) fakeScriptIndex = 0;
                 } else {
-                    // 못 찾았거나 실제 유저가 친 채팅이 마지막이라면 랜덤한 지점부터 시작
                     fakeScriptIndex = Math.floor(Math.random() * fakeChatLog.length);
                 }
             } else {
-                // DB에 채팅이 아예 없는 첫 시작일 때만 0번부터 시작
                 fakeScriptIndex = 0;
             }
             startFakeChatGenerator();
@@ -151,7 +146,7 @@ const rawScript = `가퐈 : 죄송요 저는 낼 내려가는 일인입니다. �
 냐옹:지금 힘들고 공사 막바지라 사람들 다 빠지고 공사 힘든 구간만 남아서 일하기 빡세고 힘든 구간만 남았어요
 제주도:P4로 가는데 7번게이트로 가면 금방일까요?
 커피7: 6시15분 이면 5번게이트까지 10분안 도착할까?
-갈매기:그래도 2번이 나으실텐데...걸어서 5번은 ..힘드실꺼예요
+갈매기:그래도 2번이 나으신텐데...걸어서 5번은 ..힘드실꺼예요
 냐옹:5번게이트요
 갈매기:달려가시면 가능하시겠죠?
 여보세:평택 지금 p5 공사하나요?
@@ -293,35 +288,32 @@ let inactivityTimeout = null;
 let lastFakeAuthor = '익명';
 
 function appendFakeMessage() {
-    const mtp = Math.floor(Math.random() * 3) + 1; 
-    for(let i=0; i<mtp; i++) {
-        if(fakeScriptIndex >= fakeChatLog.length) fakeScriptIndex = 0; 
-        
-        const line = fakeChatLog[fakeScriptIndex];
-        const colonIndex = line.indexOf(':');
-        let author = lastFakeAuthor;
-        let msg = line;
-        
-        // 콜론이 있는 경우 닉네임과 메시지 분리
-        if(colonIndex > -1) {
-            author = line.substring(0, colonIndex).trim();
-            msg = line.substring(colonIndex + 1).trim();
-            lastFakeAuthor = author;
-        }
-        // 콜론이 없는 경우 이전 닉네임을 그대로 유지 (lastFakeAuthor)
-        
-        // 메시지가 비어있지 않을 때만 푸시
-        if(msg.length > 0) {
-            chatRef.push({ 
-                author: author, 
-                authorId: sessionId, 
-                message: msg, 
-                timestamp: firebase.database.ServerValue.TIMESTAMP 
-            });
-        }
-        
-        fakeScriptIndex++;
+    if(fakeScriptIndex >= fakeChatLog.length) fakeScriptIndex = 0; 
+    
+    const line = fakeChatLog[fakeScriptIndex];
+    const colonIndex = line.indexOf(':');
+    let author = lastFakeAuthor;
+    let msg = line;
+    
+    // 콜론이 있는 경우 닉네임과 메시지 분리
+    if(colonIndex > -1) {
+        author = line.substring(0, colonIndex).trim();
+        msg = line.substring(colonIndex + 1).trim();
+        lastFakeAuthor = author;
     }
+    // 콜론이 없는 경우 이전 닉네임을 그대로 유지 (lastFakeAuthor)
+    
+    // 메시지가 비어있지 않을 때만 푸시
+    if(msg.length > 0) {
+        chatRef.push({ 
+            author: author, 
+            authorId: sessionId, 
+            message: msg, 
+            timestamp: firebase.database.ServerValue.TIMESTAMP 
+        });
+    }
+    
+    fakeScriptIndex++;
 }
 
 function startFakeChatGenerator() { 
