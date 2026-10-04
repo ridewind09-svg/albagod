@@ -250,11 +250,12 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
 
 /* 토글 아이콘 스타일 */
 .toggle-icon {
-    font-size: 10px;
+    font-size: 8px;
     color: #888;
     transition: transform 0.3s ease;
     display: inline-block;
-    margin-left: 5px;
+    margin-left: 10px;
+    vertical-align: middle;
 }
 
 /* 하위 메뉴 아이콘 (└) 흐린 색 처리 */
