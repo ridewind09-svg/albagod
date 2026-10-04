@@ -96,6 +96,10 @@ function linkify(text) {
 }
 
 function showPage(p, e) { 
+    // 다른 메뉴로 이동 시 하위 서브메뉴 모두 닫기 (버그 방지)
+    document.querySelectorAll('.nav-submenu').forEach(sm => sm.style.display = 'none');
+    document.querySelectorAll('.toggle-icon').forEach(icon => icon.innerText = '▶');
+    
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active')); 
     if(e) { 
         document.querySelectorAll('.nav-link, .auth-menu a, .admin-link a').forEach(l => l.classList.remove('active')); 
@@ -128,8 +132,16 @@ let currentSemiSubFilter = '전체';
 function toggleSemiSubmenu(e) {
     showPage('semiconductor', e);
     document.querySelectorAll('.nav-sub-link').forEach(l => l.classList.remove('active'));
+    
     const submenu = e.nextElementSibling;
-    if(submenu) submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+    const icon = e.querySelector('.toggle-icon');
+    
+    if(submenu) {
+        const isShown = submenu.style.display === 'block';
+        submenu.style.display = isShown ? 'none' : 'block';
+        if(icon) icon.innerText = isShown ? '▶' : '▼';
+    }
+    
     currentSemiSubCategory = null; 
     currentSemiSubFilter = '전체';
     renderSemiFilters();
