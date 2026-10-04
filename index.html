@@ -14,10 +14,9 @@
 
         .app-wrapper { display: flex; min-height: 100vh; max-width: 1280px; margin: 0 auto; background-color: #f0f2f5; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
         .sidebar { width: 250px; background-color: #1e1e2f; color: #fff; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; }
+        
         .logo-container { text-align: center; margin-bottom: 30px; margin-top: 10px; padding-top: 15px; cursor: pointer; }
-        .logo { font-size: 32px; font-weight: 800; position: relative; display: inline-block; }
-        .logo .accent { color: #ffcc00; position: relative; display: inline-block; padding-right: 15px; }
-        .crown { position: absolute; top: -22px; right: -8px; font-size: 26px; transform: rotate(20deg); z-index: 10; }
+        .logo-img { width: 80%; max-width: 180px; height: auto; object-fit: contain; }
 
         .nav-menu { list-style: none; margin-top: 20px; }
         .nav-menu li { margin-bottom: 10px; }
@@ -67,12 +66,8 @@
         .post-list { display: flex; flex-direction: column; gap: 15px; }
         
         .post-item { 
-            padding: 15px 0; 
-            border-bottom: 1px solid #f0f0f0; 
-            transition: all 0.2s; 
-            display: flex; 
-            gap: 30px; 
-            align-items: center; 
+            padding: 15px 0; border-bottom: 1px solid #f0f0f0; transition: all 0.2s; 
+            display: flex; gap: 30px; align-items: center; 
         }
         .post-item:last-child { border-bottom: none; }
         
@@ -166,7 +161,6 @@
         .modal-move-area { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ccc; text-align: right; }
         .modal-move-area select { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-left: 10px; }
 
-        /* 댓글 영역 스타일 */
         .comment-section { margin-top: 30px; border-top: 1px dashed #ccc; padding-top: 20px; }
         .comment-section h3 { font-size: 16px; font-weight: 800; margin-bottom: 15px; color: #1e1e2f; }
         .comment-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
@@ -202,9 +196,8 @@
         @media (max-width: 768px) {
             .app-wrapper { flex-direction: column; box-shadow: none; } 
             .sidebar { width: 100%; min-height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px; flex-wrap: wrap; }
-            .logo-container { margin-bottom: 0; margin-top: 0; padding-top: 15px; }
-            .logo { font-size: 26px; } 
-            .crown { font-size: 20px; top: -18px; right: -5px; } 
+            .logo-container { margin-bottom: 0; margin-top: 0; padding-top: 15px; text-align: left; }
+            .logo-img { width: 120px; }
             .nav-menu { display: flex; gap: 5px; margin-top: 10px; width: 100%; flex-wrap: wrap; order: 3; }
             .nav-menu a { padding: 8px 10px; font-size: 13px; }
             .auth-menu { border-top: none; padding-top: 0; width: auto; order: 2; }
@@ -224,7 +217,8 @@
     <div class="app-wrapper">
         <aside class="sidebar">
             <div class="logo-container" onclick="showPage('home', document.querySelector('.nav-link'))">
-                <div class="logo">알바의 <span class="accent">신<span class="crown">👑</span></span></div>
+                <!-- 로고 이미지 적용 -->
+                <img src="https://z-cdn-media.chatglm.cn/files/1d336aba-7f84-4d6f-b911-2029cdfb962c.png?auth_key=1891092163-a7b4c1d6c439477da8818bbe50291141-0-b5954bc99d85372f1cf3f2f2444b82be" alt="알바의 신 로고" class="logo-img">
             </div>
             <ul class="nav-menu">
                 <li><a class="nav-link active" onclick="showPage('home', this)">홈</a></li>
@@ -456,7 +450,6 @@
             <div class="modal-actions" id="modalActions"></div>
             <div class="modal-move-area" id="modalMoveArea" style="display:none;"></div>
             
-            <!-- 댓글 섹션 추가 -->
             <div class="comment-section">
                 <h3>💬 댓글 (<span id="commentCount">0</span>)</h3>
                 <div class="comment-list" id="commentList"></div>
@@ -528,7 +521,7 @@
         let recommendedJobs = {};
         let editingFiles = [];
         let tempSelectedFiles = [];
-        let currentViewingPost = { type: null, id: null }; // 현재 보고 있는 게시글 정보 (댓글용)
+        let currentViewingPost = { type: null, id: null };
         
         const savedUser = sessionStorage.getItem('currentUser');
         if(savedUser) currentUser = JSON.parse(savedUser);
@@ -585,7 +578,6 @@
             posts = snapshot.val() || { semi: {}, other: {}, free: {}, ref: {} };
             renderPosts();
             if(document.getElementById('home').classList.contains('active')) searchJobs();
-            // 상세보기 창이 열려있을 때 댓글 새로고침
             if(currentViewingPost.type && currentViewingPost.id) {
                 renderComments(currentViewingPost.type, currentViewingPost.id);
             }
@@ -1265,14 +1257,12 @@
                 }
             }
             
-            // 현재 보고 있는 게시글 설정 및 댓글 렌더링
             currentViewingPost = { type, id: postId };
             renderComments(type, postId);
             
             document.getElementById('postModal').style.display = 'flex';
         }
 
-        // 댓글 렌더링
         function renderComments(type, postId) {
             const post = posts[type][postId];
             const comments = post.comments || {};
@@ -1303,7 +1293,6 @@
             }
         }
 
-        // 댓글 추가
         async function addComment() {
             if(!currentViewingPost.type || !currentViewingPost.id) return;
             
@@ -1334,7 +1323,6 @@
             });
         }
 
-        // 댓글 삭제
         function deleteComment(type, postId, commentId) {
             if(!confirm('댓글을 삭제하시겠습니까?')) return;
             
