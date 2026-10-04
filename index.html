@@ -153,20 +153,6 @@
         .chat-modal-content .chat-input { font-size: 16px; padding: 15px; }
         .chat-modal-content .btn-send { font-size: 16px; padding: 15px 30px; }
 
-        /* 이미지 확대용 전체화면 모달 (크기 확대) */
-        .image-viewer-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center;
-            cursor: zoom-out;
-        }
-        .image-viewer-overlay img {
-            max-width: 100%; 
-            max-height: 100vh; 
-            object-fit: contain; 
-            border-radius: 0;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        }
-
         .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 20px; }
         .admin-table { width: 100%; border-collapse: collapse; min-width: 600px; background: #fff; }
         .admin-table th, .admin-table td { padding: 15px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 14px; white-space: nowrap; }
@@ -423,11 +409,6 @@
         </div>
     </div>
 
-    <!-- 이미지 원본 확대 모달 -->
-    <div id="imageViewer" class="image-viewer-overlay" onclick="closeImageViewer()">
-        <img id="imageViewerContent" src="" alt="원본 이미지">
-    </div>
-
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -650,8 +631,8 @@
                 }
                 
                 if(isImage || isVideo) {
-                    if(newFiles[i].size > 1024 * 1024) {
-                        alert(`${newFiles[i].name}은(는) 1MB를 초과하여 첨부할 수 없습니다.`);
+                    if(newFiles[i].size > 3 * 1024 * 1024) {
+                        alert(`${newFiles[i].name}은(는) 3MB를 초과하여 첨부할 수 없습니다.`);
                         continue;
                     }
                 }
@@ -693,7 +674,7 @@
                         
                         let width = img.width;
                         let height = img.height;
-                        const maxSize = 600;
+                        const maxSize = 1920; 
                         if (width > height && width > maxSize) {
                             height = Math.round(height * maxSize / width);
                             width = maxSize;
@@ -706,7 +687,7 @@
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                         resolve({ name: file.name, type: 'image/jpeg', data: dataUrl });
                     };
                     img.src = e.target.result;
@@ -816,7 +797,7 @@
         function handleProfilePicUpload(event) {
             const file = event.target.files[0];
             if(file) {
-                if(file.size > 1024 * 1024) { alert('프로필 사진은 1MB 이하만 가능합니다.'); return; }
+                if(file.size > 3 * 1024 * 1024) { alert('프로필 사진은 3MB 이하만 가능합니다.'); return; }
                 compressImage(file).then((compressed) => {
                     currentUser.profilePic = compressed.data;
                     usersRef.child(currentUser.id).update({ profilePic: currentUser.profilePic });
@@ -961,7 +942,7 @@
                 const promises = [];
                 for(let i=0; i<tempSelectedFiles.length; i++) {
                     if(tempSelectedFiles[i].type.startsWith('video/')) {
-                        if(tempSelectedFiles[i].size > 1024 * 1024) { alert('동영상 파일이 너무 큽니다. 1MB 이하만 가능합니다.'); return; }
+                        if(tempSelectedFiles[i].size > 3 * 1024 * 1024) { alert('동영상 파일이 너무 큽니다. 3MB 이하만 가능합니다.'); return; }
                     }
                     promises.push(compressImage(tempSelectedFiles[i]));
                 }
@@ -973,15 +954,30 @@
             }
         }
 
-        // 이미지 확대 모달 열기/닫기
-        function openImageViewer(src) {
-            document.getElementById('imageViewerContent').src = src;
-            document.getElementById('imageViewer').style.display = 'flex';
-        }
-
-        function closeImageViewer() {
-            document.getElementById('imageViewer').style.display = 'none';
-            document.getElementById('imageViewerContent').src = '';
+        // 이미지를 안전한 가상 URL(Blob URL)로 변환하여 새 창으로 열기 (백지 방지 + 원본 크기 유지)
+        function openImageViewer(base64Src) {
+            try {
+                const parts = base64Src.split(',');
+                const mime = parts[0].match(/:(.*?);/)[1];
+                const byteString = atob(parts[1]);
+                let u8 = new Uint8Array(byteString.length);
+                for (let i = 0; i < byteString.length; i++) {
+                    u8[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([u8], { type: mime });
+                const url = URL.createObjectURL(blob);
+                
+                const newWindow = window.open('', '_blank');
+                if (newWindow) {
+                    newWindow.location.href = url;
+                    setTimeout(() => URL.revokeObjectURL(url), 10000);
+                } else {
+                    alert('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+                }
+            } catch (e) {
+                console.error("이미지 열기 실패", e);
+                window.open(base64Src, '_blank'); // 예외 시 기존 방식 시도
+            }
         }
 
         function getFilesHTML(files) {
@@ -1239,7 +1235,6 @@
             if (event.target.id === 'postModal') closeModal('postModal');
             if (event.target.id === 'socialModal') closeModal('socialModal');
             if (event.target.id === 'chatModal') closeModal('chatModal');
-            if (event.target.id === 'imageViewer') closeImageViewer();
         }
 
         function addRecJob() {
