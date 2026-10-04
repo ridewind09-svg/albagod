@@ -36,7 +36,6 @@
         .page-section.active { display: flex; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 홈 레이아웃: 높이 360px로 축소 고정 */
         .home-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: stretch; }
         .home-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; height: 360px; overflow: hidden; }
         
@@ -46,14 +45,12 @@
         .clickable-title { cursor: pointer; transition: color 0.2s; }
         .clickable-title:hover { color: #1565c0; }
 
-        /* 추천 알바 카드 */
         .job-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; flex: 1; overflow-y: auto; align-content: start; padding-right: 5px; }
         .job-card { background: #f8f9fa; border: 1px solid #eee; padding: 15px; border-radius: 10px; transition: all 0.2s; cursor: pointer; }
         .job-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-color: #ddd; }
         .job-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #1e1e2f; }
         .job-info { font-size: 13px; color: #666; line-height: 1.4; }
 
-        /* 채팅 카드 */
         .chat-box { flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-screen { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 15px; background: #f8f9fa; }
         .chat-message { margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
@@ -66,7 +63,6 @@
         .profile-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; vertical-align: middle; }
         .profile-img-default { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: 700; }
 
-        /* 최신글 카드 */
         .main-board-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .post-list { display: flex; flex-direction: column; gap: 15px; }
         .post-item { padding: 15px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: all 0.2s; }
@@ -78,14 +74,12 @@
         .post-item .meta .view-btn { color: #1565c0; font-weight: 700; margin-left: 10px; }
         .tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; }
 
-        /* 검색창 카드 */
         .job-posting-section { background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 25px; }
         .search-area { margin-bottom: 25px; display: flex; gap: 15px; }
         .search-select { padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-weight: 700; background: #f8f9fa; cursor: pointer; }
         .search-input { flex: 1; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; background: #f8f9fa; }
         .search-select:focus, .search-input:focus { border-color: #1e1e2f; outline: none; background: #fff; }
 
-        /* 나머지 기존 스타일 */
         .board-container { background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .login-required-box { text-align: center; padding: 40px; background: #f9f9f9; border: 1px dashed #ccc; border-radius: 10px; margin-bottom: 30px; }
         .login-required-box p { margin-bottom: 15px; color: #666; font-weight: 700; }
@@ -178,7 +172,7 @@
             .auth-menu { border-top: none; padding-top: 0; width: auto; order: 2; }
             .auth-menu a { padding: 8px; font-size: 12px; }
             .home-grid, .main-board-container { grid-template-columns: 1fr; }
-            .home-card { height: auto; } /* 모바일에서는 높이 제한 해제 */
+            .home-card { height: auto; } 
             .main-content { padding: 15px; }
             .search-area { flex-direction: column; }
             .job-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
@@ -605,7 +599,7 @@
                         
                         <div class="file-upload-wrapper">
                             <label class="file-upload-label" for="${type}File">
-                                📎 파일 첨부하기 (이미지/문서 10개, 동영상 1개 / 총 1MB 이하만 가능)
+                                📎 파일 첨부하기 (이미지/문서 10개, 동영상 1개 / 이미지는 자동 압축됩니다)
                             </label>
                             <input type="file" id="${type}File" multiple onchange="handleFileSelect('${type}', this)">
                             <div class="file-name-display" id="${type}FileName">선택된 파일 없음</div>
@@ -620,12 +614,10 @@
         function handleFileSelect(type, input) {
             const files = input.files;
             let videoCount = 0;
-            let totalSize = 0;
             let fileNames = [];
             
             for(let i=0; i<files.length; i++) {
                 if(files[i].type.startsWith('video/')) videoCount++;
-                totalSize += files[i].size;
                 fileNames.push(files[i].name);
             }
             
@@ -641,19 +633,58 @@
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
                 return;
             }
-            // 무료 데이터베이스 제한으로 인해 총 용량 1MB 제한
-            if(totalSize > 1024 * 1024) { 
-                alert('파일 총 용량이 1MB를 초과했습니다. 용량이 작은 파일로 첨부해주세요. (무료 서버 환경에서는 큰 파일 저장이 차단됩니다)');
-                input.value = '';
-                document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
-                return;
-            }
 
             if(files.length > 0) {
                 document.getElementById(`${type}FileName`).innerText = `선택됨 (${files.length}개): ${fileNames.join(', ')}`;
             } else {
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
             }
+        }
+
+        // 이미지 압축 함수 (무료 서버 에러 방지)
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                if(!file.type.startsWith('image/')) {
+                    // 이미지가 아니면 그냥 원본 반환 (문서 파일 등)
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        resolve({ name: file.name, type: file.type, data: e.target.result });
+                    };
+                    reader.readAsDataURL(file);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // 최대 너비/높이를 600px로 제한하여 용량 축소
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSize = 600;
+                        if (width > height && width > maxSize) {
+                            height = Math.round(height * maxSize / width);
+                            width = maxSize;
+                        } else if (height > width && height > maxSize) {
+                            width = Math.round(width * maxSize / height);
+                            height = maxSize;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // 0.5 (50%) 품질의 JPEG으로 압축
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                        resolve({ name: file.name, type: 'image/jpeg', data: dataUrl });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         function handleSignup() {
@@ -757,20 +788,14 @@
         function handleProfilePicUpload(event) {
             const file = event.target.files[0];
             if(file) {
-                if(file.size > 1024 * 1024) {
-                    alert('프로필 사진은 1MB 이하의 파일만 등록 가능합니다.');
-                    event.target.value = '';
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentUser.profilePic = e.target.result;
+                // 프로필 사진도 압축
+                compressImage(file).then((compressed) => {
+                    currentUser.profilePic = compressed.data;
                     usersRef.child(currentUser.id).update({ profilePic: currentUser.profilePic });
                     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
                     loadMypage();
                     alert('프로필 사진이 변경되었습니다.');
-                };
-                reader.readAsDataURL(file);
+                });
             }
         }
 
@@ -874,32 +899,39 @@
                     alert('글이 성공적으로 작성되었습니다!');
                 }).catch((error) => {
                     console.error("저장 실패", error);
-                    alert('파일 저장에 실패했습니다. 파일 용량이 너무 크거나 서버 제한에 걸렸을 수 있습니다.\n(에러: ' + error.code + ')');
+                    if(filesDataArray && filesDataArray.length > 0) {
+                        newPost.files = []; 
+                        newPostRef.set(newPost).then(() => {
+                            alert('글은 작성되었으나, 파일 용량 제한으로 인해 첨부파일은 제외되었습니다.');
+                        }).catch(() => {
+                            alert('글 작성에 실패했습니다. Firebase 데이터베이스 규칙이 true로 되어있는지 확인해주세요.');
+                        });
+                    } else {
+                        alert('글 작성 실패! Firebase 데이터베이스가 잠겨있을 수 있습니다. (규칙 탭 확인 필요)');
+                    }
                 });
             };
 
             if (files.length > 0) {
                 let videoCount = 0;
-                let totalSize = 0;
                 for(let i=0; i<files.length; i++) {
                     if(files[i].type.startsWith('video/')) videoCount++;
-                    totalSize += files[i].size;
                 }
                 if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
                 if(files.length > 10) { alert('파일은 최대 10개까지 업로드 가능합니다.'); return; }
-                if(totalSize > 1024 * 1024) { alert('파일 총 용량이 1MB를 초과했습니다. 용량이 작은 파일로 다시 시도해주세요.'); return; }
 
-                const readers = [];
+                const promises = [];
                 for(let i=0; i<files.length; i++) {
-                    readers.push(new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            resolve({ name: files[i].name, type: files[i].type, data: e.target.result });
-                        };
-                        reader.readAsDataURL(files[i]);
-                    }));
+                    if(files[i].type.startsWith('video/')) {
+                        // 동영상은 압축 안함 (무료 서버에서는 어차피 실패할 확률 높음)
+                        if(files[i].size > 1024 * 1024) { alert('동영상 파일이 너무 큽니다. 1MB 이하만 가능합니다.'); return; }
+                        promises.push(compressImage(files[i])); // 내부에서 이미지 아니면 원본 반환
+                    } else {
+                        // 이미지/문서는 압축 함수로 처리
+                        promises.push(compressImage(files[i]));
+                    }
                 }
-                Promise.all(readers).then((results) => {
+                Promise.all(promises).then((results) => {
                     savePostToDB(results);
                 });
             } else {
@@ -1119,38 +1151,30 @@
             const postRef = postsRef.child(type).child(postId);
 
             let videoCount = 0;
-            let totalSize = 0;
             for(let i=0; i<editingFiles.length; i++) {
                 if(editingFiles[i].type.startsWith('video/')) videoCount++;
-                // 기존 파일 크기는 알 수 없으므로 패스
             }
 
             if(newFiles.length > 0) {
                 for(let i=0; i<newFiles.length; i++) {
                     if(newFiles[i].type.startsWith('video/')) videoCount++;
-                    totalSize += newFiles[i].size;
                 }
                 if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
                 if((editingFiles.length + newFiles.length) > 10) { alert('파일은 최대 10개까지 업로드 가능합니다.'); return; }
-                if(totalSize > 1024 * 1024) { alert('새로 추가한 파일의 총 용량이 1MB를 초과했습니다.'); return; }
 
-                const readers = [];
+                const promises = [];
                 for(let i=0; i<newFiles.length; i++) {
-                    readers.push(new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            resolve({ name: newFiles[i].name, type: newFiles[i].type, data: e.target.result });
-                        };
-                        reader.readAsDataURL(newFiles[i]);
-                    }));
+                    promises.push(compressImage(newFiles[i]));
                 }
-                Promise.all(readers).then((results) => {
+                Promise.all(promises).then((results) => {
                     const allFiles = editingFiles.concat(results);
                     postRef.update({ title: newTitle, content: newContent, files: allFiles, file: null, date: `${new Date().toLocaleString()} (수정됨)` })
                     .then(() => {
                         alert('글이 수정되었습니다.');
-                    }).catch((error) => {
-                        alert('파일 수정 중 에러가 발생했습니다. 용량을 확인해주세요.\n(에러: ' + error.code + ')');
+                    }).catch(() => {
+                        postRef.update({ title: newTitle, content: newContent, files: [], file: null, date: `${new Date().toLocaleString()} (수정됨)` })
+                        .then(() => alert('글은 수정되었으나, 파일 용량 제한으로 첨부파일은 제외되었습니다.'))
+                        .catch(() => alert('수정 실패. DB 규칙을 확인하세요.'));
                     });
                 });
             } else {
@@ -1158,9 +1182,7 @@
                 postRef.update({ title: newTitle, content: newContent, files: editingFiles, file: null, date: `${new Date().toLocaleString()} (수정됨)` })
                 .then(() => {
                     alert('글이 수정되었습니다.');
-                }).catch((error) => {
-                    alert('수정 중 에러가 발생했습니다.\n(에러: ' + error.code + ')');
-                });
+                }).catch(() => alert('수정 실패. DB 규칙을 확인하세요.'));
             }
             closeModal('postModal');
         }
