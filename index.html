@@ -66,39 +66,54 @@
         .main-board-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .post-list { display: flex; flex-direction: column; gap: 15px; }
         
-        /* 게시글 아이템: 간격 벌리기 및 클릭 영역 분리 */
+        /* 게시글 아이템: 간격 대폭 벌리기 */
         .post-item { 
             padding: 15px 0; 
             border-bottom: 1px solid #f0f0f0; 
-            cursor: pointer; 
             transition: all 0.2s; 
             display: flex; 
-            gap: 20px; /* 체크박스와 내용 사이 간격 확대 */
-            align-items: flex-start; 
+            gap: 30px; /* 간격 30px로 대폭 확대 */
+            align-items: center; 
         }
-        .post-item:hover { padding-left: 10px; padding-right: 10px; }
         .post-item:last-child { border-bottom: none; }
-        .post-item .content-area { flex: 1; }
+        
+        /* 관리자 전용 체크박스 영역 (클릭 영역 넓힘, 게시글 클릭 방지) */
+        .admin-checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 25px; /* 좌우 패딩 25px로 넓게 설정 */
+            cursor: pointer;
+            flex-shrink: 0;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            transition: background 0.2s;
+            min-width: 80px;
+        }
+        .admin-checkbox-label:hover {
+            background: #e3f2fd;
+            border-color: #90caf9;
+        }
+        .admin-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        /* 게시글 내용 영역 (클릭 영역 분리) */
+        .content-area {
+            flex: 1;
+            cursor: pointer;
+            padding: 5px 0;
+        }
+        .content-area:hover h3 { text-decoration: underline; }
         .post-item h3 { font-size: 16px; margin-bottom: 8px; color: #1e1e2f; font-weight: 700; }
         .post-item p { font-size: 13px; color: #777; margin-bottom: 8px; line-height: 1.5; }
         .post-item .meta { font-size: 12px; color: #999; display: flex; align-items: center; gap: 5px; }
         .post-item .meta .view-btn { color: #1565c0; font-weight: 700; margin-left: 10px; }
         .tag { display: inline-block; background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; }
-
-        /* 관리자 전용 체크박스 (클릭 영역 넓힘) */
-        .admin-checkbox-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 10px 10px 15px; /* 클릭 영역을 넓히기 위한 패딩 */
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .admin-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
 
         /* 관리자 일괄 작업바 */
         .bulk-action-bar { display: none; margin-top: 20px; padding: 15px; background: #f0f2f5; border-radius: 8px; gap: 15px; align-items: center; flex-wrap: wrap; }
@@ -208,6 +223,8 @@
             .main-content { padding: 15px; }
             .search-area { flex-direction: column; }
             .job-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+            .admin-checkbox-label { padding: 10px 15px; min-width: 50px; }
+            .post-item { gap: 15px; }
         }
     </style>
 </head>
@@ -907,12 +924,12 @@
             });
 
             let myPostsHtml = myPosts.length === 0 ? `<p style="color:#999;">작성한 글이 없습니다.</p>` : 
-                myPosts.map(m => `<div class="post-item" onclick="viewPost('${m.type}', '${m.post.id}')"><div class="content-area"><h3>${escapeHtml(m.post.title)}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div></div>`).join('');
+                myPosts.map(m => `<div class="post-item"><div class="content-area" onclick="viewPost('${m.type}', '${m.post.id}')"><h3>${escapeHtml(m.post.title)}</h3><div class="meta">${getProfileImgHTML(currentUser)} 작성일: ${m.post.date} <span class="view-btn">[보기]</span></div></div></div>`).join('');
 
             let scrapPostsHtml = scrapPosts.length === 0 ? `<p style="color:#999;">스크랩한 글이 없습니다.</p>` : 
                 scrapPosts.map(s => {
                     const scrapUser = users[s.post.authorId];
-                    return `<div class="post-item" onclick="viewPost('${s.type}', '${s.post.id}')"><div class="content-area"><h3>${escapeHtml(s.post.title)}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${escapeHtml(s.post.author)} | ${s.post.date} <span class="view-btn">[보기]</span></div></div></div>`;
+                    return `<div class="post-item"><div class="content-area" onclick="viewPost('${s.type}', '${s.post.id}')"><h3>${escapeHtml(s.post.title)}</h3><div class="meta">${getProfileImgHTML(scrapUser)} 작성자: ${escapeHtml(s.post.author)} | ${s.post.date} <span class="view-btn">[보기]</span></div></div></div>`;
                 }).join('');
 
             mypageContent.innerHTML = `
@@ -1068,7 +1085,7 @@
             return html;
         }
 
-        // 게시글 렌더링 (관리자 체크박스 간격 및 라벨 처리 개선)
+        // 게시글 렌더링 (클릭 영역 분리 및 간격 대폭 확보)
         function renderPosts() {
             ['semi', 'other', 'free', 'ref'].forEach(type => {
                 const listId = type === 'ref' ? 'refList' : `${type}List`;
@@ -1090,14 +1107,14 @@
                         const regionTag = p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : '';
                         const fileIcon = (p.files && p.files.length > 0) || p.file ? ' 📎' : '';
                         
-                        // 체크박스를 label로 감싸서 클릭 영역을 넓히고 간격 확보
+                        // 체크박스 영역과 게시글 내용 영역을 분리
                         const checkboxHtml = (currentUser && currentUser.id === 'admin') 
-                            ? `<label class="admin-checkbox-label" onclick="event.stopPropagation()"><input type="checkbox" class="admin-checkbox" data-type="${type}" data-id="${p.id}"></label>` 
+                            ? `<label class="admin-checkbox-label"><input type="checkbox" class="admin-checkbox" data-type="${type}" data-id="${p.id}"></label>` 
                             : '';
                         
-                        return `<div class="post-item" onclick="viewPost('${type}', '${p.id}')">
+                        return `<div class="post-item">
                             ${checkboxHtml}
-                            <div class="content-area">
+                            <div class="content-area" onclick="viewPost('${type}', '${p.id}')">
                                 <h3>${regionTag} ${escapeHtml(p.title)}${fileIcon}</h3>
                                 <p>${linkify(escapeHtml(p.content.length > 50 ? p.content.substring(0, 50) + '...' : p.content))}</p>
                                 <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(p.author)} | ${p.date} <span class="view-btn">[클릭하여 보기]</span></div>
@@ -1117,8 +1134,8 @@
             if (latestPosts.length === 0) list.innerHTML = `<p style="color:#999;">아직 등록된 글이 없습니다.</p>`;
             else list.innerHTML = latestPosts.map(p => {
                 const authorUser = users[p.authorId];
-                return `<div class="post-item" onclick="viewPost('${type}', '${p.id}')">
-                    <div class="content-area">
+                return `<div class="post-item">
+                    <div class="content-area" onclick="viewPost('${type}', '${p.id}')">
                         <h3>${p.region && p.region !== '지역 없음' ? `<span class="tag">${escapeHtml(p.region)}</span>` : ''} ${escapeHtml(p.title)}</h3>
                         <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(p.author)} | ${p.date}</div>
                     </div>
@@ -1445,8 +1462,8 @@
             } else {
                 searchDiv.innerHTML = results.map(r => {
                     const authorUser = users[r.post.authorId];
-                    return `<div class="post-item" onclick="viewPost('${r.type}', '${r.post.id}')">
-                        <div class="content-area">
+                    return `<div class="post-item">
+                        <div class="content-area" onclick="viewPost('${r.type}', '${r.post.id}')">
                             <h3>${r.post.region ? `<span class="tag">${escapeHtml(r.post.region)}</span>` : ''} ${escapeHtml(r.post.title)}</h3>
                             <p>${linkify(escapeHtml(r.post.content.length > 50 ? r.post.content.substring(0, 50) + '...' : r.post.content))}</p>
                             <div class="meta">${getProfileImgHTML(authorUser)} 작성자: ${escapeHtml(r.post.author)} | ${r.post.date}</div>
