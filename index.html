@@ -97,7 +97,7 @@
         .btn-write { background: #1e1e2f; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 700; margin-left: auto; display: block; }
 
         .file-attachment-box { margin-top: 15px; padding: 15px; background: #f0f2f5; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; }
-        .file-attachment-box img { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; }
+        .file-attachment-box img { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; cursor: zoom-in; }
         .file-attachment-box video { max-width: 100%; border-radius: 8px; border: 1px solid #ddd; }
         .file-download-btn { display: inline-block; padding: 10px 15px; background: #e3f2fd; color: #1565c0; text-decoration: none; border-radius: 5px; font-weight: 700; font-size: 14px; width: fit-content; }
 
@@ -433,6 +433,7 @@
         let tempSocialProvider = '';
         let recommendedJobs = {};
         let editingFiles = [];
+        let tempSelectedFiles = []; // 여러 번 나누어 파일 선택할 때 누적될 임시 배열
         
         const savedUser = sessionStorage.getItem('currentUser');
         if(savedUser) currentUser = JSON.parse(savedUser);
@@ -565,6 +566,8 @@
             const type = typeMap[pageId];
             const area = document.getElementById(areaId);
 
+            tempSelectedFiles = []; // 게시판 들어갈 때 파일 임시 바구니 초기화
+
             if(!currentUser) {
                 area.innerHTML = `<div class="login-required-box"><p>🔒 게시글 작성은 로그인 후 이용 가능합니다.</p><button class="btn-auth" style="width: auto; padding: 10px 20px;" onclick="showPage('login', document.querySelector('.auth-menu a'))">로그인 하러가기</button></div>`;
             } else {
@@ -599,7 +602,7 @@
                         
                         <div class="file-upload-wrapper">
                             <label class="file-upload-label" for="${type}File">
-                                📎 파일 첨부하기 (이미지/문서 10개, 동영상 1개 / 이미지는 자동 압축됩니다)
+                                📎 파일 첨부하기 (이미지/문서 10개, 동영상 1개 / 여러 번 나누어 올려도 누적됩니다)
                             </label>
                             <input type="file" id="${type}File" multiple onchange="handleFileSelect('${type}', this)">
                             <div class="file-name-display" id="${type}FileName">선택된 파일 없음</div>
@@ -611,37 +614,47 @@
             }
         }
 
+        // 파일 누적 선택 함수
         function handleFileSelect(type, input) {
-            const files = input.files;
-            let videoCount = 0;
-            let fileNames = [];
+            const newFiles = input.files;
             
-            for(let i=0; i<files.length; i++) {
-                if(files[i].type.startsWith('video/')) videoCount++;
-                fileNames.push(files[i].name);
-            }
-            
-            if(videoCount > 1) {
-                alert('동영상은 게시물당 1개만 업로드할 수 있습니다. 다시 선택해주세요.');
-                input.value = '';
-                document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
-                return;
-            }
-            if(files.length > 10) {
-                alert('이미지와 문서 파일은 합쳐서 최대 10개까지 업로드할 수 있습니다.');
-                input.value = '';
-                document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
-                return;
+            for(let i=0; i<newFiles.length; i++) {
+                let isVideo = newFiles[i].type.startsWith('video/');
+                let isImage = newFiles[i].type.startsWith('image/');
+                let currentVideoCount = tempSelectedFiles.filter(f => f.type.startsWith('video/')).length;
+                
+                if(isVideo && currentVideoCount >= 1) {
+                    alert('동영상은 1개만 업로드할 수 있습니다.');
+                    continue;
+                }
+                
+                if(isImage || isVideo) {
+                    // 이미지, 동영상은 무료 서버 용량 제한으로 최대 1MB
+                    if(newFiles[i].size > 1024 * 1024) {
+                        alert(`${newFiles[i].name}은(는) 1MB를 초과하여 첨부할 수 없습니다.`);
+                        continue;
+                    }
+                }
+                
+                tempSelectedFiles.push(newFiles[i]);
             }
 
-            if(files.length > 0) {
-                document.getElementById(`${type}FileName`).innerText = `선택됨 (${files.length}개): ${fileNames.join(', ')}`;
+            if(tempSelectedFiles.length > 10) {
+                alert('파일은 최대 10개까지 첨부할 수 있습니다.');
+                tempSelectedFiles = tempSelectedFiles.slice(0, 10);
+            }
+
+            // 화면에 누적된 파일 목록 표시
+            if(tempSelectedFiles.length > 0) {
+                document.getElementById(`${type}FileName`).innerText = `선택됨 (${tempSelectedFiles.length}개): ${tempSelectedFiles.map(f => f.name).join(', ')}`;
             } else {
                 document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
             }
+            
+            input.value = ''; // 같은 파일 다시 선택할 수 있도록 초기화
         }
 
-        // 이미지 압축 함수 (무료 서버 에러 방지)
+        // 이미지 압축 함수
         function compressImage(file) {
             return new Promise((resolve) => {
                 if(!file.type.startsWith('image/')) {
@@ -661,7 +674,6 @@
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // 최대 너비/높이를 600px로 제한하여 용량 축소
                         let width = img.width;
                         let height = img.height;
                         const maxSize = 600;
@@ -677,7 +689,6 @@
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // 0.5 (50%) 품질의 JPEG으로 압축
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
                         resolve({ name: file.name, type: 'image/jpeg', data: dataUrl });
                     };
@@ -788,7 +799,7 @@
         function handleProfilePicUpload(event) {
             const file = event.target.files[0];
             if(file) {
-                // 프로필 사진도 압축
+                if(file.size > 1024 * 1024) { alert('프로필 사진은 1MB 이하만 가능합니다.'); return; }
                 compressImage(file).then((compressed) => {
                     currentUser.profilePic = compressed.data;
                     usersRef.child(currentUser.id).update({ profilePic: currentUser.profilePic });
@@ -879,30 +890,42 @@
             const titleInput = document.getElementById(`${type}Title`);
             const contentInput = document.getElementById(`${type}Content`);
             const regionInput = document.getElementById(`${type}Region`);
-            const fileInput = document.getElementById(`${type}File`);
             
             if(!titleInput || titleInput.value.trim() === "") { alert('[경고] 제목을 입력해주세요.'); return; }
             if(!contentInput || contentInput.value.trim() === "") { alert('[경고] 내용을 입력해주세요.'); return; }
             if(type !== 'free' && type !== 'ref' && (!regionInput || !regionInput.value)) { alert('[경고] 근무 지역을 선택해주세요.'); return; }
 
-            const region = regionInput ? regionInput.value : '지역 없음';
-            const files = fileInput.files;
+            // 입력 필드 값 미리 캡처 (비동기 처리 중 초기화 방지)
+            const titleValue = titleInput.value;
+            const contentValue = contentInput.value;
+            const regionValue = regionInput ? regionInput.value : '지역 없음';
 
             const savePostToDB = (filesDataArray) => {
                 const newPostRef = postsRef.child(type).push();
                 const newPost = { 
-                    title: titleInput.value, content: contentInput.value, 
+                    title: titleValue, content: contentValue, 
                     author: currentUser.nickname, authorId: currentUser.id, date: new Date().toLocaleString(),
-                    region: region, files: filesDataArray
+                    region: regionValue, files: filesDataArray
                 };
                 newPostRef.set(newPost).then(() => {
                     alert('글이 성공적으로 작성되었습니다!');
+                    // 저장 성공 후에만 입력 필드 초기화
+                    titleInput.value = ""; 
+                    contentInput.value = "";
+                    if(regionInput) regionInput.value = "";
+                    tempSelectedFiles = [];
+                    if(document.getElementById(`${type}FileName`)) document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
                 }).catch((error) => {
                     console.error("저장 실패", error);
                     if(filesDataArray && filesDataArray.length > 0) {
                         newPost.files = []; 
                         newPostRef.set(newPost).then(() => {
                             alert('글은 작성되었으나, 파일 용량 제한으로 인해 첨부파일은 제외되었습니다.');
+                            titleInput.value = ""; 
+                            contentInput.value = "";
+                            if(regionInput) regionInput.value = "";
+                            tempSelectedFiles = [];
+                            if(document.getElementById(`${type}FileName`)) document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
                         }).catch(() => {
                             alert('글 작성에 실패했습니다. Firebase 데이터베이스 규칙이 true로 되어있는지 확인해주세요.');
                         });
@@ -912,24 +935,20 @@
                 });
             };
 
-            if (files.length > 0) {
+            if (tempSelectedFiles.length > 0) {
                 let videoCount = 0;
-                for(let i=0; i<files.length; i++) {
-                    if(files[i].type.startsWith('video/')) videoCount++;
+                for(let i=0; i<tempSelectedFiles.length; i++) {
+                    if(tempSelectedFiles[i].type.startsWith('video/')) videoCount++;
                 }
                 if(videoCount > 1) { alert('동영상은 1개만 업로드 가능합니다.'); return; }
-                if(files.length > 10) { alert('파일은 최대 10개까지 업로드 가능합니다.'); return; }
+                if(tempSelectedFiles.length > 10) { alert('파일은 최대 10개까지 업로드 가능합니다.'); return; }
 
                 const promises = [];
-                for(let i=0; i<files.length; i++) {
-                    if(files[i].type.startsWith('video/')) {
-                        // 동영상은 압축 안함 (무료 서버에서는 어차피 실패할 확률 높음)
-                        if(files[i].size > 1024 * 1024) { alert('동영상 파일이 너무 큽니다. 1MB 이하만 가능합니다.'); return; }
-                        promises.push(compressImage(files[i])); // 내부에서 이미지 아니면 원본 반환
-                    } else {
-                        // 이미지/문서는 압축 함수로 처리
-                        promises.push(compressImage(files[i]));
+                for(let i=0; i<tempSelectedFiles.length; i++) {
+                    if(tempSelectedFiles[i].type.startsWith('video/')) {
+                        if(tempSelectedFiles[i].size > 1024 * 1024) { alert('동영상 파일이 너무 큽니다. 1MB 이하만 가능합니다.'); return; }
                     }
+                    promises.push(compressImage(tempSelectedFiles[i]));
                 }
                 Promise.all(promises).then((results) => {
                     savePostToDB(results);
@@ -937,20 +956,15 @@
             } else {
                 savePostToDB([]);
             }
-
-            titleInput.value = ""; 
-            contentInput.value = "";
-            if(regionInput) regionInput.value = "";
-            fileInput.value = "";
-            if(document.getElementById(`${type}FileName`)) document.getElementById(`${type}FileName`).innerText = '선택된 파일 없음';
         }
 
+        // 이미지 클릭 시 원본 보기 (window.open)
         function getFilesHTML(files) {
             if(!files || files.length === 0) return '';
             let html = '<div class="file-attachment-box">';
             files.forEach(f => {
                 if(f.type.startsWith('image/')) {
-                    html += `<img src="${f.data}" alt="${escapeHtml(f.name)}">`;
+                    html += `<img src="${f.data}" alt="${escapeHtml(f.name)}" onclick="window.open(this.src, '_blank')">`;
                 } else if(f.type.startsWith('video/')) {
                     html += `<video src="${f.data}" controls>지원되지 않는 동영상 형식입니다.</video>`;
                 } else {
