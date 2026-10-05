@@ -289,21 +289,19 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
         width: 132px !important;
     }
 }
-/* 사이드바 작은 사이트맵 */
-.nav-sitemap {
-    text-align: left;
-    padding: 8px 15px;
-    margin-top: 15px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    cursor: pointer;
-}
-.nav-sitemap span {
-    font-size: 10px;
-    color: #666 !important; /* 글자 어둡게 */
-    opacity: 0.5;
+/* 사이드바 하단 작은 사이트맵 */
+.nav-sitemap-bottom {
+    margin-top: 40px; /* 위 메뉴와 아래로 거리 벌리기 */
+    padding: 12px 15px; /* 다른 메뉴와 좌측 정렬 맞추기 */
+    font-size: 12px;
+    color: #555 !important; /* 아주 어두운 색 */
+    opacity: 0.4; /* 흐리게 */
     letter-spacing: 1px;
-    font-weight: normal;
-    display: block;
+    cursor: pointer;
+    text-align: left;
+}
+.nav-sitemap-bottom:hover {
+    opacity: 0.6;
 }
 
 /* 사이트맵 모달 링크 디자인 (좌측 정렬) */
