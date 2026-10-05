@@ -124,9 +124,25 @@
     <div id="socialModal" class="modal-overlay"><div class="modal-content nickname-modal-content"><button class="modal-close" onclick="closeModal('socialModal')">&times;</button><h2>회원정보 및 전화번호 인증</h2><p style="color:#666; margin-top:10px; font-size:14px;"><span id="socialProviderName"></span> 로그인을 위한 추가 정보를 입력해주세요.</p><input type="text" id="socialNicknameInput" placeholder="사용할 닉네임"><input type="text" id="socialNameInput" placeholder="이름"><div class="phone-verify-area"><input type="text" id="socialPhoneInput" placeholder="휴대폰 번호 ('-' 없이 입력)"><button onclick="sendVerificationCode()">인증요청</button></div><input type="text" id="socialVerifyCodeInput" placeholder="인증번호 4자리 입력"><button class="btn-auth" onclick="confirmSocialLogin()">가입 및 로그인</button></div></div>
     <div id="chatModal" class="modal-overlay"><div class="modal-content chat-modal-content"><button class="modal-close" onclick="closeModal('chatModal')">&times;</button><h2>💬 실시간 채팅</h2><div class="chat-screen" id="chatModalScreen"></div><div class="new-message-alert" id="newMsgAlertModal" onclick="scrollToBottom('chatModalScreen', 'newMsgAlertModal')">새 메시지 <span class="count">0</span> ↓</div><div class="reply-preview-area" id="replyPreviewModal"><div class="reply-content"></div><button class="reply-cancel" onclick="cancelReply()">&times;</button></div><div class="chat-input-area"><input type="text" id="chatModalInput" class="chat-input" placeholder="메시지 입력" onkeypress="handleModalKeyPress(event)"><button class="btn-send" onclick="sendMessage(true)">전송</button></div></div></div>
 
-    <!-- 사이트맵 모달 -->
-    <div id="sitemapModal" class="modal-overlay"><div class="modal-content" style="max-width: 400px; text-align: center;"><button class="modal-close" onclick="closeModal('sitemapModal')">&times;</button><h2 style="margin-bottom: 20px; border-bottom: 2px solid #1e1e2f; padding-bottom: 10px;">📂 Site Map</h2><div style="display: flex; flex-direction: column; gap: 8px;"><a onclick="goFromSitemap('home')" class="sitemap-link">🏠 홈</a><a onclick="goFromSitemap('semiconductor')" class="sitemap-link">🔧 반도체현장 (전체)</a><a onclick="goFromSitemapSub('건축/토목')" class="sitemap-sub-link">└ 건축/토목</a><a onclick="goFromSitemapSub('설비/유틸')" class="sitemap-sub-link">└ 설비/유틸</a><a onclick="goFromSitemapSub('안전/감시')" class="sitemap-sub-link">└ 안전/감시</a><a onclick="goFromSitemapSub('관리자')" class="sitemap-sub-link">└ 관리자</a><a onclick="goFromSitemap('otherjobs')" class="sitemap-link">💼 기타알바</a><a onclick="goFromSitemap('reference')" class="sitemap-link">📁 자료실</a><a onclick="goFromSitemap('freeboard')" class="sitemap-link">🗣️ 자유게시판</a><a onclick="goFromSitemap('mypage')" class="sitemap-link">🧑‍💻 마이페이지</a></div></div></div>
-
+<!-- 사이트맵 모달 -->
+<div id="sitemapModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px;">
+        <button class="modal-close" onclick="closeModal('sitemapModal')">&times;</button>
+        <h2 style="margin-bottom: 20px; border-bottom: 2px solid #1e1e2f; padding-bottom: 10px;">📂 Site Map</h2>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a onclick="goFromSitemap('home')" class="sitemap-link">🏠 홈</a>
+            <a onclick="goFromSitemap('semiconductor')" class="sitemap-link">🔧 반도체현장 (전체)</a>
+            <a onclick="goFromSitemapSub('건축/토목')" class="sitemap-sub-link">└ 건축/토목</a>
+            <a onclick="goFromSitemapSub('설비/유픸')" class="sitemap-sub-link">└ 설비/유틸</a>
+            <a onclick="goFromSitemapSub('안전/감시')" class="sitemap-sub-link">└ 안전/감시</a>
+            <a onclick="goFromSitemapSub('관리자')" class="sitemap-sub-link">└ 관리자</a>
+            <a onclick="goFromSitemap('otherjobs')" class="sitemap-link">💼 기타알바</a>
+            <a onclick="goFromSitemap('reference')" class="sitemap-link">📁 자료실</a>
+            <a onclick="goFromSitemap('freeboard')" class="sitemap-link">🗣️ 자유게시판</a>
+            <a onclick="goFromSitemap('mypage')" class="sitemap-link">🧑‍💻 마이페이지</a>
+        </div>
+    </div>
+</div>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
