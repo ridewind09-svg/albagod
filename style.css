@@ -289,3 +289,17 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
         width: 132px !important;
     }
 }
+/* 사이드바 작은 사이트맵 */
+.nav-sitemap {
+    text-align: center;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+.nav-sitemap span {
+    font-size: 10px;
+    color: #777;
+    opacity: 0.5;
+    letter-spacing: 1px;
+    cursor: default;
+}
