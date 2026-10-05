@@ -735,3 +735,18 @@ function searchJobs() {
     if (res.length === 0) d.innerHTML = `<p style="color:#999;">결과 없음.</p>`; 
     else d.innerHTML = res.map(x => `<div class="post-item"><div class="content-area" onclick="viewPost('${x.type}', '${x.post.id}')"><h3>${x.post.region ? `<span class="tag">${escapeHtml(x.post.region)}</span>` : ''} ${escapeHtml(x.post.title)}</h3><p>${linkify(escapeHtml(x.post.content.length > 50 ? x.post.content.substring(0, 50) + '...' : x.post.content))}</p><div class="meta">${getProfileImgHTML(users[x.post.authorId])} ${escapeHtml(x.post.author)} | ${x.post.date}</div></div></div>`).join(''); 
 }
+function openSitemap() {
+    document.getElementById('sitemapModal').style.display = 'flex';
+}
+
+function goFromSitemap(page) {
+    closeModal('sitemapModal');
+    const navLink = document.querySelector(`.nav-link[onclick*="'${page}'"]`);
+    showPage(page, navLink);
+}
+
+function goFromSitemapSub(cat) {
+    closeModal('sitemapModal');
+    const subLink = document.querySelector(`.nav-sub-link[onclick*="'${cat}'"]`);
+    if(subLink) showSemiSubCategory(cat, subLink);
+}
