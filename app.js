@@ -161,6 +161,22 @@ function renderSemiDescription() {
         <span style="font-size:15px; color:#555; font-weight:400;">(예: ${semiSubCategories[currentSemiSubCategory]})</span>
     </div>`;
 }
+
+function openSitemap() {
+    document.getElementById('sitemapModal').style.display = 'flex';
+}
+
+function goFromSitemap(page) {
+    closeModal('sitemapModal');
+    const navLink = document.querySelector(`.nav-link[onclick*="'${page}'"]`);
+    showPage(page, navLink);
+}
+
+function goFromSitemapSub(cat) {
+    closeModal('sitemapModal');
+    const subLink = document.querySelector(`.nav-sub-link[onclick*="'${cat}'"]`);
+    if(subLink) showSemiSubCategory(cat, subLink);
+}
 // =================================================================
 
 function checkWriteAuth(p) { 
@@ -176,9 +192,33 @@ function checkWriteAuth(p) {
         let subCatHtml = '';
         if (t === 'semi') {
             const cats = Object.keys(semiSubCategories);
-            subCatHtml = `<select id="semiSubCategorySelect" style="margin-bottom:15px;"><option value="">하위 메뉴 (필수)</option>${cats.map(c => `<option value="${c}">${c}</option>`).join('')}</select>`;
+            subCatHtml = `<select id="semiSubCategorySelect" style="margin-bottom:15px;"><option value="">하위 메뉴</option>${cats.map(c => `<option value="${c}">${c}</option>`).join('')}</select>`;
         }
-        a.innerHTML = `<div class="write-form"><h3 style="margin-bottom:15px;">글쓰기</h3>${subCatHtml}${ij ? `<select id="${t}Region"><option value="">근무 지역 (필수)</option><option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option><option value="온라인">온라인</option></select>` : ''}<input type="text" id="${t}Title" placeholder="제목"><textarea id="${t}Content" placeholder="내용 (https://... 자동 링크)"></textarea><div class="file-upload-wrapper"><label class="file-upload-label" for="${t}File">📎 파일 첨부 (이미지/문서 10개, 동영상 1개)</label><input type="file" id="${t}File" multiple onchange="handleFileSelect('${t}', this)"><div class="file-name-display" id="${t}FileName">선택된 파일 없음</div></div><button class="btn-write" onclick="writePost('${t}')">작성 완료</button></div>`; 
+        
+        // 지역 옵션을 전국으로 확장
+        const regionOptions = `
+            <option value="">근무 지역 (필수)</option>
+            <option value="서울">서울</option>
+            <option value="경기">경기</option>
+            <option value="인천">인천</option>
+            <option value="부산">부산</option>
+            <option value="대구">대구</option>
+            <option value="광주">광주</option>
+            <option value="대전">대전</option>
+            <option value="울산">울산</option>
+            <option value="세종">세종</option>
+            <option value="강원">강원</option>
+            <option value="충북">충북</option>
+            <option value="충남">충남</option>
+            <option value="전북">전북</option>
+            <option value="전남">전남</option>
+            <option value="경북">경북</option>
+            <option value="경남">경남</option>
+            <option value="제주">제주</option>
+            <option value="온라인">온라인</option>
+        `;
+
+        a.innerHTML = `<div class="write-form"><h3 style="margin-bottom:15px;">글쓰기</h3>${subCatHtml}${ij ? `<select id="${t}Region">${regionOptions}</select>` : ''}<input type="text" id="${t}Title" placeholder="제목"><textarea id="${t}Content" placeholder="내용 (https://... 자동 링크)"></textarea><div class="file-upload-wrapper"><label class="file-upload-label" for="${t}File">📎 파일 첨부 (이미지/문서 10개, 동영상 1개)</label><input type="file" id="${t}File" multiple onchange="handleFileSelect('${t}', this)"><div class="file-name-display" id="${t}FileName">선택된 파일 없음</div></div><button class="btn-write" onclick="writePost('${t}')">작성 완료</button></div>`; 
     } 
 }
 
@@ -691,6 +731,7 @@ window.onclick = e => {
     if (e.target.id === 'postModal') closeModal('postModal'); 
     if (e.target.id === 'socialModal') closeModal('socialModal'); 
     if (e.target.id === 'chatModal') closeModal('chatModal'); 
+    if (e.target.id === 'sitemapModal') closeModal('sitemapModal');
 }
 
 function addRecJob() { 
@@ -734,19 +775,4 @@ function searchJobs() {
     if (i === "" && r === "") { d.innerHTML = `<p style="color:#999;">검색어 입력.</p>`; return; } 
     if (res.length === 0) d.innerHTML = `<p style="color:#999;">결과 없음.</p>`; 
     else d.innerHTML = res.map(x => `<div class="post-item"><div class="content-area" onclick="viewPost('${x.type}', '${x.post.id}')"><h3>${x.post.region ? `<span class="tag">${escapeHtml(x.post.region)}</span>` : ''} ${escapeHtml(x.post.title)}</h3><p>${linkify(escapeHtml(x.post.content.length > 50 ? x.post.content.substring(0, 50) + '...' : x.post.content))}</p><div class="meta">${getProfileImgHTML(users[x.post.authorId])} ${escapeHtml(x.post.author)} | ${x.post.date}</div></div></div>`).join(''); 
-}
-function openSitemap() {
-    document.getElementById('sitemapModal').style.display = 'flex';
-}
-
-function goFromSitemap(page) {
-    closeModal('sitemapModal');
-    const navLink = document.querySelector(`.nav-link[onclick*="'${page}'"]`);
-    showPage(page, navLink);
-}
-
-function goFromSitemapSub(cat) {
-    closeModal('sitemapModal');
-    const subLink = document.querySelector(`.nav-sub-link[onclick*="'${cat}'"]`);
-    if(subLink) showSemiSubCategory(cat, subLink);
 }
