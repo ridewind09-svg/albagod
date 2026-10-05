@@ -250,7 +250,18 @@ body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
 
 @media (max-width: 768px) {
     .app-wrapper { flex-direction: column; max-width: 100%; }
-    .sidebar { width: 100%; min-height: auto; flex-direction: column; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    .sidebar { 
+    width: 100%; 
+    height: auto; /* 모바일은 자동 높이 */
+    min-height: auto; 
+    flex-direction: column; 
+    padding: 15px; 
+    position: sticky; 
+    top: 0; 
+    z-index: 1000; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+    overflow-y: visible; /* 모바일은 내부 스크롤 해제 */
+}
     .logo-container { margin: 0 0 10px 0; padding: 0; text-align: center; }
     .logo-img { width: 132px; }
     .nav-menu { display: flex; gap: 8px; margin: 0 0 10px 0; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 5px; }
